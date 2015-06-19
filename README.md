@@ -46,8 +46,7 @@ talking to a Trimble GPS but I haven't actually tested this yet.
 
 ```
 
-
-Communication with a GPS
+Communicating with a GPS
 ------------------------
 
 Once connection is established, one can either use the ```TSIP.read()``` method
