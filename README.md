@@ -1,77 +1,70 @@
 python-TSIP
 ===========
 
+**This project had been idle for a long time until very recently. The
+previous version of this README described an API that I originally 
+intended to implement. This has now been abandoned in favour of a
+much easier to implement API as described below. Still, at this
+stage all this just exists in my head.**
+
 *Python-TSIP* is a Python package for parsing and creating TSIP 
 packets. The Trimble Standard Interface Protocol (TSIP) is
 the binary protocol spoken by the GPS receivers sold by 
-Trimble Navigation Ltd.
-
-TSIP defines approximately 70 dfferent packet types for
-configuring and querying Trimble GPS receivers. The *python-TSIP*
-package provides a Python class for each type of TSIP packet.
+[Trimble Navigation Ltd.](http://www.trimble.com).
 
 
-TSIP packet classes
+Connecting to a GPS
 -------------------
 
-The packet classes can be used to either parse a binary TSIP
-packet into a Python class instance or generate TSIP packets
-from a class instance.
+*Python-TSIP* relies on an existing connection to a GPS. This
+connection object must provide ```.read(n)``` and ```.write(data)```
+methods. The [pySerial](http://pyserial.sourceforge.net/)
+package can be used to access Trimble GPS connected to a serial
+port. 
 
-### Example: Generating a TSIP packet
+```python
+>>> import serial
+>>> serconn = serial.Serial('/dev/ttyS1', 9600)
 
-    >>> import tsip
-    >>> packet = tsip.ReceiverConfiguration()	# Packet0xBB() 
-    >>> packet.receiver_mode = tsip.OVERDETERMINED_CLOCK
-    >>> packet.dynamics_code = tsip.STATIONARY
-    >>> packet.elevation_mask = tsip.radians(15.0)
-    >>> print packet
-    >>> str(packet)
+>>> import tsip
+>>> gpsconn = tsip.TSIP(serconn)
+```
 
-### Example: Parsing a TSIP packet
+With some trickery it should also be possible to use the raw (TSIP)
+output of a [gpsd](http://www.catb.org/gpsd/) instance 
+talking to a Trimble GPS but I haven't actually tested this yet.
 
-This example uses the `packet` created in the previous example.
+```python
+>>> import socket
+>>> sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+>>> sock.connect(("localhost", 2947))
+>>> sockfp = sock.makefile()
+>>> sock.send('?WATCH={"raw": 1, "enable": true}\n')
 
-    >>> b = str(packet)
+>>> import tsip
+>>> gpsconn = tsip.TSIP(serconn)
 
-The `identify()` function can be used to determine the type of 
-TSIP packet. `Packet0xBB` is the same type as `ReceiverConfiguration`,
-the latter being an alias for the former.
-    
-    >>> packet_class = tsip.identify(b)
-    >>> packet_class
-    tsip.Packet0xBB
-
-Calling the packet class with a single argument will parse the
-TSIP packet.
-
-    >>> packet2 = packet_class(s)
-    >>> packet2.receiver_mode == tsip.OVERDETERMINED_CLOCK
-    True
-
-Parsing TSIP packets is usually not done directly as the feature
-is available through the two classes described in the next
-section.
+```
 
 
-GPS interface
--------------
+Communication with a GPS
+------------------------
 
-The *python-TSIP* package also provides two classes for communicating
-with a Trimble GPS receiver.
+Once connection is established, one can either use the ```TSIP.read()``` method
+to read the next TSIP packet or simply iterate over the received TSIP packets.
+The returned packet has already been parsed and the contained fields are
+accessible by numeric index.
 
-The first, `TrimbleGPS`, builds on the `pySerial` package to provide 
-read-write communications with a Trimble GPS receiver.
+```python
+>>> for packet in gpsconn:
+...     if packet.code == 0x8f20:	# Last fix with extra info
+...         latitude = packet[7]
+...         longitude = packet[8]
+```
 
-The second class `TrimbleGPSd` connects to a running `gpsd` instance
-and requests output in the native TSIP format. This method allows
-to share the Trimble GPS with `gpsd` but with read access only.
+Sending packets to the GPS is also possible. 
 
-Both classes implement are Python iterators that return instances of
-Python TSIP packet classes.
-
-
-### Example: `TrimbleGPS`
-
-
-### Example: `TrimbleGPSd`
+```python
+>>> packet = tsip.Packet(0x1d, 0x46)	# Erase NVRAM and flash and restart
+>>> gpsonn.write(packet)
+```
