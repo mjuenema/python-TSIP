@@ -65,6 +65,6 @@ accessible by numeric index.
 Sending packets to the GPS is also possible. 
 
 ```python
->>> packet = tsip.Packet(0x1d, 0x46)	# Erase NVRAM and flash and restart
+>>> packet = tsip.Packet(0x1e, 0x46)	# Erase NVRAM and flash and restart
 >>> gpsonn.write(packet)
 ```
