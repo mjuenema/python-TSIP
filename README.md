@@ -55,15 +55,15 @@ The returned packet has already been parsed and the contained fields are
 accessible by numeric index.
 
 ```python
->>> for packet in gpsconn:
-...     if packet.code == 0x8f20:	# Last fix with extra info
-...         latitude = packet[7]
-...         longitude = packet[8]
+>>> for report in gpsconn:
+...     if report.code == 0x8f20:	# Last fix with extra info
+...         latitude = report[7]
+...         longitude = report[8]
 ```
 
 Sending packets to the GPS is also possible. 
 
 ```python
->>> packet = tsip.Packet(0x1e, 0x46)	# Erase NVRAM and flash and restart
+>>> packet = tsip.Command(0x1e, 0x46)	# Erase NVRAM and flash and restart
 >>> gpsonn.write(packet)
 ```
