@@ -50,9 +50,8 @@ Communicating with a GPS
 ------------------------
 
 Once connection is established, one can either use the ```TSIP.read()``` method
-to read the next TSIP packet or simply iterate over the received TSIP packets.
-The returned packet has already been parsed and the contained fields are
-accessible by numeric index.
+to read the next TSIP report or simply iterate over the received TSIP reports.
+The contained fields are accessible by numeric index.
 
 ```python
 >>> for report in gpsconn:
@@ -61,7 +60,7 @@ accessible by numeric index.
 ...         longitude = report[8]
 ```
 
-Sending packets to the GPS is also possible. 
+Sending commands to the GPS is also possible. 
 
 ```python
 >>> packet = tsip.Command(0x1e, 0x46)	# Erase NVRAM and flash and restart
