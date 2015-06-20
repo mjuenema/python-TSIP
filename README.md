@@ -30,22 +30,6 @@ port.
 >>> gpsconn = tsip.TSIP(serconn)
 ```
 
-With some trickery it should also be possible to use the raw (TSIP)
-output of a [gpsd](http://www.catb.org/gpsd/) instance 
-talking to a Trimble GPS but I haven't actually tested this yet.
-
-```python
->>> import socket
->>> sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
->>> sock.connect(("localhost", 2947))
->>> sockfp = sock.makefile()
->>> sock.send('?WATCH={"raw": 1, "enable": true}\n')
-
->>> import tsip
->>> gpsconn = tsip.TSIP(serconn)
-
-```
-
 Communicating with a GPS
 ------------------------
 
