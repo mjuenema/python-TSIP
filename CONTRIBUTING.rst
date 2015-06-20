@@ -58,8 +58,12 @@ Get Started!
 
 Ready to contribute? Here's how to set up `python-TSIP` for local development.
 
-1. Fork the `python-TSIP` repo on GitHub.
-2. Clone your fork locally::
+1. Install the gitflow_ Git add-on. Gitflow implements the work-flow described
+   in `A successful Git branching model`_.
+
+2. Fork the `python-TSIP` repo on GitHub.
+
+3. Clone your fork locally::
 
     $ git clone git@github.com:your_name_here/python-TSIP.git
 
@@ -69,9 +73,13 @@ Ready to contribute? Here's how to set up `python-TSIP` for local development.
     $ cd python-TSIP/
     $ python setup.py develop
 
-4. Create a branch for local development::
+4. Initialise Gitflow::
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+   $ git flow init -d
+
+5. Start a new feature or branch::
+
+    $ git flow feature start <name-of-your-feature>
 
    Now you can make your changes locally.
 
@@ -87,9 +95,12 @@ Ready to contribute? Here's how to set up `python-TSIP` for local development.
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+    $ git push origin feature/<name-of-your-feature>
 
 7. Submit a pull request through the GitHub website.
+
+.. _gitflow: https://github.com/nvie/gitflow
+.. _`A successful Git branching model`: http://nvie.com/posts/a-successful-git-branching-model/
 
 Pull Request Guidelines
 =======================
