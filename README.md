@@ -30,41 +30,23 @@ port.
 >>> gpsconn = tsip.TSIP(serconn)
 ```
 
-With some trickery it should also be possible to use the raw (TSIP)
-output of a [gpsd](http://www.catb.org/gpsd/) instance 
-talking to a Trimble GPS but I haven't actually tested this yet.
-
-```python
->>> import socket
->>> sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
->>> sock.connect(("localhost", 2947))
->>> sockfp = sock.makefile()
->>> sock.send('?WATCH={"raw": 1, "enable": true}\n')
-
->>> import tsip
->>> gpsconn = tsip.TSIP(serconn)
-
-```
-
-
-Communication with a GPS
+Communicating with a GPS
 ------------------------
 
 Once connection is established, one can either use the ```TSIP.read()``` method
-to read the next TSIP packet or simply iterate over the received TSIP packets.
-The returned packet has already been parsed and the contained fields are
-accessible by numeric index.
+to read the next TSIP report or simply iterate over the received TSIP reports.
+The contained fields are accessible by numeric index.
 
 ```python
->>> for packet in gpsconn:
-...     if packet.code == 0x8f20:	# Last fix with extra info
-...         latitude = packet[7]
-...         longitude = packet[8]
+>>> for report in gpsconn:
+...     if report.code == 0x8f20:	# Last fix with extra info
+...         latitude = report[7]
+...         longitude = report[8]
 ```
 
-Sending packets to the GPS is also possible. 
+Sending commands to the GPS is also possible. 
 
 ```python
->>> packet = tsip.Packet(0x1d, 0x46)	# Erase NVRAM and flash and restart
+>>> packet = tsip.Command(0x1e, 0x46)	# Erase NVRAM and flash and restart
 >>> gpsonn.write(packet)
 ```
