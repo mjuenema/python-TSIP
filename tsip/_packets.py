@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
+This is meant to be converted into packets.py later.
 
+MJ, 22-Jun-2015
 
 """
 
-import bitstring
+#import bitstring
+import struct
 
 import logging
 _LOG = logging.getLogger(__name__)
@@ -18,29 +21,41 @@ DLE = 0x10
 ETX = 0x03
 
 
+#_TYPES_BITSTRING = {
+#    'b1':     'bits:1',
+#    'b2':     'bits:2',
+#    'b3':     'bits:3',
+#    'b4':     'bits:4',
+#    'b5':     'bits:5',
+#    'b6':     'bits:6',
+#    'b7':     'bits:7',
+#    'u8':     'uintbe:8',
+#    'u16':    'uintbe:16',
+#    'u32':    'uintbe:32',
+#    'i8':     'intbe:8',
+#    'i16':    'intbe:16',
+#    'i32':    'intbe:32',
+#    'string': 'bytes',
+#    'single': 'floatbe:32',
+#    'double': 'floatbe:64'
+#}
+#"""
+#Table to convert TSIP types to Bitstring types. All
+#TSIP data types are big-endian. Float types are
+#IEEE 745 encoded.
+#"""
+
 _TYPES = {
-    'b1':     'bits:1',
-    'b2':     'bits:2',
-    'b3':     'bits:3',
-    'b4':     'bits:4',
-    'b5':     'bits:5',
-    'b6':     'bits:6',
-    'b7':     'bits:7',
-    'u8':     'uintbe:8',
-    'u16':    'uintbe:16',
-    'u32':    'uintbe:32',
-    'i8':     'intbe:8',
-    'i16':    'intbe:16',
-    'i32':    'intbe:32',
-    'string': 'bytes',
-    'single': 'floatbe:32',
-    'double': 'floatbe:64'
+    'u8':     'B',
+    'u16':    'H',
+    'u32':    'I',
+    'i8':     'b',
+    'i16':    'h',
+    'i32':    'I',
+    'string': 'S',
+    'single': 'f',
+    'double': 'd'
 }
-"""
-Table to convert TSIP types to Bitstring types. All
-TSIP data types are big-endian. Float types are
-IEEE 745 encoded.
-"""
 
 # endswith command,report,error
 # len(format) == len(attrs)
@@ -59,7 +74,7 @@ _PACKETS_IN = {
              ['serial_number','build_day','build_month','build_year','build_hour',
               'hardware_code','length','hardware_id'],
              'Hardware component version report'),
-    0x1e:   ('U8', ['reset_mode'], ' Clear Battery Backup, then Reset command'),
+    0x1e:   ('B', ['reset_mode'], ' Clear Battery Backup, then Reset command'),
     0x1f:   (None, None, ' Request Software Versions command'),
     0x21:   (None, None, ' Request Current Time command'),
     0x23:   ('single,single,single', ['x', 'y', 'z'], 
@@ -77,32 +92,26 @@ _PACKETS_IN = {
              'Accurate Initial Position (XYZ ECEF) command'),
     0x32:   ('single,single,single', ['latitude', 'longitude', 'altitude'], 
              'Accurate Initial Position (Latitude, Longitude, Altitude)'),
-    0x35:   ('b2,b1,b1,b1,b1,b1,b1,b6,b1,b1,b1,b2,b5,b1,b2,b1,b1,b1,b1,b1,b1',
-             ['_r1','super_packet_output','precision_of_position_output',
-              '_r2','lla_alt_output','lla_output','xyz_ecef',
-              '_r3','enu_output','xyz_ecef2',
-              '_r4','pps_mode','_r5','time_type',
-              '_r6','signal_levels_for_all_satellites','_r7',
-              'signal_level_unit','_r8','_r9','raw_measurement'],
-              'Set Request I/O Options command'),
+    0x35:   ('BBBB', ['position','velocity','timing','auxilliary_pseudo_range_measurements'],
+             'Set Request I/O Options command'),
     0x37:   (None, None, 'Request Status and Values of Last Position and Velocity command'),
     0x38:   ('u8,u8,u8,u8,string', ['operation','type_of_data','sat_prn','length','data'],
              'Request/Load Satellite System Data command'),
-    0x3a:   ('u8', ['satellite'], 'Request Last Raw Measurement command'),
-    0x3c:   ('u8', ['satellite'], 'Request Current Satellite Tracking Status command'),
+    0x3a:   ('B', ['satellite'], 'Request Last Raw Measurement command'),
+    0x3c:   ('B', ['satellite'], 'Request Current Satellite Tracking Status command'),
     0x41:   ('single,i16,single', ['time_of_week','week_number','utc_offset'],
              'GPS Time report'),
     0x42:   ('single,single,single,single', ['x','y','z','time_of_fix'],
              'Single-Precision Position Fix, XYZ ECEF report'),
     0x43:   ('single,single,single,single,single', 
-             ['x_velocity','y_velocity','z_velocity','bias_rate','time_of_fix',
+             ['x_velocity','y_velocity','z_velocity','bias_rate','time_of_fix'],
              'Velocity Fix, XYZ ECEF report'),
     0x45:   ('u8,u8,u8,u8,u8,u8,u8,u8,u8,u8', 
             ['navproc_major_version','navproc_minor_version','navproc_month','navproc_day','navproc_year',
              'sigproc_major_revision','sigproc_minor_revision','sigproc_month','sigproc_day','sigproc_year'],
              'Software Version Information report'),
-    0x46:   ('u8,b1,b1,b1,b1,b1,b1,b1,b1', 
-             ['_r1','_r2','type_of_fault','antenna_feedline','_r3','_r4','_r5','battery_backup'],
+    0x46:   ('BB', 
+             ['status_code','health_battery_antenna_feedline_fix_fault'],
              'Health of Receiver report'),
     0x47:   (None, None, 'Signal Levels for all Satellites report'),	# This packet needs special handling.
     0x4a:   ('single,single,single,single,single',
@@ -110,8 +119,8 @@ _PACKETS_IN = {
              'Single Precision LLA Position Fix report'),
     0x4b:   ('u8,u8,u8', ['machine_id','status1','status2'],
              'Machine/ Code ID and Additional Status report'),
-    0x4d:   ('single', ['offset'], 'Oscillator Offset report'),
-    0x4e:   ('string', ['response'], 'Response to Set GPS Time report'0,
+    0x4d:   ('f', ['offset'], 'Oscillator Offset report'),
+    0x4e:   ('c', ['response'], 'Response to Set GPS Time report'),
     0x55:   (None, None, None),		# TODO: can't be bothered to do this now!
     0x56:   ('single,single,single,single,single', 
              ['east_velocity', 'north_velocity','up_velocity','clock_bias_rate','time_of_fix'],
@@ -124,17 +133,16 @@ _PACKETS_IN = {
              ['satellite_prn_number','_r1','_r2','_r3','integer_msec_of_pseudorange','signal_level',
               'code_phase','doppler','time_of_measurement'],
              'Raw Measurement Data'),
-    0x5c:   ('u8,b4,b4,u8,u8,single,single,single,single,u8',
-             ['satellite_prn_number','_r1','channel','acquisition_flag','ephemiris_flag',
+    0x5c:   ('u8,b8,u8,u8,single,single,single,single,u8',
+             ['satellite_prn_number','channel_bits','acquisition_flag','ephemiris_flag',
               'signal_level','gps_time_of_last_measurement','elevation','azimuth','_r2'],
              'Satellite Tracking Status report'),
-    0x5f:   ('string', ['data'], 'Diagnostics Use Only report'),
-    0x69:   ('u8', ['receiver_mode'], 'Receiver Acquisition Sensitivity Mode report'),
-    0x6d:   ('br43,b1,br34,single,single,single,single,bytes',
-             ['number_of_sv','manual','dimension','pdop','hdop','vdop','tdop','data'],
+    0x69:   ('B', ['receiver_mode'], 'Receiver Acquisition Sensitivity Mode report'),
+    0x6d:   ('Bffff',
+             ['dimension','pdop','hdop','vdop','tdop'],			# This packet needs special handling.
              'All-In-View Satellite Selection report'),			# This packet needs special handling.
-    0x82:   ('b1,b1,b1,b1,b1,b1,b1,b1', 
-             ['_r1','_r2','_r3','_r4','_r5','sbas_correction','sbas_feature','_sbas_correction'],
+    0x82:   ('B',
+             ['correction_status'],
              'SBAS Correction Status report'),
     0x83:   ('double,double,double,double,single', 
              ['x','y','z','clock_bias','time_of_fix'],
@@ -149,21 +157,22 @@ _PACKETS_IN = {
     0x8e26: (None, None, 'Write Configuration to NVS command'),
     0x8e41: (None, None, 'Request Manufacturing Paramaters command'),
     0x8e42: (None, None, 'Stored Production Parameters command'),
-    0x8e45: ('u8',['segment_id'], 'Revert Configuration Segment to Default Settings and Write to NVS command'),
-    0x8e4a: ('u8,u8,u8,u8,double,single', 
+    0x8e45: ('B',['segment_id'], 'Revert Configuration Segment to Default Settings and Write to NVS command'),
+    0x8e4a: ('u8,u8,u8,double,u32', 
              ['pps_driver_switch','_r1','pps_polarity','pps_offset_or_cable_delay','bias_uncertainty_threshold'],
              'Set PPS Characteristics'),
-    0x8e4c: ('u8',['segment_id'], 'Write Configuration Segment to NVS command'),
-    0x8e4e: ('u8', ['pps_driver_switch'], 'Set PPS output option command'),
+    0x8e4c: ('B',['segment_id'], 'Write Configuration Segment to NVS command'),
+    0x8e4e: ('B', ['pps_driver_switch'], 'Set PPS output option command'),
     0x8ea0: ('u8,bytes', ['flag','value'], 'Set DAC Value command'),
-    0x8ea2: ('b6,b1,b1', ['_r1', 'utc_gps_time', 'pps_reference'], 'UTC/GPS Timing command'),
-    0x8ea3: ('u8', ['disciplining_command'], ' Issue Oscillator Disciplining command'),
-    0x8ea5: ('b1,b1,b1,b1,b1,b1,b1,b1,u8,u16'), 
-             ['_r1', 'automatic_output_packets', '_r2','_r3','_r4','supplemental_timing_information',
-              '_r5','primary_timing_information', '_r6'],
+    0x8ea2: ('B', 
+             ['utc_gps_time'], 
+             'UTC/GPS Timing command'),
+    0x8ea3: ('B', ['disciplining_command'], ' Issue Oscillator Disciplining command'),
+    0x8ea5: ('HH', 
+             ['automatic_output_packets', '_r1'],
              'Packet Broadcast Mask command'),
-    0x8ea6: ('u8', ['self_survey_command'], 'Self-Survey command'),
-    0x8ea8: ('u8', ['type'], 'Request Disciplining Parameters command'),
+    0x8ea6: ('B', ['self_survey_command'], 'Self-Survey command'),
+    0x8ea8: ('B', ['type'], 'Request Disciplining Parameters command'),
     0x8ea800: ('single,single', ['time_constant','damping_factor'], 
                'Set Disciplining Parameters command (Type 0)'),
     0x8ea801: ('single,single,single', 
@@ -171,13 +180,13 @@ _PACKETS_IN = {
                'Set Disciplining Parameters command (Type 1)'),
     0x8ea802: ('single,single', ['jam_sync_threshold','maximum_frequency_offset'], 
                'Set Disciplining Parameters command (Type 2)'),
-    0x8ea803: ('single', ['initial_dc_voltage'], 
+    0x8ea803: ('f', ['initial_dc_voltage'], 
                'Set Disciplining Parameters command (Type 3)'),
     0x8ea9: ('u8,u8,u32,u32', ['self_survey_enable','position_save_flag','self_survey_length','_r1'],
              'Self-Survey Parameters command'),
-    0x8eab: ('u8', ['request_type'], 'Request Primary Timing Packet command'),
-    0x8eac: ('u8', ['request_type'], 'Request Supplementary Timing Packet command'),
-    0x8f15: ('i8,double,double,double,doubel,double',
+    0x8eab: ('B', ['request_type'], 'Request Primary Timing Packet command'),
+    0x8eac: ('B', ['request_type'], 'Request Supplementary Timing Packet command'),
+    0x8f15: ('i8,double,double,double,double,double',
              ['datum_index', 'dx','dy','dz','a_axis','eccentricity_squared'],
              'Current Datum Values report'),
     0x8f17: ('bytes:1,i16,single,single,single,single,single',
@@ -188,37 +197,43 @@ _PACKETS_IN = {
              ['gridzone_designation','gridzone','northing','easting',
               'altitude','clock_bias','time_of_fix'],
              'UTM Double Precision Output report'),
-    0x8f20: ('u8,i16,i16,i16,u32,i32,u32,i32,b7,b1,u8,u8,b3,b1,b1,b1,b1,b1,u8,u8,i16,bytes',	# this packet needs special handling.
+    0x8f20: ('BhhhHiIiBBBBBBh',						# This packet needs special handling.
              ['_r1','east_velocity','north_velocity','up_velocity','time_of_week',
-              'latitude','longitude','altitude','_r2','velocity_scaling','_r3',
-              'datum','_r4','filtered','alt_hold','fix_dimension','_r5','invalid_fix',
-              'num_svs','utc_offset','week','satellite_data'],
+              'latitude','longitude','altitude','velocity_scaling',
+              '_r2','datum','fix_dimension_alt_hold_filtered', 'num_svs',
+              'utc_offset','week'],
              'Last Fix with Extra Information report (binary fixed point)'),
     0x8f21: ('u8,u16,u16,u16,u16,i16,u8', 
              ['format_type','east_uncertainty','north_uncertainty','vertical_uncertainty',
-              'time_uncertainty','east_north_correlation','fix_age'),
+              'time_uncertainty','east_north_correlation','fix_age'],
               'Request Accuracy Information report'),
-    0x8f23  ('u32,u16,u8,b2,b1,b2,b1,b1,b1,i32,u32,i32,i16,i16,i16,u16',
-             ['fix_time','week_number','leap_second_offset','_r1','velocity_scale',
-              '_r2','two_d','dgps','fix_available','latitude','longitude','altitude',
-              'velocity_east','velocity_north','velocity_up','_r3'],
+    0x8f23:  ('IHBBIIihhhH', 
+             ['fix_time','week_number','leap_second_offset','fix_available_dgps_2d_velocity_scale',
+              'latitude','longitude','altitude','velocity_east','velocity_north','velocity_up','_r1'],
              'Request Last Compact Fix Information report'),
     0x8f26: (None, None, 'Non-Volatile Memory Status report'),
     0x8f2a: ('u8,u8,u16,u32,i32,i32,u8,b8,u8,bytes',
              ['_r1','_r2','gps_week_number','gps_millisecond','fractional_gps_nanosecond',
               'altitude','receiver_status_code','receiver_health','_r3','channel_tracking_information'],
               'Fix and Channel Tracking Info report (Type 1)'),	
-    0x8f2b: ('u8,u8,u16,u32,i32,u32,i,32,i32,i32,i32,u8,u8,u8,string'),
-             ['_r1','_r2','_gps_week_number','gps_millisecond','latitude','longitude',
+    0x8f2b: ('BBHIiIiiiiBBB',
+             ['_r1','_r2','gps_week_number','gps_millisecond','latitude','longitude',
               'altitude','east_west_velocity','north_south_velocity','up_down_velocity',
-              'receiver_status_code','receiver_health','_r3','channel_tracking_information'],
+              'receiver_status_code','receiver_health','_r3'],
               'Fix and Channel Tracking Info report (Type 2)'), 
     0x8f4a: ('u8,u8,u8,double,u32', 
              ['_r1','_r2','polarity','pps_offset_or_cable_delay','_r3'],
              'Copernicus II GPS Receiver Cable Delay and POS Polarity'),
-    0x8f4f: (none, None, 'Set PPS width report'),
-    0x8fab:
-    0x8fac:
+    0x8f4f: (None, None, 'Set PPS width report'),
+    0x8fab: ('IHhBBBBBBH',
+             ['time_of_week','week_number','utc_offset','timing_flag','seconds','minutes',
+              'hours','day_of_month','month','year'],
+             'Primary Timing Packet report'),
+    0x8fac: ('BBBIHHBBBBffI',
+             ['receiver_mode','disciplining_mode','self_survey_progress','holdover_duration',
+              'critical_alarms','minor_alarms','gps_decoding_status','disciplining_activity',
+              'spare_status1','spare_status2','pps_offset','clock_offset','dac_value'],
+             'Supplemental Timing Packet')
 }
 """
 The `_PACKETS` table contains the packet structure as 
