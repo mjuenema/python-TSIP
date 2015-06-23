@@ -34,8 +34,16 @@ clean-test:
 lint:
 	flake8 python-TSIP tests
 
-test:
-	python setup.py test
+test: test_packets test_gps test_captures
+
+test_packets:
+	nosetests -v tests/$@.py
+
+test_gps:
+	nosetests -v tests/$@.py
+
+test_captures:
+	nosetests -v tests/$@.py
 
 test-all:
 	tox

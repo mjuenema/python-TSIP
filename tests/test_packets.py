@@ -6,14 +6,12 @@ import struct
 import types
 
 
-class TestPackets():
+class TestFormats():
 
-    def test_type(self):
-        for (k, v) in PACKETS.items():
-            (f, a, d) = v
-            assert type(f) in [types.StringType, types.FunctionType]
-            assert isinstance(a, types.ListType)
-            assert isinstance(d, types.StringType)
-
+    def test_struct(self):
+        for (k, f) in FORMATS.items():
             if isinstance(f, types.StringType):
                 assert struct.Struct(f).size >= 0
+
+                if len(f) > 0:
+                    assert f[0] == '>'	# big-endian
