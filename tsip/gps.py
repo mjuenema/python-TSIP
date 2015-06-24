@@ -3,6 +3,8 @@
 """
 
 
+
+
 """
 
 import logging
@@ -14,6 +16,9 @@ import types
 
 from tsip.constants import DLE, ETX, PI
 from tsip.packets import FORMATS, DATUMS
+
+
+_BYTE_STRUCT = struct.Struct('>B')
 
 
 class GPS(object):
@@ -32,9 +37,10 @@ class GPS(object):
 
         if __debug__: 
             if b:
-               _LOG.debug('GPS._read_byte: b=0x%x' % (ord(b)))
+               _LOG.debug('GPS._read_byte: b=0x%x' % (struct.unpack('>B',b)))
             else:
                _LOG.debug('GPS._read_byte: EOF')
+               raise StopIteration
 
         return b
 
@@ -46,58 +52,99 @@ class GPS(object):
         :returns: TSIP packet as string with leading DLE
             and trailing DLE/ETX stripped.
 
+        This is largely based on the code found at `Brad's Duino Blog`_ although here
+        the packet is just read but not parsed.
+
+        .. Brad's Duino Blog: http://bradsduino.blogspot.com.au/2014/06/python-code-to-read-parse-tsip-data.html
+
         """
 
         packet = ''
+        start = False				# Has packet started?
+        last_i = 0				# Integer value of last byte.
+        DLE_count = 0				# Counter of how many DLE bytes we've seen.
 
-        # Read until next DLE.
-        #
+
         while True:
-            b = self.read_byte()
-            if b == '': raise StopIteration
-            
+            b = self.read_byte()		# raw byte 
+            i = _BYTE_STRUCT.unpack(b)[0]	# integer value of byte
 
-            if ord(b) == DLE:
-                if __debug__: _LOG.debug('GPS.next: 0x%0x == DLE (start)', ord(b))
+            if __debug__: _LOG.debug('GPS.next: i(b)=0x%x, start=%s, last_i=%x, DLE_count=%d, packet=%s ', i, start, last_i, DLE_count, packet)
 
-                # Read the next byte and check whether 
-                # this was a "stuffed" DLE.
-                #
-                b = self.read_byte()
-                if b == '': raise StopIteration
+            if start is False and i == DLE:
+                # Start of packet (DLE).
+                start = True
+            elif start is True and i == DLE:
+                DLE_count += 1
+                # A DLE was used as stuffing. Strictly speaking we added the "stuffing DLE"
+                # to the packet and skip the following value but the outcome is the same.
+                if last_i == DLE:
+                    pass
+            elif start is True and i != ETX and last_i == DLE:
+                packet += b
+            elif start is True and i == ETX and last_i == DLE and (DLE_count % 2) == 1:
+                # End of packet (DLE|ETX), return the packet.
+                return Packet(packet)
+            elif start is True:
+                # Append the byte to the packet
+                packet += b
 
-                if ord(b) != DLE:
-                    packet = b
-                    if __debug__: _LOG.debug('GPS.next: 0x%0x not DLE (start), packet="%s"', ord(b), packet)
-                    break
+            # Remember integer value of last packet.
+            last_i = i
+                
 
-
-        # Continue reading until DLE/ETX.
-        #
-        while True:
-           b = self.read_byte()
-           if b == '': raise StopIteration
-
-           if ord(b) <> DLE:
-               packet += b
-               if __debug__: _LOG.debug('GPS.next: 0x%0x not DLE (middle/end), packet="%s"', ord(b), packet)
-           else:
-               # ord(b) = DLE; stuffed DLE
-               if __debug__: _LOG.debug('GPS.next: 0x%0x == DLE (middle/end)', ord(b))
-
-               b = self.read_byte()
-               if b == '': raise StopIteration
-
-               if ord(b) == ETX:
-                   if __debug__: _LOG.debug('GPS.next: 0x%0x == ETX (end)', ord(b))
-                   break
-               else:
-                   packet = packet + struct.pack('>B', DLE) + b
-                   if __debug__: _LOG.debug('GPS.next: 0x%0x not ETX (end), packet="%s"', ord(b), packet)
-
-
-        if __debug__: _LOG.debug('GPS.next: packet="%s"' % (packet))
-        return Packet(packet)
+#            if i == DLE: 
+#                if PREVIOUS_BYTE_WAS_DLE == False:
+#                    if __debug__: _LOG.debug('GPS.next: 0x%0x == DLE (packet start?)', v)
+#                    PREVIOUS_BYTE_WAS_DLE == True
+#                else:  # PREVIOUS_BYTE_WAS_DLE == True
+#                    # stuffed DLE
+#                    PREVIOUS_BYTE_WAS_DLE == True
+#                
+#            elif i == DLE and PREVIOUS_BYTE_WAS_DLE == True:
+#
+#                if __debug__: _LOG.debug('GPS.next: 0x%0x == DLE (start)', ord(b))
+#
+#
+#
+#                # Read the next byte and check whether 
+#                # this was a "stuffed" DLE.
+#                #
+#                b = self.read_byte()
+#
+#                if _BYTE_STRUCT.unpack(b) != DLE:
+#                    packet = b
+#                    if __debug__: _LOG.debug('GPS.next: 0x%0x not DLE (start), packet="%s"', ord(b), packet)
+#                    break
+#
+#
+#        # Continue reading until DLE/ETX.
+#        #
+#        DLE_SEEN = False
+#        while True:
+#           b = self.read_byte()
+#
+#           if ord(b) 
+#
+#           if ord(b) <> DLE:
+#               packet += b
+#               if __debug__: _LOG.debug('GPS.next: 0x%0x not DLE (middle/end), packet="%s"', ord(b), packet)
+#           else:
+#               # ord(b) = DLE; stuffed DLE
+#               if __debug__: _LOG.debug('GPS.next: 0x%0x == DLE (middle/end)', ord(b))
+#
+#               b = self.read_byte()
+#
+#               if ord(b) == ETX:
+#                   if __debug__: _LOG.debug('GPS.next: 0x%0x == ETX (end)', ord(b))
+#                   break
+#               else:
+#                   packet = packet + struct.pack('>B', DLE) + b
+#                   if __debug__: _LOG.debug('GPS.next: 0x%0x not ETX (end), packet="%s"', ord(b), packet)
+#
+#
+#        if __debug__: _LOG.debug('GPS.next: packet="%s"' % (packet))
+#        return Packet(packet)
 
 
     def read(self):
@@ -212,23 +259,23 @@ class Packet(object):
 
         if __debug__: _LOG.debug('Packet.parse: packet=%s', packet)
 
-        self._packet = packet
+        cls._packet = packet
    
         # One byte ID 
         #
-        self.id = struct.unpack('B',packet[0])
+        cls.id = struct.unpack('B',packet[0])
 
 
         # TSIP Superpackets have a tow-byte ID
         #
-        if self.id in [0x8e, 0x8f]:
-            self.id = struct.unpack('H',packet[0:2])
+        if cls.id in [0x8e, 0x8f]:
+            cls.id = struct.unpack('H',packet[0:2])
 
 
         # Set self._format and initialise self._values.
         #
-        self._set_format()
-        self._set_values()
+        cls._set_format()
+        cls._set_values()
        
 
          

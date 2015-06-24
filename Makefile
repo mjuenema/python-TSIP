@@ -32,18 +32,19 @@ clean-test:
 	rm -fr htmlcov/
 
 lint:
-	flake8 python-TSIP tests
+#	flake8 python-TSIP tests
+	pylint -E tsip/*
 
 test: test_packets test_gps test_captures
 
 test_packets:
-	nosetests -v tests/$@.py
+	nosetests -x -v tests/$@.py
 
 test_gps:
-	nosetests -v tests/$@.py
+	nosetests -x -v tests/$@.py
 
 test_captures:
-	nosetests -v tests/$@.py
+	nosetests -x -v tests/$@.py
 
 test-all:
 	tox
