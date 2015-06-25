@@ -25,6 +25,24 @@ class _TestGps(object):
         d = stringio.StringIO(self.tsip)
         self.gps = GPS(d)
 
+class TestGps_Unknown(_TestGps):
+    tsip = struct.pack('>BBcBB', DLE, 0 , 'Y', DLE, ETX)
+
+    def test_read(self):
+        packet = self.gps.read()
+        assert packet.code == 0
+        assert packet._format is None
+        assert packet._values == []
+        assert len(packet) == 0
+
+    def test_iter(self):
+        packets = list(self.gps)
+        assert len(packets) == 1
+        assert packets[0].code == 0
+        assert packets[0]._format is None
+        assert packets[0]._values == []
+        assert len(packets[0]) == 0
+
 
 class TestGps_0x4e_Y(_TestGps):
     tsip = struct.pack('>BBcBB', DLE, ID , 'Y', DLE, ETX)
@@ -33,12 +51,14 @@ class TestGps_0x4e_Y(_TestGps):
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == 'Y'
+        assert len(packet) == 1
 
     def test_iter(self):
         packets = list(self.gps)
         assert len(packets) == 1
         assert packets[0].code == ID
         assert packets[0][0] == 'Y'
+        assert len(packets[0]) == 1
 
 
 class TestGps_0x4e_Y_0x4e_N(_TestGps):
@@ -48,10 +68,12 @@ class TestGps_0x4e_Y_0x4e_N(_TestGps):
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == 'Y'
+        assert len(packet) == 1
 
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == 'N'
+        assert len(packet) == 1
 
 
     def test_iter(self):
@@ -70,10 +92,12 @@ class TestGps_0x4e_Y_0x4e_DLE(_TestGps):
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == 'Y'
+        assert len(packet) == 1
 
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == DLE_STRUCT
+        assert len(packet) == 1
 
 
     def test_iter(self):
@@ -92,6 +116,7 @@ class TestGps_0x4e_DLE(_TestGps):
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == DLE_STRUCT
+        assert len(packet) == 1
 
     def test_iter(self):
         packets = list(self.gps)
@@ -107,6 +132,7 @@ class TestGps_Incomple_and_0x4e_DLE(_TestGps):
         packet = self.gps.read()
         assert packet.code == ID
         assert packet[0] == DLE_STRUCT
+        assert len(packet) == 1
 
     def test_iter(self):
         packets = list(self.gps)
@@ -142,7 +168,6 @@ class TestGpsError1(_TestGps):
         assert packets == []
 
 
-
 class TestGpsError2(_TestGps):
     tsip = struct.pack('>BcB', DLE, 'Y', ETX)
 
@@ -169,13 +194,14 @@ class TestGpsError3(_TestGps):
 
 # -------------------------------------
 
-#class TestPacket(object):
-#
-#    def test_packet_formats(self):
-#        for (code, format) in FORMATS.items():
-#            packet = Packet(code)
-#            assert packet.code == code
-#           
+class TestPacket(object):
+
+    def test_packet_formats(self):
+        for (code, format) in FORMATS.items():
+            packet = Packet(code)
+            assert packet.code == code
+            assert type(packet._format) in [types.StringType, types.FunctionType, types.NoneType]
+           
 #            if isinstance(packet._format, types.StringType): 
 #                assert struct.Struct(packet._format).size >= 0
 #

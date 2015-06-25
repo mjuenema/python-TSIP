@@ -196,6 +196,25 @@ class Packet(object):
         return self._values[i]
 
 
+    def __len__(self):
+        """
+        Return the number of fields this TSIP packet contains
+        as implemented in this class.
+
+        """
+
+        if isinstance(self._format, types.StringType):
+            return len(filter(lambda c: c in ['c','b','B','h','H','i','I','l','L','q','Q','f','d','s','p','P'], self._format))
+        elif isinstance(self._format, types.FunctionType):
+            # Not yet implemented
+            return -1
+        elif isinstance(self._format, types.NoneType):
+            return 0
+        else:
+            # Shouldn't really get here!
+            raise AttributeError("type(self._format)=%s, neither string nor function", type(self._format))
+
+
 
     def _parse(self, packet):
         """
