@@ -4,10 +4,14 @@ Constants related to TSIP.
 
 """
 
+import struct
+
 DLE = 0x10
+DLE_STRUCT = struct.pack('B', DLE)
 """ASCII character 16: Data Link Escape."""
 
-ETX = 0x03
+ETX = 0x3
+ETX_STRUCT = struct.pack('B', ETX)
 """ASCII character 3: End of Text."""
 
 PI = 3.1415926535898
