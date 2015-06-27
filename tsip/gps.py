@@ -268,11 +268,23 @@ class Packet(object):
         return (code, values)
 
 
+    def format_code(self):
+        if self.code <= 255:
+            return struct.pack('>B', self.code)
+        elif 256 <= self.code <= 65335:
+            return struct.pack('>H', self.code)
+        else:
+            raise ValueError
+
+
     def format(self):
         if isinstance(self._format, types.StringType):
-            packed = struct.pack(self._format, self._values)
+            packed = self.format_code() + struct.pack(self._format, *self._values)
         elif isinstance(self._format, types.FunctionType) or isinstance(self._format, types.LambdaType):
-            packed = self._format(self._values)
+            packed = self.format_code() + self._format(*self._values)
+
+        # TODO: DLE stuffing
+        return packed
 
 
     def __repr__(self):
