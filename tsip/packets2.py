@@ -5,7 +5,15 @@ import struct
 from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
 
 
-class _Report(object)
+class _Packet(object):
+    _format = ''
+    _values = []
+
+    def __getitem__(self, index):
+        return self._values[index]
+
+
+class _Report(_Packet)
 
     def __init__(self, packet):
         # TODO: strip DLE, DLE+ETX if still present
@@ -31,11 +39,27 @@ class _Report(object)
             return struct.unpack(self._format, self.packet[1:])
 
 
-class _Command(object):
+class _Command(_Packet):
 
     def __init__(self, code, *values):
         self.code = code
         self.values = values
+
+
+    def _pack_code(self):
+        if self.code > 255:
+            return struct.pack('>H', self.code)
+        else:
+            return struct.pack('>B', self.code)
+
+
+    def _pack_values(self):
+        return struct.pack(self._format, self._values)
+        
+
+    @property
+    def packet(self):
+       return _pack_code() + _pack_values()
 
 
 class Error(_Report):
@@ -47,6 +71,58 @@ class Error(_Report):
     _format = '<function parse_0x13 at 0x7f4b8b8cb668>'
     _values = []
 
+
+# --- 0x1c ------------------------------------------------
+
+class Command0x1c(_Command):
+    """
+    Version Information.
+
+    :param subcode: The subcode can be ``1`` (firmware version) or
+        ``3`` (hardware version).
+
+    """
+
+    _format = '>B'
+    _values = []
+
+    def __init__(self, subcode)
+        if subcode not in [1, 3]:
+            raise ValueError("subcode must be either 1 or 3")
+
+        super(Command_1c, self).__init__(0x1c, subcode)
+        self._values = [subcode]
+
+
+class Report0x1c(_Report):
+    """
+    Version information.
+
+    Report packet 0x1c is sent in reply to command packet 0x1c
+    requesting version information. There are two variants of
+    this packet, depending on the subcode sent in the command 
+    packet. Sub-code 81 reports firmware version information,
+    sub-code reports hardware version information.
+
+    """
+
+    _format    = None
+    _format_83 = '>BIBBHBHp'
+    _format_81 = '>BBBBBBBHp'
+    
+
+    def __init__(self, packet):
+        super(Report0x1c, self).__super__(packet)
+        if struct.unpack('>B', packet[1]) == 1:
+            self._format == self._format_81
+        elif struct.unpack('>B', packet[1]) == 3:
+            self._format == self._format_83
+        else:
+            raise ValueError('sub-code of report packet 0x1c must be 1 or 3')
+       
+
+    
+# ---  ------------
 
 class Command_1e(_Command):
     """
