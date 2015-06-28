@@ -1,7 +1,7 @@
 python-TSIP
 ===========
 
-**Please check the [Wiki](https://github.com/mjuenema/python-TSIP/wiki) for the current status of this project.**
+**Please check the [Wiki](https://github.com/mjuenema/python-TSIP/wiki/Current-Status) for the current status of this project.**
 
 *Python-TSIP* is a Python package for parsing and creating TSIP 
 packets. The Trimble Standard Interface Protocol (TSIP) is
