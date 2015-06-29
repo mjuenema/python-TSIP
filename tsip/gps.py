@@ -159,7 +159,7 @@ class GPS(object):
 
 class Packet(object):
 
-    _format = None	# Struct format string or function.
+    code = 0		# Dummy default
     _values = []	# List of values
 
     def __init__(self, arg, *values):
@@ -181,10 +181,15 @@ class Packet(object):
         else:
             raise ValueError
 
-        self._format = FORMATS.get(self.code)
-
         if __debug__: _LOG.debug('Packet.__init__: self.code=0x%x, self._format=%s, self._values=%s', 
                                  self.code, self._format, self._values)
+
+    @property
+    def _format(self):
+        fmt = FORMATS.get(self.code)
+        if __debug__: _LOG.debug("Packet._format: self.code=0x%x, format=%s", self.code, fmt)
+
+        return fmt
 
 
     def __getitem__(self, i):
@@ -225,7 +230,7 @@ class Packet(object):
 
         """
 
-        if __debug__: _LOG.debug('Packet._parse: packet=%s', packet)
+        if __debug__: _LOG.debug('Packet._parse: packet=%s', binascii.hexlify(packet))
 
    
         # One byte ID 
@@ -241,18 +246,49 @@ class Packet(object):
             codelen = 2
 
 
+        # Even though we return the Packet code we must set it here already
+        # so that the `Packet._format` property can work already,
+        #
+        self.code = code
+
+
         # Unpack the values
         #
-        _format = FORMATS.get(code)
+        if __debug__: _LOG.debug("Packet._parse: type(self._format=%s", type(self._format))
 
-        if isinstance(_format, types.StringType):
-            values = struct.unpack(_format, packet[codelen:])
-        elif isinstance(_format, types.FunctionType) or isinstance(_format, types.LambdaType):
-            values = _format(packet[len(code):])
+        if isinstance(self._format, types.StringType):
+            values = struct.unpack(self._format, packet[codelen:])
+        elif isinstance(self._format, types.FunctionType) or isinstance(self._format, types.LambdaType):
+            values = self._format(packet[len(code):])
         else:
             values = []
 
         if __debug__: _LOG.debug('Packet._parse: code=0x%x, values=%s', code, values)
 
         return (code, values)
+
+
+    def format_code(self):
+        if self.code <= 255:
+            return struct.pack('>B', self.code)
+        elif 256 <= self.code <= 65335:
+            return struct.pack('>H', self.code)
+        else:
+            raise ValueError
+
+
+    def format(self):
+        if isinstance(self._format, types.StringType):
+            packed = self.format_code() + struct.pack(self._format, *self._values)
+        elif isinstance(self._format, types.FunctionType) or isinstance(self._format, types.LambdaType):
+            packed = self.format_code() + self._format(*self._values)
+
+        # TODO: DLE stuffing
+        return packed
+
+
+    def __repr__(self):
+        return "Packet(0x%x, %s)" % (self.code, self._values)
+
+    
 

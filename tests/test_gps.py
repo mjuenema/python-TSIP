@@ -194,6 +194,8 @@ class TestGpsError3(_TestGps):
 
 # -------------------------------------
 
+# -------------------------------------
+
 class TestPacket(object):
 
     def test_packet_formats(self):
@@ -209,6 +211,17 @@ class TestPacket(object):
 #
 #                if len(packet._format) > 0:
 #                    assert packet._format[0] == '>'  # big-endian
+
+
+    def test_packet_0x4e_Y(self):
+        packet = Packet(0x4e, 'Y')
+        assert packet.code == 0x4e
+        assert packet[0] == 'Y'
+        assert packet._format == '>c'
+        assert packet._values[0] == 'Y'
+        assert len(packet._values) == 1
+        assert len(packet) == 1
+        assert packet.format() == struct.pack('>Bc', 0x4e, 'Y')
 
 
 
