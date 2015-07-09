@@ -1,312 +1,995 @@
 
 
+import struct
 
-import logging
-_LOG = logging.getLogger(__name__)
-
-
-def parse_0x13(packet):
-    return [packet[1:]]
+from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
 
 
-#def parse_0x58(packet):
-#    pass
+def _extract_code_from_packet(packet):
+    code = struct.unpack('>B', packet[0])[0]
+    if code in [0x8f, 0x8e]:
+        return struct.unpack('>H', packet[0:2])[0]
+    return code
 
-def parse_0x8f2a(packet):
-    pass
-
-
-NOTES = """
-Command Packet 0x38: Request Satellite System Data
---------------------------------------------------
-
-Early version of this command only accepted a single Sat PRN
-while newer versions also have Length and Data fields. 
-Python-TSIP suports only the old version of command
-packet 0x38.
-
-"""
+def _extract_data_from_packet(packet):
+    code = _extract_code_from_packet(packet)
+    if code > 255:
+        return packet[2:]
+    else:
+        return packet[1:]
 
 
+def _instantiate_report_packet(packet):
+    """
+    Return an instance of a Report packet class for `code`.
 
-FORMATS = {
-    0x13: parse_0x13,
-    0x1e: '>B',
-    0x1f: '',
-    0x21: '',
-    0x23: '>fff',
-    0x24: '',
-    0x25: '',
-    0x26: '',
-    0x27: '',
-    0x2b: '>fff',
-    0x2d: '',
-    0x2e: '>fh',
-    0x31: '>fff',
-    0x32: '>fff',
-    0x35: '>BBBB',
-    0x37: '',
-    0x38: '>BBB',
-    0x3a: '>B',
-    0x3c: '>B',
-    0x41: '>fhf',
-    0x42: '>ffff',
-    0x43: '>fffff',
-    0x45: '>BBBBBBBBBB',
-    0x46: '>BB',
-    0x47: '',
-    0x4a: '>fffff',
-    0x4b: '>BBB',
-    0x4d: '>f',
-    0x4e: '>c',
-    0x55: '>BBBB',
-    0x56: '>fffff',
-    0x57: '>BBfh',
-#    0x58: parse_0x58,
-    0x5a: '>BBBBBfffd',
-    0x5c: '>BBBBffffB',
-    0x69: '>B',
-    0x6d: '>Bffff',
-    0x82: '>B',
-    0x83: '>ddddf',
-    0x84: '>ddddf',
-    0x89: '>BB',
-    0xbb: '',
-    0xbc: '',
-    0x1c01: '',
-    0x1c03: '',
-    0x1c81: '>BBBBBBHp',
-    0x1c83: '>IBBHBHp',
-    0x8e15: '',
-    0x8e26: '',
-    0x8e41: '',
-    0x8e42: '',
-    0x8e45: '>B',
-    0x8e4a: '>BBBdI',
-    0x8e4c: '>B',
-    0x8e4e: '>B',
-#    0x8ea0: '>B?',
-    0x8ea2: '>B',
-    0x8ea3: '>B',
-    0x8ea5: '>HH',
-    0x8ea6: '>B',
-    0x8ea8: '>B',
-    0x8ea9: '>BBII',
-    0x8eab: '>B',
-    0x8eac: '>B',
-    0x8f15: '>bddddd',
-    0x8f17: '>chfffff',
-    0x8f18: '>chddddf',
-    0x8f20: '>BhhhHiIiBBBBBBh',
-    0x8f21: '>BHHHHhB',
-    0x8f23: '>IHBBIIihhhH',
-    0x8f26: '',
-    0x8f2a: parse_0x8f2a,
-    0x8f2b: '>BBHIiIiiiiBBB',
-    0x8f4a: '>BBBdI',
-    0x8f4f: '',
-    0x8fab: '>IHhBBBBBBH',
-    0x8fac: '>BBBIHHBBBBffI',
-    0x8ea800: '>ff',
-    0x8ea801: '>fff',
-    0x8ea802: '>ff',
-    0x8ea803: '>f',
+    """
+
+    code = _extract_code_from_packet(packet)
+    cls = _code_report_map.get(code)
+    if cls is not None:
+        return cls(packet)
+    else:
+        return None
+
+
+
+class _Packet(object):
+    _format = ''
+    _values = []
+
+    def __getitem__(self, index):
+        return self._values[index]
+
+
+class _Report(_Packet):
+
+    def __init__(self, packet):
+        # TODO: strip DLE, DLE+ETX if still present
+        self._packet = packet
+
+    @property
+    def code(self):
+        return _extract_code_from_packet(self._packet)
+
+    
+    @property
+    def data(self):
+        return _extract_data_from_packet(self._packet)
+
+
+    @property
+    def values(self):
+
+        # TSIP superpacket?
+        if self.code > 255:
+            return struct.unpack(self._format, self.packet[2:])
+        else:
+            return struct.unpack(self._format, self.packet[1:])
+
+
+class _Command(_Packet):
+
+    def __init__(self, code, *values):
+        self.code = code
+        self.values = values
+
+
+    def _pack_code(self):
+        if self.code > 255:
+            return struct.pack('>H', self.code)
+        else:
+            return struct.pack('>B', self.code)
+
+
+    def _pack_values(self):
+        return struct.pack(self._format, self._values)
+        
+
+    @property
+    def packet(self):
+       return _pack_code() + _pack_values()
+
+
+class Error(_Report):
+    """
+    Parsing error
+
+    """
+
+    _format = '<function parse_0x13 at 0x7f4b8b8cb668>'
+    _values = []
+
+
+class Diagnostics(_Report):
+
+    _format = None
+    _values = None
+
+
+# --- 0x1c ------------------------------------------------
+
+class Command_1c(_Command):
+    """
+    Version Information.
+
+    :param subcode: The subcode can be ``1`` (firmware version) or
+        ``3`` (hardware version).
+
+    """
+
+    _format = '>B'
+    _values = []
+
+    def __init__(self, subcode):
+        if subcode not in [1, 3]:
+            raise ValueError("subcode must be either 1 or 3")
+
+        super(Command_1c, self).__init__(0x1c, subcode)
+        self._values = [subcode]
+
+
+class Report_1c(_Report):
+    """
+    Version information.
+
+    Report packet 0x1c is sent in reply to command packet 0x1c
+    requesting version information. There are two variants of
+    this packet, depending on the subcode sent in the command 
+    packet. Sub-code 81 reports firmware version information,
+    sub-code reports hardware version information.
+
+    """
+
+    _format    = None
+    _format_83 = '>BIBBHBHp'
+    _format_81 = '>BBBBBBBHp'
+    
+
+    def __init__(self, packet):
+        super(Report0x1c, self).__super__(packet)
+        if struct.unpack('>B', packet[1]) == 1:
+            self._format == self._format_81
+        elif struct.unpack('>B', packet[1]) == 3:
+            self._format == self._format_83
+        else:
+            raise ValueError('sub-code of report packet 0x1c must be 1 or 3')
+       
+
+    
+# ---  ------------
+
+class Command_1e(_Command):
+    """
+     Clear Battery Backup, then Reset command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_1f(_Command):
+    """
+     Request Software Versions command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_21(_Command):
+    """
+     Request Current Time command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_23(_Command):
+    """
+    Initial Position (XYZ ECEF) command
+
+    """
+
+    _format = '>fff'
+    _values = []
+
+
+class Command_24(_Command):
+    """
+    Request GPS Receiver Position Fix Mode command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_25(_Command):
+    """
+    Initiate Soft Reset & Self Test command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_26(_Command):
+    """
+    Request Health command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_27(_Command):
+    """
+    Request Signal Levels command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_2b(_Command):
+    """
+    Initial Position (Latitude, Longitude, Altitude)
+
+    """
+
+    _format = '>fff'
+    _values = []
+
+
+class Command_2d(_Command):
+    """
+    Request Oscillator Offset command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_2e(_Command):
+    """
+    Set GPS time
+
+    """
+
+    _format = '>fh'
+    _values = []
+
+
+class Command_31(_Command):
+    """
+    Accurate Initial Position (XYZ ECEF) command
+
+    """
+
+    _format = '>fff'
+    _values = []
+
+
+class Command_32(_Command):
+    """
+    Accurate Initial Position (Latitude, Longitude, Altitude)
+
+    """
+
+    _format = '>fff'
+    _values = []
+
+
+class Command_35(_Command):
+    """
+    Set Request I/O Options command
+
+    """
+
+    _format = '>BBBB'
+    _values = []
+
+
+class Command_37(_Command):
+    """
+    Request Status and Values of Last Position and Velocity command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_38(_Command):
+    """
+    Request/Load Satellite System Data command
+
+    """
+
+    _format = '>BBB'
+    _values = []
+
+
+class Command_3a(_Command):
+    """
+    Request Last Raw Measurement command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_3c(_Command):
+    """
+    Request Current Satellite Tracking Status command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Report_41(_Report):
+    """
+    GPS Time report
+
+    """
+
+    _format = '>fhf'
+    _values = []
+
+
+class Report_42(_Report):
+    """
+    Single-Precision Position Fix, XYZ ECEF report
+
+    """
+
+    _format = '>ffff'
+    _values = []
+
+
+class Report_43(_Report):
+    """
+    Velocity Fix, XYZ ECEF report
+
+    """
+
+    _format = '>fffff'
+    _values = []
+
+
+class Report_45(_Report):
+    """
+    Software Version Information report
+
+    """
+
+    _format = '>BBBBBBBBBB'
+    _values = []
+
+
+class Report_46(_Report):
+    """
+    Health of Receiver report
+
+    """
+
+    _format = '>BB'
+    _values = []
+
+
+class Report_47(_Report):
+    """
+    Signal Levels for all Satellites report
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Report_4a(_Report):
+    """
+    Single Precision LLA Position Fix report
+
+    """
+
+    _format = '>fffff'
+    _values = []
+
+
+class Report_4b(_Report):
+    """
+    Machine/ Code ID and Additional Status report
+
+    """
+
+    _format = '>BBB'
+    _values = []
+
+
+class Report_4d(_Report):
+    """
+    Oscillator Offset report
+
+    """
+
+    _format = '>f'
+    _values = []
+
+
+class Report_4e(_Report):
+    """
+    Response to Set GPS Time report
+
+    """
+
+    _format = '>c'
+    _values = []
+
+
+class Report_55(_Report):
+    """
+    None
+
+    """
+
+    _format = '>BBBB'
+    _values = []
+
+
+class Report_56(_Report):
+    """
+    Velocity Fix, East-North-Up (ENU) report
+
+    """
+
+    _format = '>fffff'
+    _values = []
+
+
+class Report_57(_Report):
+    """
+     Information About Last Computed Fix
+
+    """
+
+    _format = '>BBfh'
+    _values = []
+
+
+class Report_58(_Report):
+    """
+    Satellite System Data/Acknowledge from Receiver
+
+    """
+
+    _format = '>?????'
+    _values = []
+
+
+class Report_5a(_Report):
+    """
+    Raw Measurement Data
+
+    """
+
+    _format = '>BBBBBfffd'
+    _values = []
+
+
+class Report_5c(_Report):
+    """
+    Satellite Tracking Status report
+
+    """
+
+    _format = '>BBBBffffB'
+    _values = []
+
+
+class Report_69(_Report):
+    """
+    Receiver Acquisition Sensitivity Mode report
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Report_6d(_Report):
+    """
+    All-In-View Satellite Selection report
+
+    """
+
+    _format = '>Bffff'
+    _values = []
+
+
+class Report_82(_Report):
+    """
+    SBAS Correction Status report
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Report_83(_Report):
+    """
+    Double-Precision XYZ Position Fix and Bias Information report
+
+    """
+
+    _format = '>ddddf'
+    _values = []
+
+
+class Report_84(_Report):
+    """
+    Double-Precision LLA Position Fix and Bias Information report
+
+    """
+
+    _format = '>ddddf'
+    _values = []
+
+
+class Report_89(_Report):
+    """
+    Receiver Acquisition Sensitivity Mode report
+
+    """
+
+    _format = '>BB'
+    _values = []
+
+
+class Command_bb(_Command):
+    """
+    Set Receiver Configuration command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_bc(_Command):
+    """
+    Set Port Configuration command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_1c01(_Command):
+    """
+    Firmware version command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_1c03(_Command):
+    """
+    Hardware component version command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Report_1c81(_Report):
+    """
+    Firmware version report
+
+    """
+
+    _format = '>BBBBBBHp'
+    _values = []
+
+
+class Report_1c83(_Report):
+    """
+    Hardware component version report
+
+    """
+
+    _format = '>IBBHBHp'
+    _values = []
+
+
+class Command_8e15(_Command):
+    """
+    Request current Datum values command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_8e26(_Command):
+    """
+    Write Configuration to NVS command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_8e41(_Command):
+    """
+    Request Manufacturing Paramaters command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_8e42(_Command):
+    """
+    Stored Production Parameters command
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Command_8e45(_Command):
+    """
+    Revert Configuration Segment to Default Settings and Write to NVS command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8e4a(_Command):
+    """
+    Set PPS Characteristics
+
+    """
+
+    _format = '>BBBdI'
+    _values = []
+
+
+class Command_8e4c(_Command):
+    """
+    Write Configuration Segment to NVS command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8e4e(_Command):
+    """
+    Set PPS output option command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8ea0(_Command):
+    """
+    Set DAC Value command
+
+    """
+
+    _format = '>?????'
+    _values = []
+
+
+class Command_8ea2(_Command):
+    """
+    UTC/GPS Timing command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8ea3(_Command):
+    """
+     Issue Oscillator Disciplining command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8ea5(_Command):
+    """
+    Packet Broadcast Mask command
+
+    """
+
+    _format = '>HH'
+    _values = []
+
+
+class Command_8ea6(_Command):
+    """
+    Self-Survey command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8ea8(_Command):
+    """
+    Request Disciplining Parameters command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8ea9(_Command):
+    """
+    Self-Survey Parameters command
+
+    """
+
+    _format = '>BBII'
+    _values = []
+
+
+class Command_8eab(_Command):
+    """
+    Request Primary Timing Packet command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Command_8eac(_Command):
+    """
+    Request Supplementary Timing Packet command
+
+    """
+
+    _format = '>B'
+    _values = []
+
+
+class Report_8f15(_Report):
+    """
+    Current Datum Values report
+
+    """
+
+    _format = '>bddddd'
+    _values = []
+
+
+class Report_8f17(_Report):
+    """
+    UTM Single Precision Output report
+
+    """
+
+    _format = '>chfffff'
+    _values = []
+
+
+class Report_8f18(_Report):
+    """
+    UTM Double Precision Output report
+
+    """
+
+    _format = '>chddddf'
+    _values = []
+
+
+class Report_8f20(_Report):
+    """
+    Last Fix with Extra Information report (binary fixed point)
+
+    """
+
+    _format = '>BhhhHiIiBBBBBBh'
+    _values = []
+
+
+class Report_8f21(_Report):
+    """
+    Request Accuracy Information report
+
+    """
+
+    _format = '>BHHHHhB'
+    _values = []
+
+
+class Report_8f23(_Report):
+    """
+    Request Last Compact Fix Information report
+
+    """
+
+    _format = '>IHBBIIihhhH'
+    _values = []
+
+
+class Report_8f26(_Report):
+    """
+    Non-Volatile Memory Status report
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Report_8f2a(_Report):
+    """
+    Fix and Channel Tracking Info report (Type 1)
+
+    """
+
+    _format = '<function parse_0x8f2a at 0x7f4b8b832050>'
+    _values = []
+
+
+class Report_8f2b(_Report):
+    """
+    Fix and Channel Tracking Info report (Type 2)
+
+    """
+
+    _format = '>BBHIiIiiiiBBB'
+    _values = []
+
+
+class Report_8f4a(_Report):
+    """
+    Copernicus II GPS Receiver Cable Delay and POS Polarity
+
+    """
+
+    _format = '>BBBdI'
+    _values = []
+
+
+class Report_8f4f(_Report):
+    """
+    Set PPS width report
+
+    """
+
+    _format = ''
+    _values = []
+
+
+class Report_8fab(_Report):
+    """
+    Primary Timing Packet report
+
+    """
+
+    _format = '>IHhBBBBBBH'
+    _values = []
+
+
+class Report_8fac(_Report):
+    """
+    Supplemental Timing Packet
+
+    """
+
+    _format = '>BBBIHHBBBBffI'
+    _values = []
+
+
+class Report_8ea8(_Report):
+    """
+    Set Disciplining Parameters command (Type 0)
+
+    """
+
+    _format = '>ff'
+    _values = []
+
+
+#class Unknown_8ea801(_Unknown):
+#    """
+#    Set Disciplining Parameters command (Type 1)
+#
+#    """
+#
+#    _format = '>fff'
+#    _values = []
+#
+#
+#class Unknown_8ea802(_Unknown):
+#    """
+#    Set Disciplining Parameters command (Type 2)
+#
+#    """
+#
+#    _format = '>ff'
+#    _values = []
+#
+#
+#class Unknown_8ea803(_Unknown):
+#    """
+#    Set Disciplining Parameters command (Type 3)
+#
+#    """
+#
+#    _format = '>f'
+#    _values = []
+
+
+_code_report_map = {
+        0x1e: Error,
+	0x1c: Report_1c,
+	0x41: Report_41,
+	0x42: Report_42,
+	0x43: Report_43,
+	0x45: Report_45,
+	0x46: Report_46,
+	0x47: Report_47,
+	0x4a: Report_4a,
+	0x4b: Report_4b,
+	0x4d: Report_4d,
+	0x4e: Report_4e,
+	0x56: Report_56,
+	0x5c: Report_5c,
+	0x5f: Diagnostics,
+	0x69: Report_69,
+	0x6d: Report_6d,
+	0x82: Report_82,
+	0x83: Report_83,
+	0x84: Report_84,
+	0x89: Report_89,
+	0x1c81: Report_1c81,
+	0x1c83: Report_1c83,
+	0x8f15: Report_8f15,
+	0x8f17: Report_8f17,
+	0x8f18: Report_8f18,
+	0x8f21: Report_8f21,
+	0x8f23: Report_8f23,
+	0x8f26: Report_8f26,
+	0x8f4f: Report_8f4f,
+	0x8fab: Report_8fab
 }
-"""
-The `FORMATS` table contains the packet structure as
-`struct` format string or a custom function.
-"""
-
-
-DATUMS = {
-    0: "0 WGS-84",
-    1: "1 Tokyo",
-    2: "2 North American 1927 Mean Solution (CONUS) NAS-C",
-    3: "3 Alaska Canada",
-    4: "4 European 1950 Mean Solution EUR-M",
-    5: "5 Australian Geodetic 1966 Australia and Tasmania AUA",
-    6: "6 WGS-72",
-    7: "7 NAD-83",
-    8: "8 NAD-02",
-    9: "9 Mexican",
-    10: "Hawaii",
-    11: "Astronomic",
-    12: "U.S. Navy",
-    13: "European 1950 Mean Solution EUR-M",
-    14: "Australian Geodetic 1984 Australia and Tasmania AUG",
-    15: "Adindan Mean Solution (Ethiopia and Sudan) ADI-M",
-    16: "Adindan Ethiopia ADI-A",
-    17: "Adindan Mali ADI-C",
-    18: "Adindan Senegal ADI-D",
-    19: "Adindan Sudan ADI-B",
-    20: "Afgooye Somalia AFG",
-    21: "Ain El Abd 1970 Bahrain Island AIN-A",
-    22: "Anna 1 Astro 1965 Cocos Islands ANO",
-    23: "ARC 1950 Mean Solution ARF-M",
-    24: "ARC 1950 Botswana ARF-A",
-    25: "ARC 1950 Lesotho ARF-B",
-    26: "ARC 1950 Malawi ARF-C",
-    27: "ARC 1950 Swaziland ARF-D",
-    28: "ARC 1950 Zaire ARF-E",
-    29: "ARC 1950 Zambia ARF-F",
-    30: "ARC 1950 Zimbabwe ARF-G",
-    31: "ARC 1960 Mean Solution ARS",
-    32: "ARC 1960 Kenya ARS",
-    33: "ARC 1960 Tanzania ARS",
-    34: "Ascension Island 1958 Ascension Island ASC",
-    35: "Astro Beacon E 1945 Iwo Jima ATF",
-    36: "Astro Tern Island (F RIG) 1961 T ern Island TRN",
-    37: "Astro Dos 71 /4 St. Helena Island SHB",
-    38: "Astronomical Station 1952 Marcus Island TRN",
-    39: "Australian Geodetic 1966 Australia and Tasmania AUA",
-    40: "Bellevue (IGN) Efate Erromango Island IBE",
-    41: "Bermuda 1957 Bermuda Islands BER",
-    42: "Bogota Observatory Columbia BOO",
-    43: "Compo Inchauspe 1969 Argentina CAI",
-    44: "Canton Astro1966 Phoenix Island CAO",
-    45: "Cape South Africa CAP",
-    46: "Cape Canaveral Mean Solution (Florida and Bahamas) CAC",
-    47: "Carthage Tunisia CGE",
-    48: "Chatham Island Astro 1971 Chatham Island (New Zealand) CHI",
-    49: "Chua Astro Paraguay CHU",
-    50: "Corrego Alegre Brazil COA",
-    51: "Djakarta (Batavia) Sumatra (Indonesia) BAT",
-    52: "Dos 1968 Gizo Island (New Georgia Islands) GIZ",
-    53: "Easter Island 1967 Easter Island EAS",
-    54: "European 1950 Mean Solution EUR-M",
-    55: "European 1950 Cyprus EUR-E",
-    56: "European 1950 Egypt EUR-F",
-    57: "European 1950 England, Ireland, Scotland, Shetland Islands EUR-G",
-    58: "European 1950 England, Ireland, Scotland, Shetland Islands EUR-K",
-    59: "European 1950 Greece EUR-B",
-    60: "European 1950 Iran EUR-H",
-    61: "European 1950 Sardinia EUR-I",
-    62: "European 1950 Sicily EUR-J",
-    63: "European 1950 Norway and Finland EUR-C",
-    64: "European 1950 Portugal and Spain EUR-D",
-    65: "European 1979 Mean Solution EUS",
-    66: "Gan 1970 Republic of Maldives GAA",
-    67: "Geodetic Datum 1948 New Zealand GEO",
-    68: "Guam 1963 Guam GUA",
-    69: "Gux 1 Astro Guadalcanal Islands DOB",
-    70: "Hjorsey 1955 Iceland HJO",
-    71: "Hong Kong 1963 Hong Kong HKD",
-    72: "Indian 1975 Thailand INH -A",
-    73: "Indian India and Nepal IND-I",
-    74: "Ireland 1965 Ireland IRL",
-    75: "ISTS 073 Astro 1969 Diego Garcia IST",
-    76: "Johnstone Island 19 61 Johnstone Island JOH",
-    77: "Kandawala Sri Lanka KAN",
-    78: "Kerguelen Island 1949 Kerguelen Island KEG",
-    79: "Kertau 1948 West Malaysia and Singapore KEA",
-    80: "Reunion Mascarene Island REU",
-    81: "L.C.5 Astro 1961 Ca yman Brac Island LCF",
-    82: "Liberia 1964 Liberia LIB",
-    83: "Luzon Philippines LUZ-A",
-    84: "Luzon Mindanao Island LUZ-B",
-    85: "Mahe 1971 Mahe Island MIK",
-    86: "Sel vagem Grande 1938 Salvage Islands SGM",
-    87: "Massawa Eritrea (Ethiopia) MAS",
-    88: "Merchich Morocco MER",
-    89: "Midway Astro 1961 Midway Islands MID",
-    90: "Minna Nigeria MIN-B",
-    91: "Nahrwan Masirah Island (Oman) NAH-A",
-    92: "Nahrwan United Arab Emirates NAH-B",
-    93: "Nahrwan Saudi Arabia NAH-C",
-    94: "Schwarzeck Namibia SCK",
-    95: "Naparima, BWI Trinidad and Tobago NAP",
-    96: "NAD 27 Western United States NAS-B",
-    97: "NAD 27 Eastern United States NAS-A",
-    98: "NAD 27 Alaska NAS-D",
-    99: "NAD 27 Bahamas NAS-Q",
-    100: "NAD 27 San Salvador NAS-R",
-    101: "NAD 27 Canada NAS-E",
-    102: "NAD 27 Alberta BC NAS-F",
-    103: "NAD 27 East Canada NAS-G",
-    104: "NAD 27 Manitoba Ontario NAS-H",
-    105: "NAD 27 Northwest Terri tories Saskatchewan NAS-I",
-    106: "NAD 27 Yukon NAS-J",
-    107: "NAD 27 Canal Zone NAS-O",
-    108: "NAD 27 Caribbean NAS-P",
-    109: "NAD 27 Central America NAS-N",
-    110: "NAD 27 Cuba NAS-T",
-    111: "NAD 27 Greenland NAS-U",
-    112: "NAD 27 Mexico NAS-V",
-    113: "NAD 83 Alaska NAR-A",
-    114: "NAD 83 Canada NAR-B",
-    115: "NAD 83 CONUS NAR-C",
-    116: "NAD 83 Mexico and Central America NAR-D",
-    117: "Observatorio Meteorologico 1939 Corvo and Flores Islands (Azores) FLO",
-    118: "Old Egyptian 1907 Egypt OEG",
-    119: "Old Hawaiian Mean Solution OHA-M",
-    120: "Old Hawaiian Hawaii OHA-A",
-    121: "Old Hawaiian Kauai OHA-B",
-    122: "Old Hawaiian Maui OHA-C",
-    123: "Old Hawaiian Oahu OHA-D",
-    124: "Oman Oman FAH",
-    125: "Ordnance Survey of Great Britain Mean Solution OGB-M",
-    126: "Ordnance Survey of Great Britain England OGB-M",
-    127: "Ordnance Survey of Great Britain Isle of Man OGB-M",
-    128: "Ordnance Survey of Great Britain Scotland and Shetland Islands OGB-M",
-    129: "Ordnance Survey of Great Britain Wales OGB-M",
-    130: "Pico De Las Nieves Canary Islands PLN",
-    131: "Pitcairn Astro 1967 Pitcairn Island PIT",
-    132: "Provisional South Chilean 1963 Southern Chile (near 53S) HIT",
-    133: "Provisional South American 1956 Mean Solution (Bolivia, Ch ile, Columbia, Ecuador, Guyana, Peru, Venezuela) PRP-M",
-    134: "Provisional South American 1956 Bolivia, Chile PRP-A",
-    135: "Provisional South American 1956 Northern Chile (near 19S) PRP-B",
-    136: "Provisional South American 1956 Southern Chile (near 43S) PRP-C",
-    137: "Provisional South American 1956 Columbia PRP-D",
-    138: "Provisional South American 1956 Ecuador PRP-E",
-    139: "Provisional South American 1956 Guyana PRP-F",
-    140: "Provisional South American 1956 Peru PRP-G",
-    141: "Provisional South American 1956 Venezuela PRP-H",
-    142: "Puerto Rico Puerto Rico and Virgin Islands PUR",
-    143: "Quatar National Qatar QAT",
-    144: "Qornoq South Greenland QUO",
-    145: "Rome 1940 Sardinia MOD",
-    146: "Santa Braz Sao Miguel, Santa Maria Islands (Azores) SAO",
-    147: "Santo (DOS) 1952 Espirito Santo Island SAE",
-    148: "Sapper Hill 1943 East Falkland Islands SAP",
-    149: "South American 1969 Mean Solution (Argentina, Bolivia, Br azil, Chile, Columbia, Ecuador, Guyana, Paraguay, Peru, Trinidad Tobago, Venezuela) SAN-M",
-    150: "South American 1969 Argentina SAN-A",
-    151: "South American 1969 Bolivia SAN-B",
-    152: "South American 1969 Brazil SAN-C",
-    153: "South American 1969 Chile SAN-D",
-    154: "South American 1969 Columbia, SAN-E",
-    155: "South American 1969 Ecuador (Excluding Galapagos Isl a nds) SAN-F",
-    156: "South American 1969 Guyana SAN-G",
-    157: "South American 1969 Paraguay SAN-H",
-    158: "South American 1969 Peru SAN-I",
-    159: "South American 1969 Trinidad and Tobago SAN-K",
-    160: "South American 1969 Venezuela SAN-L",
-    161: "South Asia Singapore SOA",
-    162: "Porto Santo 1936 Porto Santo and Madera Islands POS",
-    163: "Graciosa Base Southwest 1948 Faial, Graciosa, Pico, San Jorg, and Terceira Islands (Azores) GRA",
-    164: "Timbalai 1948 Brunei and East Malaysia (Sarawak and Sabah) TIL",
-    165: "Tokyo Mean Solution (Japan, Okinawa and South Korea) TOY-M",
-    166: "Tokyo South Korea TOY-B",
-    167: "Tokyo Okinawa TOY-C",
-    168: "Tristan Astro 1968 Tristan Da Cunha TDC",
-    169: "Viti Levu 1916 Viti Levu Island (Fiji Islands) MVS",
-    170: "Wake Eniwetok 1960 Marshall Islands ENW",
-    171: "Zanderij Surinam ZAN",
-    172: "Bukit Rimpah Bangka and Belitung Islands (Indonesia) BUR",
-    173: "Camp Area Astro Camp McMurdo Area, Antarctica CAZ",
-    174: "Gunung Segara Kalimantan (Indonesia) GSE",
-    175: "Herat North Afghanistan HEN",
-    176: "Hu-Tzu-Shan Taiwan HTN",
-    179: "Tokyo GIS Coordinates TOY-B",
-    }
-"""
-Mapping of datum value as contained in packets 0x8e15 and 0x8f15 to
-their name.
-
-Taken from Trimble Copernicus 2 - Reference Manual (Rev. 1.07) , p.144+.
-
-Reference: DMA TR 8350.2 Second Edition, 1 Sept. 1991. DMA Technical Report, 
-Department of Defense World Geodetic System 1984, Definition and Relationships 
-with Local Geodetic Systems.
-"""
-
-
+"""Map the code of a TSIP report packet to the Python class."""

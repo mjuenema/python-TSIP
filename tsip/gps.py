@@ -13,7 +13,7 @@ import struct
 import types
 
 from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT, PI
-from tsip.packets import FORMATS, DATUMS
+from tsip.packets import _instantiate_report_packet	#, DATUMS
 
 
 if __debug__:
@@ -55,7 +55,7 @@ class GPS(object):
         """
         Return the next TSIP packet.
 
-        :returns: TSIP packet as string with leading DLE
+        >:returns: TSIP packet as string with leading DLE
             and trailing DLE/ETX stripped.
 
         This is largely based on the code found at `Brad's Duino Blog`_ although here
@@ -135,7 +135,7 @@ class GPS(object):
         packet = packet[1:-1]
         if __debug__: _LOG.debug('GPS.next: packet(stripped)=%s', binascii.hexlify(packet))
 
-        return Packet(packet)
+        return _instantiate_report_packet(packet)
         
         
 
@@ -235,14 +235,14 @@ class Packet(object):
    
         # One byte ID 
         #
-        code = struct.unpack('B',packet[0])[0]
+        code = struct.unpack('>B',packet[0])[0]
         codelen = 1
 
 
         # TSIP Superpackets have a two-byte ID
         #
         if code in [0x8e, 0x8f]:
-            code = struct.unpack('H',packet[0:2])[0]
+            code = struct.unpack('>H',packet[0:2])[0]
             codelen = 2
 
 
