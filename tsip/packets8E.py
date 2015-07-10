@@ -25,9 +25,7 @@ TSIP super-packet commands (0x8e??)
 
 import struct
 
-from tsip.constants import *
-
-from tsip.base import *
+from tsip.base import _Command, _Report
 
 
 class Command_8e15(_Command):

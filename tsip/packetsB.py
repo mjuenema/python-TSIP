@@ -11,9 +11,7 @@ TSIP packets in the 0xb? range.
 
 import struct
 
-from tsip.constants import *
-
-from tsip.base import *
+from tsip.base import _Command, _Report
 
 
 class Command_bb(_Command):

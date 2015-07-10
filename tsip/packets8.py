@@ -13,9 +13,7 @@ TSIP packets in the 0x8? range, excluding super-packets.
 
 import struct
 
-from tsip.constants import *
-
-from tsip.base import *
+from tsip.base import _Command, _Report
 
 
 class Report_82(_Report):

@@ -15,9 +15,7 @@ TSIP packets in the 0x5? range.
 
 import struct
 
-from tsip.constants import *
-
-from tsip.base import *
+from tsip.base import _Command, _Report
 
 
 class Report_55(_Report):

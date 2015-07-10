@@ -21,11 +21,8 @@ TSIP super-packet commands (0x8f??)
 
 import struct
 
-from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
+from tsip.base import _Command, _Report
 
-from tsip.base import _extract_code_from_packet, _extract_data_from_packet,
-                      _instantiate_report_packet,
-                      _Packet, _Report, _Command
 
 class Report_8f15(_Report):
     """

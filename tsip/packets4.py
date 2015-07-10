@@ -19,10 +19,7 @@ TSIP packets in the 0x4? range.
 
 import struct
 
-from tsip.constants import *
-
-from tsip.base import *
-
+from tsip.base import _Command, _Report
 
 class Report_41(_Report):
     """

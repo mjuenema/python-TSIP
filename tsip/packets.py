@@ -16,18 +16,36 @@ import struct
 
 from tsip.constants import *
 
-from tsip.base import *
+from tsip.base import _Command, _Report
 
-from tsip.packets1 import *
-from tsip.packets2 import *
-from tsip.packets3 import *
-from tsip.packets4 import *
-from tsip.packets5 import *
-from tsip.packets6 import *
-from tsip.packets8 import *
-from tsip.packetsB import *
-from tsip.packets8E import *
-from tsip.packets8F import *
+from packets1 import Command_1c, Report_1c, Command_1e, Command_1f
+
+from packets2 import Command_21, Command_23, Command_24, Command_25, Command_26
+from packets2 import Command_27, Command_2b, Command_2d, Command_2e
+
+from packets3 import Command_31, Command_32, Command_35, Command_37, Command_38
+from packets3 import Command_3a, Command_3c
+
+from packets4 import Report_41, Report_42, Report_43, Report_45, Report_46, Report_47
+from packets4 import Report_4a, Report_4b, Report_4d, Report_4e
+
+from packets5 import Report_55, Report_56, Report_57, Report_58, Report_5a, Report_5c
+
+from packets6 import Report_69, Report_6d
+
+from packets8 import Report_82, Report_83, Report_84, Report_89
+
+from packetsB import Command_bb, Command_bc
+
+from packets8E import Command_8e15, Command_8e26, Command_8e41, Command_8e42, Command_8e45
+from packets8E import Command_8e4a, Command_8e4c, Command_8e4e, Command_8ea0, Command_8ea2
+from packets8E import Command_8ea3, Command_8ea5, Command_8ea6, Command_8ea8, Command_8ea9
+from packets8E import Command_8eab, Command_8eac
+
+from packets8F import Report_8f15, Report_8f17, Report_8f18, Report_8f20, Report_8f21
+from packets8F import Report_8f23, Report_8f26, Report_8f2a, Report_8f2b, Report_8f4a
+from packets8F import Report_8f4f, Report_8fab,Report_8fac
+
 
 
 class Error(_Report):
@@ -74,8 +92,6 @@ _code_report_map = {
 	0x83: Report_83,
 	0x84: Report_84,
 	0x89: Report_89,
-	0x1c81: Report_1c81,
-	0x1c83: Report_1c83,
 	0x8f15: Report_8f15,
 	0x8f17: Report_8f17,
 	0x8f18: Report_8f18,
