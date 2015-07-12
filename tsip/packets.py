@@ -14,9 +14,11 @@ and Trimble disgnostics (0x5f).
 
 import struct
 
-from tsip.constants import *
+from tsip.constants import DLE, ETX, PI
 
-from tsip.base import _Command, _Report
+from tsip.base import _extract_code_from_packet
+
+from tsip.base import Command, Report
 
 from packets1 import Command_1c, Report_1c, Command_1e, Command_1f
 
@@ -48,7 +50,7 @@ from packets8F import Report_8f4f, Report_8fab,Report_8fac
 
 
 
-class Error(_Report):
+class Error(Report):
     """
     Parsing error
 
@@ -58,7 +60,7 @@ class Error(_Report):
     _values = []
 
 
-class Diagnostics(_Report):
+class Diagnostics(Report):
     """
     For Trimble diagnostic use only (0x5f)!
 
@@ -102,3 +104,17 @@ _code_report_map = {
 	0x8fab: Report_8fab
 }
 """Map the code of a TSIP report packet to the Python class."""
+
+
+def _instantiate_report_packet(packet):
+    """
+    Return an instance of a Report packet class for `code`.
+
+    """
+
+    code = _extract_code_from_packet(packet)
+    cls = _code_report_map.get(code)
+    if cls is not None:
+        return cls(packet)
+    else:
+        return None

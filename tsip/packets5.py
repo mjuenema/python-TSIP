@@ -15,10 +15,10 @@ TSIP packets in the 0x5? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Report_55(_Report):
+class Report_55(Report):
     """
     I/O Options report.
 
@@ -28,7 +28,7 @@ class Report_55(_Report):
     _values = []
 
 
-class Report_56(_Report):
+class Report_56(Report):
     """
     Velocity Fix, East-North-Up (ENU) report
 
@@ -38,7 +38,7 @@ class Report_56(_Report):
     _values = []
 
 
-class Report_57(_Report):
+class Report_57(Report):
     """
      Information About Last Computed Fix
 
@@ -48,7 +48,7 @@ class Report_57(_Report):
     _values = []
 
 
-class Report_58(_Report):
+class Report_58(Report):
     """
     Satellite System Data/Acknowledge from Receiver
 
@@ -58,7 +58,7 @@ class Report_58(_Report):
     _values = []
 
 
-class Report_5a(_Report):
+class Report_5a(Report):
     """
     Raw Measurement Data
 
@@ -68,7 +68,7 @@ class Report_5a(_Report):
     _values = []
 
 
-class Report_5c(_Report):
+class Report_5c(Report):
     """
     Satellite Tracking Status report
 

@@ -16,10 +16,10 @@ TSIP packets in the 0x3? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Command_31(_Command):
+class Command_31(Command):
     """
     Accurate Initial Position (XYZ ECEF) command
 
@@ -29,7 +29,7 @@ class Command_31(_Command):
     _values = []
 
 
-class Command_32(_Command):
+class Command_32(Command):
     """
     Accurate Initial Position (Latitude, Longitude, Altitude)
 
@@ -39,7 +39,7 @@ class Command_32(_Command):
     _values = []
 
 
-class Command_35(_Command):
+class Command_35(Command):
     """
     Set Request I/O Options command
 
@@ -49,7 +49,7 @@ class Command_35(_Command):
     _values = []
 
 
-class Command_37(_Command):
+class Command_37(Command):
     """
     Request Status and Values of Last Position and Velocity command
 
@@ -59,7 +59,7 @@ class Command_37(_Command):
     _values = []
 
 
-class Command_38(_Command):
+class Command_38(Command):
     """
     Request/Load Satellite System Data command
 
@@ -69,7 +69,7 @@ class Command_38(_Command):
     _values = []
 
 
-class Command_3a(_Command):
+class Command_3a(Command):
     """
     Request Last Raw Measurement command
 
@@ -79,7 +79,7 @@ class Command_3a(_Command):
     _values = []
 
 
-class Command_3c(_Command):
+class Command_3c(Command):
     """
     Request Current Satellite Tracking Status command
 

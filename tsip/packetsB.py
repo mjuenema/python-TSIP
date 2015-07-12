@@ -11,10 +11,10 @@ TSIP packets in the 0xb? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Command_bb(_Command):
+class Command_bb(Command):
     """
     Set Receiver Configuration command
 
@@ -24,7 +24,7 @@ class Command_bb(_Command):
     _values = []
 
 
-class Command_bc(_Command):
+class Command_bc(Command):
     """
     Set Port Configuration command
 

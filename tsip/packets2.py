@@ -18,10 +18,10 @@ TSIP packets in the 0x2? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Command_21(_Command):
+class Command_21(Command):
     """
      Request Current Time command
 
@@ -31,7 +31,7 @@ class Command_21(_Command):
     _values = []
 
 
-class Command_23(_Command):
+class Command_23(Command):
     """
     Initial Position (XYZ ECEF) command
 
@@ -41,7 +41,7 @@ class Command_23(_Command):
     _values = []
 
 
-class Command_24(_Command):
+class Command_24(Command):
     """
     Request GPS Receiver Position Fix Mode command
 
@@ -51,7 +51,7 @@ class Command_24(_Command):
     _values = []
 
 
-class Command_25(_Command):
+class Command_25(Command):
     """
     Initiate Soft Reset & Self Test command
 
@@ -61,7 +61,7 @@ class Command_25(_Command):
     _values = []
 
 
-class Command_26(_Command):
+class Command_26(Command):
     """
     Request Health command
 
@@ -71,7 +71,7 @@ class Command_26(_Command):
     _values = []
 
 
-class Command_27(_Command):
+class Command_27(Command):
     """
     Request Signal Levels command
 
@@ -81,7 +81,7 @@ class Command_27(_Command):
     _values = []
 
 
-class Command_2b(_Command):
+class Command_2b(Command):
     """
     Initial Position (Latitude, Longitude, Altitude)
 
@@ -91,7 +91,7 @@ class Command_2b(_Command):
     _values = []
 
 
-class Command_2d(_Command):
+class Command_2d(Command):
     """
     Request Oscillator Offset command
 
@@ -101,7 +101,7 @@ class Command_2d(_Command):
     _values = []
 
 
-class Command_2e(_Command):
+class Command_2e(Command):
     """
     Set GPS time
 

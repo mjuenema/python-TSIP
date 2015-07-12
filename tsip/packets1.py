@@ -11,10 +11,10 @@ TSIP packets in the 0x1? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Command_1c(_Command):
+class Command_1c(Command):
     """
     Version Information.
 
@@ -34,7 +34,7 @@ class Command_1c(_Command):
         self._values = [subcode]
 
 
-class Report_1c(_Report):
+class Report_1c(Report):
     """
     Version information.
 
@@ -52,7 +52,7 @@ class Report_1c(_Report):
     
 
     def __init__(self, packet):
-        super(Report0x1c, self).__super__(packet)
+        super(Report_1c, self).__super__(packet)
         if struct.unpack('>B', packet[1]) == 1:
             self._format == self._format_81
         elif struct.unpack('>B', packet[1]) == 3:
@@ -64,7 +64,7 @@ class Report_1c(_Report):
     
 # ---  ------------
 
-class Command_1e(_Command):
+class Command_1e(Command):
     """
      Clear Battery Backup, then Reset command
 
@@ -74,7 +74,7 @@ class Command_1e(_Command):
     _values = []
 
 
-class Command_1f(_Command):
+class Command_1f(Command):
     """
      Request Software Versions command
 

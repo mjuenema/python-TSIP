@@ -21,10 +21,10 @@ TSIP super-packet commands (0x8f??)
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Report_8f15(_Report):
+class Report_8f15(Report):
     """
     Current Datum Values report
 
@@ -34,7 +34,7 @@ class Report_8f15(_Report):
     _values = []
 
 
-class Report_8f17(_Report):
+class Report_8f17(Report):
     """
     UTM Single Precision Output report
 
@@ -44,7 +44,7 @@ class Report_8f17(_Report):
     _values = []
 
 
-class Report_8f18(_Report):
+class Report_8f18(Report):
     """
     UTM Double Precision Output report
 
@@ -54,7 +54,7 @@ class Report_8f18(_Report):
     _values = []
 
 
-class Report_8f20(_Report):
+class Report_8f20(Report):
     """
     Last Fix with Extra Information report (binary fixed point)
 
@@ -64,7 +64,7 @@ class Report_8f20(_Report):
     _values = []
 
 
-class Report_8f21(_Report):
+class Report_8f21(Report):
     """
     Request Accuracy Information report
 
@@ -74,7 +74,7 @@ class Report_8f21(_Report):
     _values = []
 
 
-class Report_8f23(_Report):
+class Report_8f23(Report):
     """
     Request Last Compact Fix Information report
 
@@ -84,7 +84,7 @@ class Report_8f23(_Report):
     _values = []
 
 
-class Report_8f26(_Report):
+class Report_8f26(Report):
     """
     Non-Volatile Memory Status report
 
@@ -94,7 +94,7 @@ class Report_8f26(_Report):
     _values = []
 
 
-class Report_8f2a(_Report):
+class Report_8f2a(Report):
     """
     Fix and Channel Tracking Info report (Type 1)
 
@@ -104,7 +104,7 @@ class Report_8f2a(_Report):
     _values = []
 
 
-class Report_8f2b(_Report):
+class Report_8f2b(Report):
     """
     Fix and Channel Tracking Info report (Type 2)
 
@@ -114,7 +114,7 @@ class Report_8f2b(_Report):
     _values = []
 
 
-class Report_8f4a(_Report):
+class Report_8f4a(Report):
     """
     Copernicus II GPS Receiver Cable Delay and POS Polarity
 
@@ -124,7 +124,7 @@ class Report_8f4a(_Report):
     _values = []
 
 
-class Report_8f4f(_Report):
+class Report_8f4f(Report):
     """
     Set PPS width report
 
@@ -134,7 +134,7 @@ class Report_8f4f(_Report):
     _values = []
 
 
-class Report_8fab(_Report):
+class Report_8fab(Report):
     """
     Primary Timing Packet report
 
@@ -144,7 +144,7 @@ class Report_8fab(_Report):
     _values = []
 
 
-class Report_8fac(_Report):
+class Report_8fac(Report):
     """
     Supplemental Timing Packet
 

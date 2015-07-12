@@ -13,10 +13,10 @@ TSIP packets in the 0x8? range, excluding super-packets.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Report_82(_Report):
+class Report_82(Report):
     """
     SBAS Correction Status report
 
@@ -26,7 +26,7 @@ class Report_82(_Report):
     _values = []
 
 
-class Report_83(_Report):
+class Report_83(Report):
     """
     Double-Precision XYZ Position Fix and Bias Information report
 
@@ -36,7 +36,7 @@ class Report_83(_Report):
     _values = []
 
 
-class Report_84(_Report):
+class Report_84(Report):
     """
     Double-Precision LLA Position Fix and Bias Information report
 
@@ -46,7 +46,7 @@ class Report_84(_Report):
     _values = []
 
 
-class Report_89(_Report):
+class Report_89(Report):
     """
     Receiver Acquisition Sensitivity Mode report
 

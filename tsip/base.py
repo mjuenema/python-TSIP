@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
 
+"""
+Base classes for all TSIP packets
+
+"""
 
 import struct
 
@@ -19,22 +24,7 @@ def _extract_data_from_packet(packet):
         return packet[1:]
 
 
-def _instantiate_report_packet(packet):
-    """
-    Return an instance of a Report packet class for `code`.
-
-    """
-
-    code = _extract_code_from_packet(packet)
-    cls = _code_report_map.get(code)
-    if cls is not None:
-        return cls(packet)
-    else:
-        return None
-
-
-
-class _Packet(object):
+class Packet(object):
     _format = ''
     _values = []
 
@@ -42,7 +32,7 @@ class _Packet(object):
         return self._values[index]
 
 
-class _Report(_Packet):
+class Report(Packet):
 
     def __init__(self, packet):
         # TODO: strip DLE, DLE+ETX if still present
@@ -60,15 +50,10 @@ class _Report(_Packet):
 
     @property
     def values(self):
-
-        # TSIP superpacket?
-        if self.code > 255:
-            return struct.unpack(self._format, self.packet[2:])
-        else:
-            return struct.unpack(self._format, self.packet[1:])
+        return struct.unpack(self._format, self.data)
 
 
-class _Command(_Packet):
+class Command(Packet):
 
     def __init__(self, code, *values):
         self.code = code
@@ -88,20 +73,4 @@ class _Command(_Packet):
 
     @property
     def packet(self):
-       return _pack_code() + _pack_values()
-
-
-class Error(_Report):
-    """
-    Parsing error
-
-    """
-
-    _format = '<function parse_0x13 at 0x7f4b8b8cb668>'
-    _values = []
-
-
-class Diagnostics(_Report):
-
-    _format = None
-    _values = None
+       return self._pack_code() + self._pack_values()

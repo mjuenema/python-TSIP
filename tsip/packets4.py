@@ -19,9 +19,9 @@ TSIP packets in the 0x4? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
-class Report_41(_Report):
+class Report_41(Report):
     """
     GPS Time report
 
@@ -31,7 +31,7 @@ class Report_41(_Report):
     _values = []
 
 
-class Report_42(_Report):
+class Report_42(Report):
     """
     Single-Precision Position Fix, XYZ ECEF report
 
@@ -41,7 +41,7 @@ class Report_42(_Report):
     _values = []
 
 
-class Report_43(_Report):
+class Report_43(Report):
     """
     Velocity Fix, XYZ ECEF report
 
@@ -51,7 +51,7 @@ class Report_43(_Report):
     _values = []
 
 
-class Report_45(_Report):
+class Report_45(Report):
     """
     Software Version Information report
 
@@ -61,7 +61,7 @@ class Report_45(_Report):
     _values = []
 
 
-class Report_46(_Report):
+class Report_46(Report):
     """
     Health of Receiver report
 
@@ -71,7 +71,7 @@ class Report_46(_Report):
     _values = []
 
 
-class Report_47(_Report):
+class Report_47(Report):
     """
     Signal Levels for all Satellites report
 
@@ -81,7 +81,7 @@ class Report_47(_Report):
     _values = []
 
 
-class Report_4a(_Report):
+class Report_4a(Report):
     """
     Single Precision LLA Position Fix report
 
@@ -91,7 +91,7 @@ class Report_4a(_Report):
     _values = []
 
 
-class Report_4b(_Report):
+class Report_4b(Report):
     """
     Machine/ Code ID and Additional Status report
 
@@ -101,7 +101,7 @@ class Report_4b(_Report):
     _values = []
 
 
-class Report_4d(_Report):
+class Report_4d(Report):
     """
     Oscillator Offset report
 
@@ -111,7 +111,7 @@ class Report_4d(_Report):
     _values = []
 
 
-class Report_4e(_Report):
+class Report_4e(Report):
     """
     Response to Set GPS Time report
 

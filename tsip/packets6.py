@@ -11,10 +11,10 @@ TSIP packets in the 0x6? range.
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Report_69(_Report):
+class Report_69(Report):
     """
     Receiver Acquisition Sensitivity Mode report
 
@@ -24,7 +24,7 @@ class Report_69(_Report):
     _values = []
 
 
-class Report_6d(_Report):
+class Report_6d(Report):
     """
     All-In-View Satellite Selection report
 

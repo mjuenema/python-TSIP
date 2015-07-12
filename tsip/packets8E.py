@@ -25,10 +25,10 @@ TSIP super-packet commands (0x8e??)
 
 import struct
 
-from tsip.base import _Command, _Report
+from tsip.base import Command, Report
 
 
-class Command_8e15(_Command):
+class Command_8e15(Command):
     """
     Request current Datum values command
 
@@ -38,7 +38,7 @@ class Command_8e15(_Command):
     _values = []
 
 
-class Command_8e26(_Command):
+class Command_8e26(Command):
     """
     Write Configuration to NVS command
 
@@ -48,7 +48,7 @@ class Command_8e26(_Command):
     _values = []
 
 
-class Command_8e41(_Command):
+class Command_8e41(Command):
     """
     Request Manufacturing Paramaters command
 
@@ -58,7 +58,7 @@ class Command_8e41(_Command):
     _values = []
 
 
-class Command_8e42(_Command):
+class Command_8e42(Command):
     """
     Stored Production Parameters command
 
@@ -68,7 +68,7 @@ class Command_8e42(_Command):
     _values = []
 
 
-class Command_8e45(_Command):
+class Command_8e45(Command):
     """
     Revert Configuration Segment to Default Settings and Write to NVS command
 
@@ -78,7 +78,7 @@ class Command_8e45(_Command):
     _values = []
 
 
-class Command_8e4a(_Command):
+class Command_8e4a(Command):
     """
     Set PPS Characteristics
 
@@ -88,7 +88,7 @@ class Command_8e4a(_Command):
     _values = []
 
 
-class Command_8e4c(_Command):
+class Command_8e4c(Command):
     """
     Write Configuration Segment to NVS command
 
@@ -98,7 +98,7 @@ class Command_8e4c(_Command):
     _values = []
 
 
-class Command_8e4e(_Command):
+class Command_8e4e(Command):
     """
     Set PPS output option command
 
@@ -108,7 +108,7 @@ class Command_8e4e(_Command):
     _values = []
 
 
-class Command_8ea0(_Command):
+class Command_8ea0(Command):
     """
     Set DAC Value command
 
@@ -118,7 +118,7 @@ class Command_8ea0(_Command):
     _values = []
 
 
-class Command_8ea2(_Command):
+class Command_8ea2(Command):
     """
     UTC/GPS Timing command
 
@@ -128,7 +128,7 @@ class Command_8ea2(_Command):
     _values = []
 
 
-class Command_8ea3(_Command):
+class Command_8ea3(Command):
     """
      Issue Oscillator Disciplining command
 
@@ -138,7 +138,7 @@ class Command_8ea3(_Command):
     _values = []
 
 
-class Command_8ea5(_Command):
+class Command_8ea5(Command):
     """
     Packet Broadcast Mask command
 
@@ -148,7 +148,7 @@ class Command_8ea5(_Command):
     _values = []
 
 
-class Command_8ea6(_Command):
+class Command_8ea6(Command):
     """
     Self-Survey command
 
@@ -158,7 +158,7 @@ class Command_8ea6(_Command):
     _values = []
 
 
-class Command_8ea8(_Command):
+class Command_8ea8(Command):
     """
     Request Disciplining Parameters command
 
@@ -168,7 +168,7 @@ class Command_8ea8(_Command):
     _values = []
 
 
-class Command_8ea9(_Command):
+class Command_8ea9(Command):
     """
     Self-Survey Parameters command
 
@@ -178,7 +178,7 @@ class Command_8ea9(_Command):
     _values = []
 
 
-class Command_8eab(_Command):
+class Command_8eab(Command):
     """
     Request Primary Timing Packet command
 
@@ -188,7 +188,7 @@ class Command_8eab(_Command):
     _values = []
 
 
-class Command_8eac(_Command):
+class Command_8eac(Command):
     """
     Request Supplementary Timing Packet command
 
