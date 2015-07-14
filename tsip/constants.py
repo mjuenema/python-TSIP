@@ -5,6 +5,7 @@ Constants related to TSIP.
 """
 
 import struct
+import datetime
 
 DLE = 0x10
 DLE_STRUCT = struct.pack('B', DLE)
@@ -22,3 +23,5 @@ This value for Pi is slightly less accurate than the Python
 version of math.pi = 3.141592653589793. The Trimble TSIP 
 documentation refers to the ICD-GPS-200 value."""
 
+GPS_EPOCH = datetime.datetime(1980, 1, 6)
+"""The GPS epoch is 00:00 UTC on the first Sunday of 1980."""

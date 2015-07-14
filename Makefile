@@ -33,9 +33,11 @@ clean-test:
 
 lint:
 #	flake8 python-TSIP tests
-	pylint -E tsip/*
+	pylint -E tsip/*.py tests/*.py
 
 test: test_packets test_gps test_captures
+
+test_copernicus_file: 
 
 test_packets:
 	nosetests -x -v tests/$@.py

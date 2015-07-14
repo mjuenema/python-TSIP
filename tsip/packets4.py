@@ -10,7 +10,7 @@ TSIP packets in the 0x4? range.
 * 0x46 - Health of Receiver report.
 * 0x47 - Signal Levels for all Satellites report.
 * 0x4a - Single Precision LLA Position Fix report.
-* 0x4b - Machine/ Code ID and Additional Status report.
+* 0x4b - Machine/Code ID and Additional Status report.
 * 0x4d - Oscillator Offset report.
 * 0x4e - Response to Set GPS Time report.
 
@@ -23,7 +23,15 @@ from tsip.base import Command, Report
 
 class Report_41(Report):
     """
-    GPS Time report
+    GPS Time report.
+
+    =====   ===============================================
+    Index   Description
+    =====   ===============================================
+    0       GPS time of week (seconds)
+    1       Extended GPS week number (weeks)
+    2       GPS UTC offset (seconds)
+    =====   ===============================================
 
     """
 
@@ -65,6 +73,13 @@ class Report_46(Report):
     """
     Health of Receiver report
 
+    =====   ===============================================
+    Index   Description
+    =====   ===============================================
+    0       Status code 
+    1       Bits in byte 1
+    =====   ===============================================
+
     """
 
     _format = '>BB'
@@ -93,7 +108,15 @@ class Report_4a(Report):
 
 class Report_4b(Report):
     """
-    Machine/ Code ID and Additional Status report
+    Machine/Code ID and Additional Status report
+
+    =====   ===============================================
+    Index   Description
+    =====   ===============================================
+    0       Machine ID
+    1       Status 1
+    2       Status 2
+    =====   ===============================================
 
     """
 

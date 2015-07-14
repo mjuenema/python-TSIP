@@ -64,12 +64,18 @@ class Diagnostics(Report):
     """
     For Trimble diagnostic use only (0x5f)!
 
-    The `.values` attribute contains the raw packet.
+    =====   ===============================================
+    Index   Description
+    =====   ===============================================
+    0       The raw diagnostics packet.
+    =====   ===============================================
+
 
     """
 
-    _format = None
-    _values = None
+    @property
+    def values(self):
+        return [self.data]
 
 
 _code_report_map = {

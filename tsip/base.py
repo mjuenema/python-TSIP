@@ -52,6 +52,12 @@ class Report(Packet):
     def values(self):
         return struct.unpack(self._format, self.data)
 
+    def __getitem__(self, i):
+        return self.values[i]
+
+    def __len__(self):
+        return len(self.values)
+
 
 class Command(Packet):
 
