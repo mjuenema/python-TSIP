@@ -14,6 +14,9 @@ import tsip
 import time
 import binascii
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 def help():
     sys.stderr.write("%s <file|device> [<baudrate>]\n")
@@ -42,12 +45,11 @@ def main():
 
     gps = tsip.GPS(conn)
       
-
-    for i in xrange(0, 100):
+    while True:
         packet = gps.read()
 
         if packet:
-            print "0x%0x %s" % (packet.code, binascii.hexlify(packet.data))
+            print "0x%0x %s" % (packet.code, packet.values)
         else:
             print 'None'
 

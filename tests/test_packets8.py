@@ -13,13 +13,13 @@ Tests for TSIP packets in the 0x8? range, excluding super-packets.
 from nose.tools import *
 from types import *
 from tsip import GPS
+from base import setup_gps
 
 
 
 class Base(object):
     def setup(self):
-        self.gps = GPS(open('tests/copernicus2.tsip'))
-
+        self.gps = setup_gps()
 
 
 class Test_8(Base):

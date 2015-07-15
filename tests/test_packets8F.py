@@ -23,19 +23,20 @@ import datetime
 
 from nose.tools import *
 from types import *
+from serial import Serial
 from tsip import GPS
 
 
 
 class Base(object):
     def setup(self):
-        self.gps = GPS(open('tests/copernicus2.tsip'))
+        self.gps = GPS(Serial('/dev/ttyAMA0', 38400))
 
 
 
 class Test_8f(Base):
 
-    @timed(2.0)
+    @timed(2)
     def test_report_8f23(self):
         """0x8f23 - Request Last Compact Fix Information report"""
 
