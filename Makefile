@@ -58,12 +58,12 @@ coverage:
 	open htmlcov/index.html
 
 docs:
-	rm -f docs/python-TSIP.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ python-TSIP
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	open docs/_build/html/index.html
+#	rm -f docs/python-TSIP.rst
+#	rm -f docs/modules.rst
+#	sphinx-apidoc -o docs/ python-TSIP
+#	$(MAKE) -C docs clean
+#	$(MAKE) -C docs html
+#	open docs/_build/html/index.html
 
 release: clean
 	python setup.py sdist upload

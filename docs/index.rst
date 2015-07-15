@@ -14,6 +14,9 @@ Contents:
    readme
    installation
    usage
+   packets
+   packets_table
+   api
    contributing
    authors
    history
