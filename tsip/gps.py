@@ -61,7 +61,7 @@ class GPS(object):
         This is largely based on the code found at `Brad's Duino Blog`_ although here
         the packet is just read but not parsed.
 
-        .. Brad's Duino Blog: http://bradsduino.blogspot.com.au/2014/06/python-code-to-read-parse-tsip-data.html
+        .. _Brad's Duino Blog: http://bradsduino.blogspot.com.au/2014/06/python-code-to-read-parse-tsip-data.html
 
         """
 
