@@ -60,11 +60,15 @@ class Report(Packet):
 
 
 class Command(Packet):
+    _code = None
 
-    def __init__(self, code, *values):
-        self.code = code
-        self.values = values
+    def __init__(self, *values):
+        self._values = list(values)
 
+    @property
+    def code(self):
+        # Make self.code read-only.
+        return self._code
 
     def _pack_code(self):
         if self.code > 255:
@@ -74,9 +78,12 @@ class Command(Packet):
 
 
     def _pack_values(self):
-        return struct.pack(self._format, self._values)
+        return struct.pack(self._format, *self._values)
         
 
     @property
-    def packet(self):
+    def _packet(self):
        return self._pack_code() + self._pack_values()
+
+    def __setitem__(self, i, v):
+        self._values[i] = v
