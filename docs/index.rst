@@ -16,6 +16,7 @@ Contents:
    usage
    packets
    packets_table
+   01_packets_version_information
    api
    contributing
    authors

@@ -26,12 +26,6 @@ class Command_1c(Command):
     code = 0x1c
     _format = '>B'
 
-#    def __init__(self, subcode):
-#        if subcode not in [1, 3]:
-#            raise ValueError("subcode must be either 1 or 3")
-#
-#        super(Command_1c, self).__init__(subcode)
-
 
 class Report_1c(Report):
     """
@@ -61,11 +55,9 @@ class Report_1c(Report):
        
 
     
-# ---  ------------
-
 class Command_1e(Command):
     """
-     Clear Battery Backup, then Reset command
+    Clear Battery Backup, then Reset command.
 
     """
 

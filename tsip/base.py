@@ -52,18 +52,38 @@ class Report(Packet):
     def values(self):
         return struct.unpack(self._format, self.data)
 
+
     def __getitem__(self, i):
         return self.values[i]
+
 
     def __len__(self):
         return len(self.values)
 
 
+    @property
+    def _formatlen(self):
+        """
+        Number of fields in `self._format`.
+
+        """
+
+        return len(filter(lambda i: i in ['cbB?hHiIlLqQfdspP'], self._format))
+        
+
+# TODO: make self._values a descriptor
 class Command(Packet):
     _code = None
 
     def __init__(self, *values):
+        values = list(values)
+
+        if len(values) != self._formatlen:
+            raise TypeError('takes exactly %d arguments (%d given)' % 
+                            (self._formatlen, len(values)))
+
         self._values = list(values)
+
 
     @property
     def code(self):
