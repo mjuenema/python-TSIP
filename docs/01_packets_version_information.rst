@@ -1,9 +1,8 @@
-==========================
 Version information (0x1c)
-==========================
+--------------------------
 
 Command packet 0x1c
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. class:: Command_1c(subcode)
 
@@ -14,7 +13,7 @@ Command packet 0x1c
    to 81 or 83, depending on what information was requested.
 
 Report packet 0x1c
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. class:: Report_1c()
 
@@ -75,20 +74,22 @@ Report packet 0x1c
   
 Firmware version example::
 
-   >>> command = Command_1c(1)
-   >>> gps_conn.send(command)
-   >>> report = gps_conn.read()
-   >>> if report.code == 0x1c and report.subcode == 81:
-   ...    print report.major_version
-   TODO
-   ...    print report.minor_version
-   TODO
-   ...    print report.build_number
-   TODO
-   ...    print report.version
-   TODO
-   ...    print report.product_name
-   TODO
+.. code-block:: python
+
+   command = Command_1c(1)
+   gps_conn.send(command)
+   report = gps_conn.read()
+   if report.code == 0x1c and report.subcode == 81:
+      print report.major_version
+   # TODO
+      print report.minor_version
+   # TODO
+      print report.build_number
+   # TODO
+      print report.version
+   # TODO
+      print report.product_name
+   # TODO
 
 Hardware version example::
 
