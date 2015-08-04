@@ -18,13 +18,13 @@ Report packet 0x1c
 .. class:: Report_1c()
 
    :class:`Report_1c()` contains the information requested by a
-   :class:`Command_1c()` packet. The :attribute:`subcode` must be
+   :class:`Command_1c()` packet. The :attr:`Report_1c.subcode` must be
    checked to determine whether the report contains firmware version
    information (81) or hardware version information (83). 
 
    .. attribute:: subcode
 
-   If :attribute:`Report_1c.subcode` equals 81, then the following attributes
+   If :attr:`Report_1c.subcode` equals 81, then the following attributes
    provide firmware version information.
 
    .. attribute:: major_version
@@ -52,7 +52,7 @@ Report packet 0x1c
 
       The product name as a string.
 
-   If :attr`Report_1c.subcode` equals 83, then the following attributes
+   If :attr:`Report_1c.subcode` equals 83, then the following attributes
    provide hardware version information.
 
    .. attribute:: serial_number
