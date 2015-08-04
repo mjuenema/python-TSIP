@@ -24,7 +24,7 @@ Report packet 0x1c
 
    .. attribute:: subcode
 
-   If :attribute:`subcode` equals 81, then the following attributes
+   If :attribute:`Report_1c.subcode` equals 81, then the following attributes
    provide firmware version information.
 
    .. attribute:: major_version
@@ -41,8 +41,8 @@ Report packet 0x1c
 
    .. attribute:: version
 
-      The combination of :attribute:`major_version`, :attribute:`minor_version`
-      and :attribute:`build_number` as a string.
+      The combination of :attr`major_version`, :attr`minor_version`
+      and :attr`build_number` as a string.
 
    .. attribute:: build_date
 
@@ -52,7 +52,7 @@ Report packet 0x1c
 
       The product name as a string.
 
-   If :attribute:`subcode` equals 83, then the following attributes
+   If :attr`Report_1c.subcode` equals 83, then the following attributes
    provide hardware version information.
 
    .. attribute:: serial_number
@@ -72,7 +72,7 @@ Report packet 0x1c
       The hardware ID as an ASCII string.
 
   
-Firmware version example::
+Firmware version example.
 
 .. code-block:: python
 
@@ -91,17 +91,19 @@ Firmware version example::
       print report.product_name
    # TODO
 
-Hardware version example::
+Hardware version example.
 
-   >>> command = Command_1c(3)
-   >>> gps_conn.send(command)
-   >>> report = gps_conn.read()
-   >>> if report.code == 0x1c and report.subcode == 83:
-   ...    print report.serial_number
-   TODO
-   ...    print report.build_date
-   TODO
-   ...    print report.hardware_code
-   TODO
-   ...    print report.hardware_id
-   TODO
+.. code-block:: python
+
+   command = Command_1c(3)
+   gps_conn.send(command)
+   report = gps_conn.read()
+   if report.code == 0x1c and report.subcode == 83:
+      print report.serial_number
+   # TODO
+      print report.build_date
+   # TODO
+      print report.hardware_code
+   # TODO
+      print report.hardware_id
+   # TODO
