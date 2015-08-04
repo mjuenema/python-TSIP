@@ -10,7 +10,7 @@ Command packet 0x1c
    The command packet 0x1c may be issued to obtain version information.
    The *subcode* determines whether firmware version (1) or hardware
    version (3) information is requested. The GPS replies with a
-   :class:`Report_1c()` packet with its :attribute:`subcode` set
+   :class:`Report_1c()` packet with its :attribute:`Report_1c.subcode` set
    to 81 or 83, depending on what information was requested.
 
 Report packet 0x1c
