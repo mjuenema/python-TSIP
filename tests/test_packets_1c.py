@@ -2,12 +2,15 @@
 
 from nose.tools import *
 
-from tsip.packets1 import Command_1c, Report_1c
+from tsip.packets1 import Command_1c, Report_1cim
 
-import helpers
+import base
+
+GPS = None
 
 def setup_module():
-   helpers.setup_module()
+   global GPS
+   GPS = base.setup_gps()
 
 class Test_1c(object):
 
@@ -15,9 +18,9 @@ class Test_1c(object):
     def test_1c_firmware_version(self):
         command = Command_1c(1)
         assert command.subcode == 1
-        helpers.GPS_CONN.write(command)
+        helpers.GPS.write(command)
 
-        for report in GPS_CONN:
+        for report in GPS:
             if report.code == 0x1c:
                 assert report.subcode == 0x81
                 break
@@ -26,9 +29,9 @@ class Test_1c(object):
     def test_1c_hardware_version(self):
         command = Command_1c(3)
         assert command.subcode == 3
-        helpers.GPS_CONN.write(command)
+        helpers.GPS.write(command)
 
-        for report in GPS_CONN:
+        for report in GPS:
             if report.code == 0x1c:
                 assert report.subcode == 0x83
                 break
