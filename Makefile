@@ -73,3 +73,14 @@ dist: clean
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
+
+build: clean
+	python setup.py build
+
+sdist: clean
+	python setup.py sdist
+
+bdist: clean
+	python setup.py bdist
+
+
