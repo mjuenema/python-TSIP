@@ -97,7 +97,8 @@ class GPS(object):
                         pass
                     elif (packet.count(DLE_STRUCT, 1) % 2) == 0:
                         # Number of DLE is even, not odd; keep reading...
-                        if __debug__: _LOG.debug('GPS.next: Number of DLE is even')
+                        if __debug__: _LOG.info('GPS.next: Number of DLE is even')
+                        raise ValueError('Bad framing, dropping %d bytes' % len(packet))
                         pass
                     else:
                         # Passed all checks, break out of the while True loop
@@ -116,6 +117,8 @@ class GPS(object):
 
 
             packet = packet + b
+            if len(packet) > 1000:
+                 raise ValueError('Packet too long, lost something? CMD 0x%02x 0x%02x' % (ord(packet[1]), ord(packet[2])))
             # end while True
 
 
