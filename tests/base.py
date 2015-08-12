@@ -8,6 +8,7 @@ import os
 import os.path
 import stat
 import logging
+import signal
 
 _LOG = logging.getLogger(__name__)
 
@@ -17,6 +18,48 @@ try:
 except ImportError:
     # pyserial not installed.
     pass
+
+
+# -------------------------------------
+
+# @alarm decorator - unfortunately doesn't work well 
+#                    with --pdb
+
+from nose.tools import make_decorator
+
+class Alarm(Exception):
+    pass
+
+def sigalrm_handler(signum, frame):
+    raise Alarm
+
+
+def alarm(limit):
+    """Test must finish within specified time limit to pass.
+
+    This is a better @timed decorator than the one that comes
+    with *nose.tools*.
+
+    Example use::
+
+      @alarm(1)
+      def test_that_fails():
+          time.sleep(2)
+    """
+    def decorate(func):
+        def newfunc(*arg, **kw):
+            signal.signal(signal.SIGALRM, sigalrm_handler)
+            signal.alarm(int(limit))
+            try:
+                func(*arg, **kw)
+            except:
+                signal.alarm(0)
+                raise
+        newfunc = make_decorator(func)(newfunc)
+        return newfunc
+    return decorate
+
+# -------------------------------------
 
 
 def setup_gps():

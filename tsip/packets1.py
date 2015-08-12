@@ -12,7 +12,7 @@ TSIP packets in the 0x1? range.
 import struct
 import collections
 
-from tsip.base import Command, Report, _extract_code_from_raw
+from tsip.base import Command, Report, _RO, _RW, _extract_code_from_raw
 
 
 class Command_1c(Command):
@@ -23,7 +23,7 @@ class Command_1c(Command):
 
     """
 
-    _default = collections.deque([0x1c], 2)
+    _default = collections.deque([0x1c, 0x1], 2)
     _struct = struct.Struct('>BB')
 
 
@@ -32,6 +32,8 @@ class Command_1c(Command):
             raise ValueError('invalid sub-code')
 
         super(Command_1c, self).__init__(subcode)
+
+    subcode = _RW(1)
 
 
 class Report_1c(Report):
@@ -64,6 +66,8 @@ class Report_1c(Report):
         if self.values[1] not in [0x81, 0x83]:
             raise ValueError('invalid sub-code')
 
+    subcode = _RO(1)
+
     
 class Command_1e(Command):
     """
@@ -71,7 +75,7 @@ class Command_1e(Command):
 
     """
 
-    _default = collections.deque([0x1e], 2)
+    _default = collections.deque([0x1e, 0x4b], 2)
     _struct = struct.Struct('>BB')
 
 
@@ -81,6 +85,7 @@ class Command_1e(Command):
 
         super(Command_1e, self).__init__(mode)
 
+    mode = _RW(1)
 
 
 class Command_1f(Command):

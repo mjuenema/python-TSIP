@@ -7,6 +7,7 @@ Base classes for all TSIP packets
 
 import struct
 import collections
+import copy
 
 from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
 
@@ -23,6 +24,20 @@ def _extract_data_from_raw(raw):
         return raw[2:]
     else:
         return raw[1:]
+
+
+class _RO(object):
+    def __init__(self, i):
+        self.i = i
+
+    def __get__(self, instance, owner):
+        return instance[self.i]
+
+class _RW(_RO):
+
+    def __set__(self, instance, value):
+        instance[self.i] = value
+
 
 
 class Packet(object):
@@ -83,21 +98,25 @@ class Packet(object):
         return self._values[0]
 
     
-    def _get_subcode(self):
-        """
-        Some TSIP packets contain a subcode. Such packets can simply create
-        a property pointing to `_get_subcode` and `_set_subcode` if needed::
-
-            subcode = property(_get_subcode)                 # Report packet
-            subcode = property(_get_subcode, _set_subcode)   # Command packet
-
-        """
-       
-        return self._values[1]
-
-
-    def _set_subcode(self, value):
-        self._values[1] = value
+#    def _get_subcode(self):
+#        """
+#        Some TSIP packets contain a subcode. Such packets can simply create
+#        a property pointing to `_get_subcode` and `_set_subcode` if needed::
+#
+#            subcode = property(_get_subcode)                 # Report packet
+#            subcode = property(_get_subcode, _set_subcode)   # Command packet
+#
+#        """
+#       
+#        return self._values[1]
+#
+#
+#    def _set_subcode(self, value):
+#        self._values[1] = value
+#
+#    _subcode_ro = property(lambda self: self._values[1]) 
+#
+#    _subcode_rw = property(lambda self: self._values[1], lambda self,v: self._values[1] = v) 
 
 
     def __len__(self):
@@ -146,7 +165,7 @@ class Command(Packet):
         #
         self._values = copy.copy(self._default)
 
-        for i, value in enumerate(values):
+        for (i, value) in enumerate(values):
             try:
                 self._values[i+1] = value
             except IndexError:

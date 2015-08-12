@@ -16,7 +16,7 @@ import struct
 
 from tsip.constants import DLE, ETX, PI
 
-from tsip.base import _extract_code_from_packet
+from tsip.base import _extract_code_from_raw
 
 from tsip.base import Command, Report
 
@@ -118,9 +118,12 @@ def _instantiate_report_packet(packet):
 
     """
 
-    code = _extract_code_from_packet(packet)
+    code = _extract_code_from_raw(packet)
     cls = _code_report_map.get(code)
     if cls is not None:
-        return cls(packet)
+        try:
+            return cls(packet)
+        except AttributeError:	# TODO: possibly remove this later
+            return None
     else:
         return None

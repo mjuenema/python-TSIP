@@ -155,3 +155,13 @@ class GPS(object):
             return self.next()
         except StopIteration:
             raise EOFError
+
+  
+    def write(self, packet):
+        """
+        Write an instance of `tsip.Command` to GPS.
+
+        """
+
+        raw = DLE_STRUCT + packet._pack() + DLE_STRUCT + ETX_STRUCT
+        print binascii.hexlify(raw)
