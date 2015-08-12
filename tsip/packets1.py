@@ -10,21 +10,28 @@ TSIP packets in the 0x1? range.
 """
 
 import struct
+import collections
 
-from tsip.base import Command, Report
+from tsip.base import Command, Report, _extract_code_from_raw
 
 
 class Command_1c(Command):
     """
     Version Information.
 
-    :param subcode: The subcode can be ``1`` (firmware version) or
-        ``3`` (hardware version).
+    :param subcode: The subcode can be ``1`` (firmware version) or ``3`` (hardware version).
 
     """
 
-    code = 0x1c
-    _format = '>B'
+    _default = collections.deque([0x1c], 2)
+    _struct = struct.Struct('>BB')
+
+
+    def __init__(self, subcode):
+        if subcode not in [0x1, 0x3]:
+            raise ValueError('invalid sub-code')
+
+        super(Command_1c, self).__init__(subcode)
 
 
 class Report_1c(Report):
@@ -39,20 +46,23 @@ class Report_1c(Report):
 
     """
 
-    _format    = None
-    _format_83 = '>BIBBHBHp'
-    _format_81 = '>BBBBBBBHp'
-    
+    _format_81 = struct.Struct('>BBBBBBBBHp')
+    _format_83 = struct.Struct('>BBIBBHBHp')
 
-    def __init__(self, packet):
-        super(Report_1c, self).__super__(packet)
-        if struct.unpack('>B', packet[1]) == 1:
-            self._format == self._format_81
-        elif struct.unpack('>B', packet[1]) == 3:
-            self._format == self._format_83
-        else:
-            raise ValueError('sub-code of report packet 0x1c must be 1 or 3')
-       
+    def __init__(self, raw):
+
+        for _struct in [self._format_81, self._format_83]:
+            try:
+                self._values = _struct.unpack(raw)
+                self._struct = _struct
+            except struct.error:
+                pass
+
+        if self._values is None:
+            raise struct.error('unable to unpack raw packet')
+
+        if self.values[1] not in [0x81, 0x83]:
+            raise ValueError('invalid sub-code')
 
     
 class Command_1e(Command):
@@ -61,17 +71,24 @@ class Command_1e(Command):
 
     """
 
-    code = 0x1e
-    _format = '>B'
+    _default = collections.deque([0x1e], 2)
+    _struct = struct.Struct('>BB')
+
+
+    def __init__(self, mode):
+        if mode not in [0x4b, 0x46, 0x4d]:
+            raise ValueError('invalid sub-code')
+
+        super(Command_1e, self).__init__(mode)
 
 
 
 class Command_1f(Command):
     """
-     Request Software Versions command
+     Request Software Versions command.
 
     """
 
-    code = 0x1f
-    _format = ''
+    _default = collections.deque([0x1f], 1)
+    _struct = struct.Struct('>B')
 

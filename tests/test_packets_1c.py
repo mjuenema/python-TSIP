@@ -2,7 +2,7 @@
 
 from nose.tools import *
 
-from tsip.packets1 import Command_1c, Report_1cim
+from tsip.packets1 import Command_1c, Report_1c
 
 import base
 
