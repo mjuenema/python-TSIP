@@ -112,17 +112,18 @@ _code_report_map = {
 """Map the code of a TSIP report packet to the Python class."""
 
 
-def _instantiate_report_packet(packet):
+
+def _instantiate_report_packet(raw):
     """
     Return an instance of a Report packet class for `code`.
 
     """
 
-    code = _extract_code_from_raw(packet)
+    code = _extract_code_from_raw(raw)
     cls = _code_report_map.get(code)
     if cls is not None:
         try:
-            return cls(packet)
+            return cls.parse(raw)
         except AttributeError:	# TODO: possibly remove this later
             return None
     else:
