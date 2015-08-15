@@ -9,6 +9,9 @@ import struct
 import collections
 import copy
 
+import namedlist
+
+from tsip.globals import _PACKET_MAP
 from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
 
 
@@ -21,6 +24,18 @@ def _extract_code_from_raw(raw):
     if code in SUPERPACKETS:
         return struct.unpack('>H', raw[0:2])[0]
     return code
+
+
+def register_packet(code, cls):
+    """
+    Register a packet with `_PACKET_MAP`
+
+    """
+
+    global _PACKET_MAP
+
+    _PACKET_MAP[code] = cls
+
 
 
 class _RO(object):
@@ -43,62 +58,48 @@ class Packet(object):
     """
 
     _code = None
-    """Packet code."""
+    _subcode = None
+    """Packet code and subcode."""
 
-    _values = None
-    """The values contained in the TSIP packet."""
+#    _struct = None
+#    """Instance of `struct.Struct` describing the binary structure of the TSIP packet including its code."""
 
-    _struct = None
-    """Instance of `struct.Struct` describing the binary structure of the TSIP packet including its code."""
+    _format = None
+    """Format string for `struct.struct()` call."""
 
-
-    def __init__(self, *values):
-        self._values = list(values)
-
-
-    @classmethod
-    def parse(cls, raw):
-        inst = cls()
-        inst._values = inst._struct.unpack(raw)[1:]
-
-
-    def __getitem__(self, i):
-        return self._values[i]
-
-
-    def __setitem__(self, i, v):
-        self._values[i] = v
-
-
-    def __len__(self):
-        return len(self.values)
-
-
-    def _pack(self):
+    def pack(self):
         """Generate the binary structure of the TSIP packet."""
+        b = struct.pack('>B', self.code)
+
+        if self._subcode:
+            b += struct.pack('>B', self.subcode)
+
+        if self._format:
+            b += struct.pack(self._format, *self)
+            # `self` works because derived classes must also derive
+            # from `namedlist.namedlist`.
+
         # TODO: DLE padding!!!
-        return self._struct.pack(self._code, *self._values)
-
-
-#    def _unpack(self, raw):
-#        """
-#        Parse the binary structure of the TSIP packet.
-#
-#        :param raw: The binary TSIP packet with leading DLE and trailing DLE+ETX stripped.
-#        :returns: List of individual fields as defined by `self._struct`. The first item 
-#
-#        """
-#
-#        return list(self._struct.unpack(raw))
+        return b
 
 
     @property
     def code(self):
         return self._code
 
-    
-    def __len__(self):
-        return len(self._values)
+
+    @property
+    def subcode(self):
+        return self._subcode
+
+
+class Report(Packet):
+    # TODO: clean-up later
+    pass
+
+class Command(Packet):
+    # TODO: clean-up later
+    pass
     
 
 #class Report(Packet):

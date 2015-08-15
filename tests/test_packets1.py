@@ -3,59 +3,77 @@ from nose.tools import *
 
 from tsip.packets1 import *
 
+class Base(object):
 
-class TestCommand1c(object):
+    def test_code(self):
+        assert self.pkt.code == self.code
+        assert self.pkt.code == self.pkt._code
 
-    def test_subcode_1(self):
-        p = Command_1c(1)
-        assert p.code == 0x1c
-        assert p._values == [1]
-        assert p[0] == 1
-        assert p._packet == struct.pack('>BB', 0x1c, 1)
-        p[0] = 2
-        assert p[0] == 2
-        assert p._packet == struct.pack('>BB', 0x1c, 2)
-        p[0] = 1
-        assert p[0] == 1
-        assert p._packet == struct.pack('>BB', 0x1c, 1)
+    @raises(AttributeError)
+    def test_code_readonly(self):
+        self.pkt.code = -1
 
-    def test_subcode_3(self):
-        p = Command_1c(3)
-        assert p.code == 0x1c
-        assert p._values == [3]
-        assert p[0] == 3
-        assert p._packet == struct.pack('>BB', 0x1c, 3)
-        p[0] = 2
-        assert p[0] == 2
-        assert p._packet == struct.pack('>BB', 0x1c, 2)
-        p[0] = 3
-        assert p[0] == 3
-        assert p._packet == struct.pack('>BB', 0x1c, 3)
+    def test_subcode(self):
+        if hasattr(self, 'subcode'):
+            assert self.pkt.subcode == self.subcode
+            assert self.pkt.subcode == self.pkt._subcode
 
-#    @raises(IndexError)
-#    def test_indexerror(self):
-#        p = Command_1c(1)
-#        p[1] = None
+    @raises(AttributeError)
+    def test_subcode_readonly(self):
+        if hasattr(self, 'subcode'):
+            self.pkt.subcode = -1
 
 
-class TestCommand1e(object):
+class Test_Packet_0x1c01(Base):
+    code = 0x1c
+    subcode = 0x01
 
-    def tests(self):
-        p = Command_1e(0x4b)
-        assert p.code == 0x1e
-        assert p._values == [0x4b]
-        assert len(p._values) == 1
-        assert p[0] == 0x4b
+    def setup(self):
+        self.pkt = Packet_0x1c01()
 
-#    @raises(IndexError)
-#    def test_indexerror(self):
-#        p = Command_1e(0x4b)
-#        p[0] = None
 
-class TestCommand1f(object):
+class Test_Packet_0x1c03(Base):
+    code = 0x1c
+    subcode = 0x03
 
-    def tests(self):
-        p = Command_1f()
-        assert p.code == 0x1f
-        assert p._values == []
-        assert len(p._values) == 0
+    def setup(self):
+        self.pkt = Packet_0x1c03()
+
+
+class Test_Packet_0x1c81(Base):
+    code = 0x1c
+    subcode = 0x81
+
+    def setup(self):
+        self.pkt = Packet_0x1c81(0, 1, 2, 3, 8, 15, 2015, 'test product')
+
+    def test_attributes(self):
+        assert self.pkt.reserved1 == 0
+        assert self.pkt.major_version == 1
+        assert self.pkt.minor_version == 2
+        assert self.pkt.build_number == 3
+        assert self.pkt.month == 8
+        assert self.pkt.day == 15
+        assert self.pkt.year == 2015
+        assert self.pkt.product_name == 'test product'
+
+        self.pkt.reserve1 = 100
+       
+        assert self.pkt.reserved1 == 0
+       
+       
+    def test_list(self):
+        assert self.pkt[0] == 0
+        assert self.pkt[1] == 1
+        assert self.pkt[2] == 2
+        assert self.pkt[3] == 3
+        assert self.pkt[4] == 8
+        assert self.pkt[5] == 15
+        assert self.pkt[6] == 2015
+        assert self.pkt[7] == 'test product'
+
+        self.pkt[0] = 200
+       
+        assert self.pkt[0] == 200
+
+
