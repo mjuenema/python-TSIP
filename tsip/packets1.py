@@ -10,68 +10,92 @@ TSIP packets in the 0x1? range.
 """
 
 import struct
+import collections
+from namedlist import namedlist as nl
 
-from tsip.base import Command, Report
+from tsip.base import Packet, register_packet
 
 
-class Command_1c(Command):
-    """
-    Version Information.
+# ---------------------------------------------------------
+#
+class Packet_0x1c01(nl('Packet_0x1c01', []),
+                       Packet):
+    """Command packet 0x1c - Firmware version."""
+    _code = 0x1c
+    _subcode = 0x01
+    _format = None
 
-    :param subcode: The subcode can be ``1`` (firmware version) or
-        ``3`` (hardware version).
+register_packet(0x1c01, Packet_0x1c01)
 
-    """
 
-    code = 0x1c
+# ---------------------------------------------------------
+#
+class Packet_0x1c03(nl('Packet_0x1c03', []),
+                       Packet):
+    """Command packet 0x1c - Hardware component version information."""
+    _code = 0x1c
+    _subcode = 0x03
+    _format = None
+
+register_packet(0x1c03, Packet_0x1c03)
+
+
+# ---------------------------------------------------------
+#
+class Packet_0x1c81(nl('Packet_0x1c81', ['reserved1', 
+                                         'major_version',
+                                         'minor_version',
+                                         'build_number',
+                                         'month',
+                                         'day',
+                                         'year',
+                                         'product_name']),
+                       Packet):
+    """Report packet 0x1c - Firmware version."""
+    _code = 0x1c
+    _subcode = 0x81
+    _format = '>BBBBBBHp'
+
+register_packet(0x1c81, Packet_0x1c81)
+
+
+# ---------------------------------------------------------
+#
+class Packet_0x1c83(nl('Packet_0x1c03', ['serial_number', 
+                                         'build_day',
+                                         'build_month',
+                                         'build_year',
+                                         'build_hour',
+                                         'hardware_code',
+                                         'hardware_id']),
+                       Packet):
+    """Report packet 0x1c - Firmware version."""
+    _code = 0x1c
+    _subcode = 0x81
+    _format = '>BBIBBHBHp'
+
+register_packet(0x1c83, Packet_0x1c83)
+
+
+# ---------------------------------------------------------
+#
+class Packet_0x1e(nl('Packet_0x1e', [('reset_mode', 0x4b)]),
+                      Packet):
+    """Command packet 0x1e - Clear battery backup, then reset."""
+    _code = 0x1e
+    _subcode = None
     _format = '>B'
 
-
-class Report_1c(Report):
-    """
-    Version information.
-
-    Report packet 0x1c is sent in reply to command packet 0x1c
-    requesting version information. There are two variants of
-    this packet, depending on the subcode sent in the command 
-    packet. Sub-code 81 reports firmware version information,
-    sub-code reports hardware version information.
-
-    """
-
-    _format    = None
-    _format_83 = '>BIBBHBHp'
-    _format_81 = '>BBBBBBBHp'
-    
-
-    def __init__(self, packet):
-        super(Report_1c, self).__super__(packet)
-        if struct.unpack('>B', packet[1]) == 1:
-            self._format == self._format_81
-        elif struct.unpack('>B', packet[1]) == 3:
-            self._format == self._format_83
-        else:
-            raise ValueError('sub-code of report packet 0x1c must be 1 or 3')
-       
-
-    
-class Command_1e(Command):
-    """
-    Clear Battery Backup, then Reset command.
-
-    """
-
-    code = 0x1e
-    _format = '>B'
+register_packet(0x1e, Packet_0x1e)
 
 
+# ---------------------------------------------------------
+#
+class Packet_0x1f(nl('Packet_0x1f', []),
+                  Packet):
+    """Command packet 0x1f - Request software versions."""
+    _code = 0x1f
+    _subcode = None
+    _format = None
 
-class Command_1f(Command):
-    """
-     Request Software Versions command
-
-    """
-
-    code = 0x1f
-    _format = ''
-
+register_packet(0x1f, Packet_0x1f)

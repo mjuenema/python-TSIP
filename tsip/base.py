@@ -6,104 +6,155 @@ Base classes for all TSIP packets
 """
 
 import struct
+import collections
+import copy
 
+import namedlist
+
+from tsip.globals import _PACKET_MAP
 from tsip.constants import DLE, DLE_STRUCT, ETX, ETX_STRUCT
 
 
-def _extract_code_from_packet(packet):
-    code = struct.unpack('>B', packet[0])[0]
-    if code in [0x8f, 0x8e]:
-        return struct.unpack('>H', packet[0:2])[0]
+SUPERPACKETS = [0x8e, 0x8f]
+"""TSIP superpackets have 2-byte IDs."""
+
+
+def _extract_code_from_raw(raw):
+    code = struct.unpack('>B', raw[0])[0]
+    if code in SUPERPACKETS:
+        return struct.unpack('>H', raw[0:2])[0]
     return code
 
-def _extract_data_from_packet(packet):
-    code = _extract_code_from_packet(packet)
-    if code > 255:
-        return packet[2:]
-    else:
-        return packet[1:]
+
+def register_packet(code, cls):
+    """
+    Register a packet with `_PACKET_MAP`
+
+    """
+
+    global _PACKET_MAP
+
+    _PACKET_MAP[code] = cls
+
+
+
+class _RO(object):
+    def __init__(self, i):
+        self.i = i
+
+    def __get__(self, instance, owner):
+        return instance[self.i]
+
+class _RW(_RO):
+
+    def __set__(self, instance, value):
+        instance[self.i] = value
 
 
 class Packet(object):
-    _format = ''
-    _values = []
+    """
+    Base class for `Command` and `Report` packets.
 
-    def __getitem__(self, index):
-        return self._values[index]
+    """
+
+    _code = None
+    _subcode = None
+    """Packet code and subcode."""
+
+#    _struct = None
+#    """Instance of `struct.Struct` describing the binary structure of the TSIP packet including its code."""
+
+    _format = None
+    """Format string for `struct.struct()` call."""
+
+    def pack(self):
+        """Generate the binary structure of the TSIP packet."""
+        b = struct.pack('>B', self.code)
+
+        if self._subcode:
+            b += struct.pack('>B', self.subcode)
+
+        if self._format:
+            b += struct.pack(self._format, *self)
+            # `self` works because derived classes must also derive
+            # from `namedlist.namedlist`.
+
+        # TODO: DLE padding!!!
+        return b
+
+
+    @property
+    def code(self):
+        return self._code
+
+
+    @property
+    def subcode(self):
+        return self._subcode
 
 
 class Report(Packet):
+    # TODO: clean-up later
+    pass
 
-    def __init__(self, packet):
-        # TODO: strip DLE, DLE+ETX if still present
-        self._packet = packet
-
-    @property
-    def code(self):
-        return _extract_code_from_packet(self._packet)
-
-    
-    @property
-    def data(self):
-        return _extract_data_from_packet(self._packet)
-
-
-    @property
-    def values(self):
-        return struct.unpack(self._format, self.data)
-
-
-    def __getitem__(self, i):
-        return self.values[i]
-
-
-    def __len__(self):
-        return len(self.values)
-
-
-    @property
-    def _formatlen(self):
-        """
-        Number of fields in `self._format`.
-
-        """
-
-        return len(filter(lambda i: i in ['cbB?hHiIlLqQfdspP'], self._format))
-        
-
-# TODO: make self._values a descriptor
 class Command(Packet):
-    _code = None
+    # TODO: clean-up later
+    pass
+    
 
-    def __init__(self, *values):
-        values = list(values)
+#class Report(Packet):
+#    """
+#    TSIP report packet.
+#
+#    :param raw: The binary TSIP packet with leading DLE and trailing DLE+ETX stripped.
+#    :type raw: String.
+#
+#    Derived classes must either set the `_struct` attribute to match the content of 
+#    the `raw` TSIP packet or implement a custom `__init__()` method. The latter case 
+#    is necessary if the structure of the TSIP report packet is not fixed. For example, 
+#    report packet 0x1c has a different structure depending on its subc-code.
+#
+#    """
+#
+#    def __init__(self, raw=None):
+#        # `raw` may be ``None`` for `from_values` to work.
+#        if raw:
+#            self._values = self._unpack(raw)
+#
+#
+#    @classmethod
+#    def from_values(cls, *values):
+#        """
+#
+#        """
+#
+#        inst = cls()
+#        inst._values = list(values)
+#        return inst
+   
 
-        if len(values) != self._formatlen:
-            raise TypeError('takes exactly %d arguments (%d given)' % 
-                            (self._formatlen, len(values)))
-
-        self._values = list(values)
-
-
-    @property
-    def code(self):
-        # Make self.code read-only.
-        return self._code
-
-    def _pack_code(self):
-        if self.code > 255:
-            return struct.pack('>H', self.code)
-        else:
-            return struct.pack('>B', self.code)
-
-
-    def _pack_values(self):
-        return struct.pack(self._format, *self._values)
-        
-
-    @property
-    def _packet(self):
-       return self._pack_code() + self._pack_values()
-
-    def __setitem__(self, i, v):
-        self._values[i] = v
+#class Command(Packet):
+#    """
+#    TSIP command packet.
+#
+#    :param *values: Values for the individual fields of the TSIP command packet.
+#
+#    Derived classes must set the `_struct` attribute to match the content of the `raw` TSIP
+#    packet. The `_default` attribute must contain the Command packet's code as the first
+#    field. The `_struct` and `_default` attributes must match insofar as `_default` must
+#    be a valid argument to the `_pack()` method.
+#
+#    """
+#
+#    def __init__(self, *values):
+#        self._values = list(values)
+#
+#        # Initialise with the default then copy the `*values`.
+#        #
+#        self._values = copy.copy(self._default)
+#
+#        for (i, value) in enumerate(values):
+#            try:
+#                self._values[i] = value
+#            except IndexError:
+#                raise ValueError('too many arguments')
