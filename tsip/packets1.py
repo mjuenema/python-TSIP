@@ -3,21 +3,20 @@
 """
 TSIP packets in the 0x1? range.
 
-* 0x1c - Version Information command and report.
-* 0x1e - Clear Battery Backup, then Reset command.
-* 0x1f - Request Software Versions command.
+* Command packet 0x1c01 - Firmware version.
+* Command packet 0x1c03 - Hardware component version information.
+* Report packet 0x1c81 - Firmware version.
+* Report packet 0x1c83 - Hardware component version information.
+* Command packet 0x1e - Clear battery backup, then reset.
+* Command packet 0x1f - Request software versions.
 
 """
 
-import struct
-import collections
 from namedlist import namedlist as nl
 
 from tsip.base import Packet, register_packet
 
 
-# ---------------------------------------------------------
-#
 class Packet_0x1c01(nl('Packet_0x1c01', []),
                        Packet):
     """Command packet 0x1c - Firmware version."""
@@ -28,8 +27,6 @@ class Packet_0x1c01(nl('Packet_0x1c01', []),
 register_packet(0x1c01, Packet_0x1c01)
 
 
-# ---------------------------------------------------------
-#
 class Packet_0x1c03(nl('Packet_0x1c03', []),
                        Packet):
     """Command packet 0x1c - Hardware component version information."""
@@ -40,8 +37,6 @@ class Packet_0x1c03(nl('Packet_0x1c03', []),
 register_packet(0x1c03, Packet_0x1c03)
 
 
-# ---------------------------------------------------------
-#
 class Packet_0x1c81(nl('Packet_0x1c81', ['reserved1', 
                                          'major_version',
                                          'minor_version',
@@ -51,7 +46,7 @@ class Packet_0x1c81(nl('Packet_0x1c81', ['reserved1',
                                          'year',
                                          'product_name']),
                        Packet):
-    """Report packet 0x1c - Firmware version."""
+    """Report packet 0x1c81 - Firmware version."""
     _code = 0x1c
     _subcode = 0x81
     _format = '>BBBBBBHp'
@@ -59,9 +54,7 @@ class Packet_0x1c81(nl('Packet_0x1c81', ['reserved1',
 register_packet(0x1c81, Packet_0x1c81)
 
 
-# ---------------------------------------------------------
-#
-class Packet_0x1c83(nl('Packet_0x1c03', ['serial_number', 
+class Packet_0x1c83(nl('Packet_0x1c83', ['serial_number', 
                                          'build_day',
                                          'build_month',
                                          'build_year',
@@ -69,7 +62,7 @@ class Packet_0x1c83(nl('Packet_0x1c03', ['serial_number',
                                          'hardware_code',
                                          'hardware_id']),
                        Packet):
-    """Report packet 0x1c - Firmware version."""
+    """Report packet 0x1c83 - Hardware component version information."""
     _code = 0x1c
     _subcode = 0x81
     _format = '>BBIBBHBHp'
@@ -77,8 +70,6 @@ class Packet_0x1c83(nl('Packet_0x1c03', ['serial_number',
 register_packet(0x1c83, Packet_0x1c83)
 
 
-# ---------------------------------------------------------
-#
 class Packet_0x1e(nl('Packet_0x1e', [('reset_mode', 0x4b)]),
                       Packet):
     """Command packet 0x1e - Clear battery backup, then reset."""
@@ -89,8 +80,6 @@ class Packet_0x1e(nl('Packet_0x1e', [('reset_mode', 0x4b)]),
 register_packet(0x1e, Packet_0x1e)
 
 
-# ---------------------------------------------------------
-#
 class Packet_0x1f(nl('Packet_0x1f', []),
                   Packet):
     """Command packet 0x1f - Request software versions."""
