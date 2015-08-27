@@ -25,7 +25,7 @@ class Command_31(Command):
 
     """
 
-    _format = '>fff'
+    _fmt = '>fff'
     _values = []
 
 
@@ -35,7 +35,7 @@ class Command_32(Command):
 
     """
 
-    _format = '>fff'
+    _fmt = '>fff'
     _values = []
 
 
@@ -45,7 +45,7 @@ class Command_35(Command):
 
     """
 
-    _format = '>BBBB'
+    _fmt = '>BBBB'
     _values = []
 
 
@@ -55,7 +55,7 @@ class Command_37(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -65,7 +65,7 @@ class Command_38(Command):
 
     """
 
-    _format = '>BBB'
+    _fmt = '>BBB'
     _values = []
 
 
@@ -75,7 +75,7 @@ class Command_3a(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -85,6 +85,6 @@ class Command_3c(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 

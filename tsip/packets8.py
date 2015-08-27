@@ -28,7 +28,7 @@ class Report_82(Report):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -38,7 +38,7 @@ class Report_83(Report):
 
     """
 
-    _format = '>ddddf'
+    _fmt = '>ddddf'
     _values = []
 
 
@@ -48,7 +48,7 @@ class Report_84(Report):
 
     """
 
-    _format = '>ddddf'
+    _fmt = '>ddddf'
     _values = []
 
 
@@ -58,5 +58,5 @@ class Report_89(Report):
 
     """
 
-    _format = '>BB'
+    _fmt = '>BB'
     _values = []

@@ -37,7 +37,7 @@ class Packet_0x23(nl('Packet_0x23', ['x',
     """Command packet 0x23 - Initial position (XYZ ECEF)."""
     
     _code = 0x23
-    _format = '>fff'
+    _fmt = '>fff'
     
 register_packet(0x23, Packet_0x23)
 
@@ -85,7 +85,7 @@ class Packet_0x2b(nl('Packet_0x2b', ['latitude',
     """Command Packet 0x2b - Initial position (LLA)."""
 
     _code = 0x2b
-    _format = '>fff'
+    _fmt = '>fff'
 
 register_packet(0x2b, Packet_0x2b)    
 
@@ -105,6 +105,6 @@ class Packet_0x2e(nl('Packet_0x2e', ['gps_time_of_week',
     """Command packet 0x2e - Set GPS time."""
 
     _code = 0x2e
-    _format = '>fh'
+    _fmt = '>fh'
     
 register_packet(0x2e, Packet_0x2e)

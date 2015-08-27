@@ -24,7 +24,7 @@ class Report_55(Report):
 
     """
 
-    _format = '>BBBB'
+    _fmt = '>BBBB'
     _values = []
 
 
@@ -34,7 +34,7 @@ class Report_56(Report):
 
     """
 
-    _format = '>fffff'
+    _fmt = '>fffff'
     _values = []
 
 
@@ -44,7 +44,7 @@ class Report_57(Report):
 
     """
 
-    _format = '>BBfh'
+    _fmt = '>BBfh'
     _values = []
 
 
@@ -54,7 +54,7 @@ class Report_58(Report):
 
     """
 
-    _format = '>?????'
+    _fmt = '>?????'
     _values = []
 
 
@@ -64,7 +64,7 @@ class Report_5a(Report):
 
     """
 
-    _format = '>BBBBBfffd'
+    _fmt = '>BBBBBfffd'
     _values = []
 
 
@@ -74,5 +74,5 @@ class Report_5c(Report):
 
     """
 
-    _format = '>BBBBffffB'
+    _fmt = '>BBBBffffB'
     _values = []

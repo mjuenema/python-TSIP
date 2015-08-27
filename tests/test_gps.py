@@ -31,7 +31,7 @@ class TestGps_Unknown(_TestGps):
     def test_read(self):
         packet = self.gps.read()
         assert packet.code == 0
-        assert packet._format is None
+        assert packet._fmt is None
         assert packet._values == []
         assert len(packet) == 0
 
@@ -39,7 +39,7 @@ class TestGps_Unknown(_TestGps):
         packets = list(self.gps)
         assert len(packets) == 1
         assert packets[0].code == 0
-        assert packets[0]._format is None
+        assert packets[0]._fmt is None
         assert packets[0]._values == []
         assert len(packets[0]) == 0
 
@@ -202,7 +202,7 @@ class TestPacket(object):
         for (code, format) in FORMATS.items():
             packet = Packet(code)
             assert packet.code == code
-            assert type(packet._format) in [types.StringType, types.FunctionType, types.NoneType]
+            assert type(packet._fmt) in [types.StringType, types.FunctionType, types.NoneType]
            
 #            if isinstance(packet._format, types.StringType): 
 #                assert struct.Struct(packet._format).size >= 0
@@ -217,7 +217,7 @@ class TestPacket(object):
         packet = Packet(0x4e, 'Y')
         assert packet.code == 0x4e
         assert packet[0] == 'Y'
-        assert packet._format == '>c'
+        assert packet._fmt == '>c'
         assert packet._values[0] == 'Y'
         assert len(packet._values) == 1
         assert len(packet) == 1
