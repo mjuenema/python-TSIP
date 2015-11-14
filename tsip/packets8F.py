@@ -34,7 +34,7 @@ class Report_8f15(Report):
 
     """
 
-    _format = '>bddddd'
+    _fmt = '>bddddd'
     _values = []
 
 
@@ -44,7 +44,7 @@ class Report_8f17(Report):
 
     """
 
-    _format = '>chfffff'
+    _fmt = '>chfffff'
     _values = []
 
 
@@ -54,7 +54,7 @@ class Report_8f18(Report):
 
     """
 
-    _format = '>chddddf'
+    _fmt = '>chddddf'
     _values = []
 
 
@@ -64,7 +64,7 @@ class Report_8f20(Report):
 
     """
 
-    _format = '>BhhhHiIiBBBBBBh'
+    _fmt = '>BhhhHiIiBBBBBBh'
     _values = []
 
 
@@ -74,7 +74,7 @@ class Report_8f21(Report):
 
     """
 
-    _format = '>BHHHHhB'
+    _fmt = '>BHHHHhB'
     _values = []
 
 
@@ -144,7 +144,7 @@ class Report_8f23(Report):
 
     """
 
-    _format = '>IHBBiIihhhH'
+    _fmt = '>IHBBiIihhhH'
     _values = []
     
     @property
@@ -229,7 +229,7 @@ class Report_8f26(Report):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -239,7 +239,7 @@ class Report_8f2a(Report):
 
     """
 
-    _format = '<function parse_0x8f2a at 0x7f4b8b832050>'
+    _fmt = '<function parse_0x8f2a at 0x7f4b8b832050>'
     _values = []
 
 
@@ -249,7 +249,7 @@ class Report_8f2b(Report):
 
     """
 
-    _format = '>BBHIiIiiiiBBB'
+    _fmt = '>BBHIiIiiiiBBB'
     _values = []
 
 
@@ -259,7 +259,7 @@ class Report_8f4a(Report):
 
     """
 
-    _format = '>BBBdI'
+    _fmt = '>BBBdI'
     _values = []
 
 
@@ -269,7 +269,7 @@ class Report_8f4f(Report):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -279,7 +279,7 @@ class Report_8fab(Report):
 
     """
 
-    _format = '>IHhBBBBBBH'
+    _fmt = '>IHhBBBBBBH'
     _values = []
 
 
@@ -289,5 +289,5 @@ class Report_8fac(Report):
 
     """
 
-    _format = '>BBBIHHBBBBffI'
+    _fmt = '>BBBIHHBBBBffI'
     _values = []

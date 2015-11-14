@@ -34,7 +34,7 @@ class Command_8e15(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -44,7 +44,7 @@ class Command_8e26(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -54,7 +54,7 @@ class Command_8e41(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -64,7 +64,7 @@ class Command_8e42(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -74,7 +74,7 @@ class Command_8e45(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -84,7 +84,7 @@ class Command_8e4a(Command):
 
     """
 
-    _format = '>BBBdI'
+    _fmt = '>BBBdI'
     _values = []
 
 
@@ -94,7 +94,7 @@ class Command_8e4c(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -104,7 +104,7 @@ class Command_8e4e(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -114,7 +114,7 @@ class Command_8ea0(Command):
 
     """
 
-    _format = '>?????'
+    _fmt = '>?????'
     _values = []
 
 
@@ -124,7 +124,7 @@ class Command_8ea2(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -134,7 +134,7 @@ class Command_8ea3(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -144,7 +144,7 @@ class Command_8ea5(Command):
 
     """
 
-    _format = '>HH'
+    _fmt = '>HH'
     _values = []
 
 
@@ -154,7 +154,7 @@ class Command_8ea6(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -164,7 +164,7 @@ class Command_8ea8(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -174,7 +174,7 @@ class Command_8ea9(Command):
 
     """
 
-    _format = '>BBII'
+    _fmt = '>BBII'
     _values = []
 
 
@@ -184,7 +184,7 @@ class Command_8eab(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -194,5 +194,5 @@ class Command_8eac(Command):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []

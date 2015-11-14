@@ -21,7 +21,7 @@ class Report_69(Report):
 
     """
 
-    _format = '>B'
+    _fmt = '>B'
     _values = []
 
 
@@ -49,7 +49,7 @@ class Report_6d(Report):
     
     """
 
-    _format = '>Bffff'
+    _fmt = '>Bffff'
 
     @property
     def dimension(self):
@@ -73,7 +73,7 @@ class Report_6d(Report):
 
     @property
     def values(self):
-        (byte0, pdop, hdop, vdop, tdop) = struct.unpack(self._format, self.data[0:17])
+        (byte0, pdop, hdop, vdop, tdop) = struct.unpack(self._fmt, self.data[0:17])
 
         #dimension = b012(byte0)
         #auto = b3(byte0)

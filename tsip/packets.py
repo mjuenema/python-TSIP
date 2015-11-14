@@ -39,7 +39,7 @@ class Error(Report):
 
     """
 
-    _format = '<function parse_0x13 at 0x7f4b8b8cb668>'
+    _fmt = '<function parse_0x13 at 0x7f4b8b8cb668>'
     _values = []
 
 

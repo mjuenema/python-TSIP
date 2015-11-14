@@ -20,7 +20,7 @@ class Command_bb(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
 
 
@@ -30,5 +30,5 @@ class Command_bc(Command):
 
     """
 
-    _format = ''
+    _fmt = ''
     _values = []
