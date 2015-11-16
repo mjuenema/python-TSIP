@@ -3,9 +3,13 @@
 NAME = 'tsip'
 VERSION = '0.0.1'
 LICENSE = 'BSD License'
+AUTHOR = 'Markus Juenemann'
+EMAIL = 'markus@juenemann.net'
+DESCRIPTION = 'Python package for parsing and creating TSIP packets'
+URL='https://github.com/mjuenema/python-TSIP'
 
-from tsip.constants import DLE, ETX, PI
-#from tsip.packets import DATUMS
-from tsip.gps import GPS
+from tsip.config import *
+from tsip.structs import *
+from tsip.llapi import *
+from tsip.hlapi import *
 
-from tsip.misc import b0, b1, b2, b3, b4, b5, b6, b7
