@@ -17,12 +17,52 @@ CHR_ETX = chr(ETX)
 
 # List of packets which have a sub-code.
 #
-#PACKETS_WITH_SUBCODE = [0x8e, 0x8f, 0x1c, 0x7a, 0x7e, 0xbb]
-PACKETS_WITH_SUBCODE = [0x1c, 0x7a, 0x7e, 0xbb]
+PACKETS_WITH_SUBCODE = [0x8e, 0x8f, 0x1c, 0x7a, 0x7e, 0xbb, 0x5f]
+
+
+# Classes for packing/unpacking TSIP packets whose structure
+# cannot be expressed as `struct.Struct()` instances. These 
+# mostly deal with packets of variable size/strcuture/content.
+#
+class Struct0x47(object):
+    def __init__(self):
+        pass
+
+    def pack(self, *fields):
+        raise NotImplemented()
+
+    def unpack(self, s):
+
+        count = struct.unpack('>B', s[0])
+        fields = [count]
+
+        for i in xrange(0, count):
+            (satnum, siglevel) = struct.unpack('>Bf', s[i+1:i+5])
+            fields.append(satnum)
+            fields.append(siglevel)
+
+        return fields
+
+class Struct0x58(object):
+    pass
+
+class Struct0x6d(object):
+    pass
+
+class Struct0xbb(object):
+    pass
+
+class Struct0xbc(object):
+    pass
 
 
 # Packet structures.
 #
+# Keys are the packet codes. Values can be either an instance
+# of `struct.Struct()`, ``None`` if the packet does not contain
+# any fields, or a class instance providing custom `pack()` and 
+# `unpack()` methods for a particular TSIp packet.
+# 
 # Packets with sub-codes are two tiered: [code][subcode].
 #
 PACKET_STRUCTURES = {
@@ -42,7 +82,109 @@ PACKET_STRUCTURES = {
     0x21: None,
     # Command Packet 0x23 - Initial Position (XYZ ECEF)
     0x23: struct.Struct('>fff'),
+    # Command Packet 0x24: Request GPS Satellite Selection
+    0x24: None,
+    # Command Packet 0x25: Initiate Hot Reset
+    0x25: None,
+    # Command Packet 0x26: Request Receiver Health
+    0x26: None,
+    # Command Packet 0x27: Request Signal Levels
+    0x27: None,
+    # Command Packet 0x29: Request Almanac Health
+    0x29: None,
+    # Command Packet 0x31: Accurate Initial Position (XYZ Cartesian ECEF)
+    # Here this packet will always contain double precision values.
+    0x31: struct.Struct('>ddd'),
+    # Command Packet 0x32: Accurate Initial Position (LLA)
+    # Here this packet will always contain double precision values.
+    0x32: struct.Struct('>ddd'),
+    # Command Packet 0x34: Satellite Selection For One-Satellite Mode
+    0x34: struct.Struct('>B'),
+    # Command Packet 0x35: Set or Request I/O Options
+    0x35: struct.Struct('>BBBB'),
+    # Command Packet 0x37: Request Status and Values of Last Position
+    0x37: None,
+    # Command Packet 0x38: Request Satellite System Data
+    0x38: struct.Struct('>BBB'),
+    # Command Packet 0x39: Set or Request SV Disable and Health Use
+    0x39: struct.Struct('>BB'),
+    # Command Packet 0x3A: Request Last Raw Measurement
+    0x3a: struct.Struct('>B'),
+    # Command Packet 0x3B: Request Ephemeris Status
+    0x3b: struct.Struct('>B'),
+    # Command Packet 0x3C: Request Satellite Tracking Status
+    0x3c: struct.Struct('>B'),
+    # Command Packet 0x3F-11: Request EEPROM Segment Status
+    0x3f: strcut.Struct('>B'),
+    # Report Packet 0x42: Single-precision Position Fix
+    0x42: struct.Struct('>ffff'),
+    # Report Packet 0x43: Velocity Fix, XYZ ECEF
+    0x43: struct.Struct('>fffff'),
+    # Report Packet 0x45: Software Version Information
+    0x45: struct.Struct('>BBBBBBBBBB'),
+    # Report Packet 0x46: Receiver Health
+    0x46: struct.Struct('>BB'),
+    # Report Packet 0x47: Signals Levels for Tracked Satellites
+    0x47: Struct0x47(),
+    # Report Packet 0x49: Almanac Health
+    0x49: struct.Struct('>32B'),
+    # Report Packet 0x4A: Single Precision LLA Position Fix
+    0x4a: struct.Struct('>fffff'),
+    # Report Packet 0x4B: Receiver Health
+    0x4b: struct.Struct('>BBB'),
+    # Report Packet 0x55: I/O Options
+    0x55: struct.Struct('>BBBB'),
+    # Report Packet 0x56: Velocity Fix, East-North-Up (ENU)
+    0x56: struct.Struct('>fffff'),
+    # Report Packet 0x57: Information about Last Computed Fix
+    0x57: struct.Struct('>BBfI'),
+    # Report Packet 0x58: GPS System Data from the Receiver
+    0x58: Struct0x58(), 
+    # Report Packet 0x59: Status of Satellite Disable or Ignore Health
+    0x59: struct.Struct('>B32B'),
+    # Report Packet 0x5A: Raw Data Measurement Data
+    0x5a: struct.Struct('>Bffffd'),
+    # Report Packet 0x5B: Satellite Ephemeris Status
+    0x5b: struct.Struct('>BfBBfBf'),
+    # Report Packet 0x5C: Satellite Tracking Status
+    0x5c: struct.Struct('>BBBBffffBBBB'),
+    # Report Packet 0x5F-11: EEPROM Segment Status
+    0x5f: { 0x11: struct.Struct('>I') 
+          },
+    # Report Packet 0x6D: Satellite Selection List
+    0x6d: Struct0x6d(),
+    # Command/Report Packet 0x70: Filter Configuration
+    0x70: struct.Struct('>BBBB'),
+    # Report Packet 0x83: Double Precision XYZ
+    0x83: struct.Struct('>ddddf'),
+    # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)
+    0x84: struct.Struct('ddddf'),
+    # Command/Report Packet 0xBB: Set Receiver Configuration
+    0xbb: Struct0xbb(),
+    # Command/Report Packet 0xBC: Set Port Configuration
+    0xbc: Struct0xbc(),
+    # TSIP super-packets:
+            # Command Packet 0x8E-15: Request current Datum values
+    0x8e: { 0x15: None,
+            # Command Packet 0x8E-26: Write Configuration to NVS
+            0x26: None,
+            # Command Packet 0x8E-41: Request Manufacturing Parameters
+            0x41: none
+          }
+    
 }
+
+
+# Contants for setting bits
+#
+BIT0 = B0 = 0b00000001
+BIT1 = B1 = 0b00000010
+BIT2 = B2 = 0b00000100
+BIT3 = B3 = 0b00001000
+BIT4 = B4 = 0b00010000
+BIT5 = B5 = 0b00100000
+BIT6 = B6 = 0b01000000
+BIT7 = B7 = 0b10000000
 
 
 def is_framed(packet):
@@ -245,7 +387,7 @@ class Packet(object):
 
     _struct = property(_get_struct)
 
-    def _pack(self):
+    def pack(self):
         """Return binary format of packet.
 
            The returned string is the binary format of the packet. Neither
