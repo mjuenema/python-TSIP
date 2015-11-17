@@ -10,7 +10,7 @@ except ImportError:
 from os.path import join, dirname
 
 
-from tsip import NAME, VERSION, LICENSE
+from tsip import NAME, VERSION, LICENSE, AUTHOR, EMAIL, DESCRIPTION, URL
 
 readme = open(join(dirname(__file__), 'README.rst')).read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
@@ -27,13 +27,13 @@ test_requirements = [
 setup(
     name=NAME,
     version=VERSION,
-    description='Python package for parsing and creating TSIP packets',
+    description=DESCRIPTION,
     long_description=readme + '\n\n' + history,
-    author='Markus Juenemann',
-    author_email='markus@juenemann.net',
-    url='https://github.com/mjuenema/python-TSIP',
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
     packages=[
-        'tsip',
+        NAME,
     ],
     package_dir={'tsip':
                  'tsip'},
