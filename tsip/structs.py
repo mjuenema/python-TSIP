@@ -52,11 +52,20 @@ class StructRaw(object):
        
     """
     
-    def pack(self, f):
+    def pack(self, *f):
         raise NotImplementedError()
     
     def unpack(self, s):
         return struct.unpack('%ds' % (len(s)), s)
+    
+    
+class Struct0x1c81(object):
+    def pack(self, f):
+        return struct.pack('>BBBBBBH', *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
+     
+    def unpack(self, s):
+        return struct.unpack('>BBBBBBH', s[:8]) + (s[10:])
+         
     
     
 class Struct0x47(object):
@@ -153,11 +162,12 @@ PACKET_STRUCTURES = {
     # Command Packet 0x1C - Firmware Version
     0x1c: { 0x01: StructNone(),
     # Report Packet 0x1C - Firmware Version
-            0x81: struct.Struct('>BBBBBBHBB'),
+            0x81: Struct0x1c81(),
     # Command Packet 0x1C - Hardware Component Version Information
             0x03: StructNone(),
     # Report Packet 0x1C - Hardware Component Version Information
-            0x83: struct.Struct('>IBBHBHp') },
+    #        0x83: struct.Struct('>IBBHBHp') 
+          },
     # Command Packet 0x1E - Clear Battery Backup, then Reset
     0x1e: struct.Struct('>B'),
     # Command Packet 0x1F - Request Software Versions

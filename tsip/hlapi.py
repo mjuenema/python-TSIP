@@ -40,13 +40,10 @@ class Packet(object):
 
     def __init__(self, code, *args, **kwargs):
 
-        if code > 255:
-            self.code = code >> 8
-        else:
-            self.code = code
+        self.code = code
 
         if self.code in PACKETS_WITH_SUBCODE:
-            self.subcode = args[1]
+            self.subcode = args[0]
             self.fields = args[1:]
         else:
             self.subcode = None
@@ -67,6 +64,15 @@ class Packet(object):
         return self._subcode
 
     subcode = property(_get_subcode, _set_subcode)
+    
+    
+    def _set_fields(self, fields):
+        self._fields = list(fields)
+    
+    def _get_fields(self):
+        return self._fields
+    
+    fields = property(_get_fields, _set_fields)
 
 
     # The packet structure depends `self.code` and `self.subcode`.
