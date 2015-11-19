@@ -262,8 +262,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x5C: Satellite Tracking Status
     0x5c: [struct.Struct('>BBBBffffBBBB')],
     # Report Packet 0x5F-11: EEPROM Segment Status
-    0x5f: { 0x11: [struct.Struct('>I')] 
-          },
+    0x5f: [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
     0x6d: [Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
@@ -360,32 +359,49 @@ for (key, value) in PACKET_STRUCTURES.items():
 def get_structs(code, subcode=None):
     """
     
-       :return: List(!) of possible structures of this packet.
+       :param code: Packet code.
+       :type code: Integer.
+       :param subcode: Packet subcode or ``None``.
+       :type code: Integer or ``None``.
+       :return: Possible structures of this packet.
+       :rtype: List.
     
     """
     
-    value = PACKET_STRUCTURES.get(code)
-    
-    if isinstance(value, types.ListType):
-        structs_ = value
-    elif isinstance(value, types.DictType):
-        structs_ = value.get(subcode)
+    if code in PACKETS_WITH_SUBCODE:
+        return PACKET_STRUCTURES[code][subcode]
     else:
-        raise ValueError('Invalid packet code/subcode')
+        return PACKET_STRUCTURES.get(code, [StructRaw()])
+        
+#         
+#     if PACKET_STRUCTURES.has_key(code):
+#         if PACKET_STRUCTURES[code].has_key(subcode):
+#             return PACKET_STRUCTURES[code][subcode]
+#         else:
+#             return PACKET_STRUCTURES[code]
+#     else:
+#         return [StructRaw()]
     
-    if not isinstance(structs_, types.ListType):
-        raise ValueError('Invalid packet code/subcode')
-    else:
-        return structs_
     
     
 #     try:
-#         return PACKET_STRUCTURES.get(code).get(subcode)
-#     except (KeyError, TypeError):
-#         try:
-#             return PACKET_STRUCTURES.get(code)
-#         except KeyError:
-#             raise ValueError('Invalid packet code/subcode')
+#         return PACKET_STRUCTURES[code].get(subcode)
+#     except KeyError:
+#         return PACKET_STRUCTURES.get(code)
+#     except KeyError:
+#         return [StructRaw()]
+    
+#     if isinstance(value, types.ListType):
+#         return value
+#     elif isinstance(value, types.DictType):
+#         structs_ = value.get(subcode)
+#     else:
+#         structs_ = [StructRaw()]
+#     
+#     if not isinstance(structs_, types.ListType):
+#         raise ValueError('Invalid packet code/subcode')
+#     else:
+#         return structs_
 
 
 

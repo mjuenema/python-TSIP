@@ -76,8 +76,9 @@ class Packet(object):
     def pack(self):
         """Return binary format of packet.
 
-           The returned string is the binary format of the packet. Neither
-           stuffing nor framing has been applied.
+           The returned string is the binary format of the packet with
+           stuffing and framing applied. It is ready to be sent to
+           the GPS.
 
         """
         
@@ -96,28 +97,30 @@ class Packet(object):
 
 
     @classmethod
-    def unpack(cls, packet):
+    def unpack(cls, data):
         """Instantiate `Packet` from binary string.
 
-           :param packet: TSIP packet in binary format.
-           :type packet: String.
+           :param pkt: TSIP pkt in binary format.
+           :type pkt: String.
 
-           `packet` must already have framing (DLE...DLE/ETX) removed and
+           `pkt` may already have framing (DLE...DLE/ETX) removed and
            byte stuffing reversed.
 
         """
 
-        # The packet must have leading DLE and trailing DLE/ETX removed already!
+        # The pkt must have leading DLE and trailing DLE/ETX removed
         # 
-        if is_framed(packet):
-            raise ValueError('packet contains leading DLE and trailing DLE/ETX')
+#         if is_framed(pkt):
+#             data = unstuff(unframe(pkt))
+#         else:
+#             data = pkt
 
 
-        # Extract packet code and potential(!) subcode.
+        # Extract pkt code and potential(!) subcode.
         #
-        code = struct.unpack('>B', packet[0])[0]
+        code = struct.unpack('>B', data[0])[0]
         if code in PACKETS_WITH_SUBCODE:
-            subcode = struct.unpack('>B', packet[1])[0]
+            subcode = struct.unpack('>B', data[1])[0]
         else:
             subcode = None
             
@@ -128,9 +131,9 @@ class Packet(object):
         for struct_ in structs_:
             try:
                 if subcode:
-                    return cls(code, subcode, *struct_.unpack(packet[2:]))
+                    return cls(code, subcode, *struct_.unpack(data[2:]))
                 else:
-                    return cls(code, *struct_.unpack(packet[1:]))
+                    return cls(code, *struct_.unpack(data[1:]))
             except struct.error:
                 pass
             
@@ -147,13 +150,14 @@ class Packet(object):
 
 class GPS(gps):
 
-    def __init__(self, reader):
-        super(GPS,self).__init__(reader)
+    def __init__(self, conn):
+        super(GPS, self).__init__(conn)
 
 
     def read(self):
-        packet = super(GPS, self).read()
-
+        pkt = super(GPS, self).read()
+        return Packet.unpack(unstuff(unframe(pkt))) 
+    
+    def write(self, packet):
+        super(GPS, self).write(frame(stuff(packet.pack())))
         
-
-        return packet

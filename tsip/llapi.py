@@ -20,23 +20,21 @@ def is_framed(packet):
     return packet[0] == CHR_DLE and packet[-2] == CHR_DLE and packet[-1] == CHR_ETX
 
 
-def frame(packet):
+def frame(data):
     """
-    Add leading DLE and trailing DLE/ETX to packet. 
+    Add leading DLE and trailing DLE/ETX to data. 
 
-    :param packet: TSIP packet without leading DLE and trailing DLE/ETX.
-    :type packet: Binary string.
-    :return: TSIP packet with leading DLE and trailing DLE/ETX added.
-
-    If the packet already starts with DLE and ends in DLE/ETX then the 
-    packet is returned unchanged.
+    :param data: TSIP data without leading DLE and trailing DLE/ETX.
+    :type data: Binary string.
+    :return: TSIP data with leading DLE and trailing DLE/ETX added.
+    :raise: ``ValueError`` if `data` already starts with DLE and ends in DLE/ETX.
 
     """
 
-    if is_framed(packet):
-        return packet
+    if is_framed(data):
+        raise ValueError('data contains leading DLE and trailing DLE/ETX')
     else:
-        return CHR_DLE + packet + CHR_DLE + CHR_ETX
+        return CHR_DLE + data + CHR_DLE + CHR_ETX
 
 
 def unframe(packet):
@@ -46,19 +44,15 @@ def unframe(packet):
     :param packet: TSIP packet with leading DLE and trailing DLE/ETX.
     :type packet: Binary string.
     :return: TSIP packet with leading DLE and trailing DLE/ETX removed.
-
-    If the packet does not start with DLE _and_ end with DLE/ETX it will be
-    returned unchanged. It should therefore be reasonably safe to "strip" a
-    packet twice. A packet must be stripped first before it is "unstuffed".
-
-    The `frame()` function is the opposite to `strip()`. 
+    :raise: ``ValueError`` if `packet` does not start with DLE and end in DLE/ETX.
+ 
 
     """
 
     if is_framed(packet):
         return packet.lstrip(CHR_DLE).rstrip(CHR_ETX).rstrip(CHR_DLE)
     else:
-        return packet
+        raise ValueError('packet does not contain leading DLE and trailing DLE/ETX')
 
 
 def stuff(packet):
@@ -72,9 +66,10 @@ def stuff(packet):
     """
 
     if is_framed(packet):
-        return packet.replace(CHR_DLE + CHR_DLE, CHR_DLE)
-    else:
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
+    else:
+        return packet.replace(CHR_DLE, CHR_DLE + CHR_DLE)
+        
 
 
 def unstuff(packet):
@@ -96,8 +91,8 @@ def unstuff(packet):
 
 class gps(object):
 
-    def __init__(self, reader):
-        self.reader = reader
+    def __init__(self, conn):
+        self.conn = conn
 
     def __iter__(self):
         return self
@@ -108,7 +103,7 @@ class gps(object):
         dle_count = 0
 
         while True:
-            b = self.reader.read(1)
+            b = self.conn.read(1)
 
             if b == '':
                 return None
@@ -118,7 +113,7 @@ class gps(object):
             if b == CHR_DLE:
                 dle_count += 1
             elif b == CHR_ETX and (dle_count % 2) == 0:    # even, because leading DLE is counted!
-                return unstuff(unframe(packet))
+                return packet
                 packet = ''
                 dle_count = 0
             else:
@@ -132,4 +127,16 @@ class gps(object):
             raise StopIteration()
         else:
             return packet
+        
+    
+    def write(self, packet):
+        """
+        
+           :param packet: A complete TSIP packet with byte
+                stuffing and framing applied.
+            
+        """
+        
+        self.conn.write(packet)
+        
 

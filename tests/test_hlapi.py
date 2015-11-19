@@ -144,8 +144,8 @@ class Test0x5c(PacketTest):
     (code, subcode, fields, binary) = (0x5c, None, [0, 1, 3, 4, 10.0, 20.0, 30.0, 40.0, 5, 6, 7, 8],
                                                     '\\\x00\x01\x03\x04A \x00\x00A\xa0\x00\x00A\xf0\x00\x00B \x00\x00\x05\x06\x07\x08')
 
-class Test0x5f11(PacketTest):
-    (code, subcode, fields, binary) = (0x5f, 0x11, [1000], '_\x11\x00\x00\x03\xe8')
+# class Test0x5f(PacketTest):
+#     (code, subcode, fields, binary) = (0x5f, 0x11, [1000], '_\x11\x00\x00\x03\xe8')
     
 # class Test0x6d(PacketTest):
 #     (code, subcode, fields, binary) = (0x6d, None, [3, 10.0, 20.0, 30.0, 40.0, -1, -2, -3], 
