@@ -22,12 +22,10 @@ class Packet(object):
       >>> pkt = Packet(0x1f)                        # Request software versions.
       
       >>> pkt = Packet(0x1e, 0x4b)                  # Request cold-start.
-      >>> pkt = Packet(0x1e4b)                      # Request cold-start.
       
       >>> pkt = Packet(0x23, -37.1, 144.1, 10.0)    # Set initial position.
       
       >>> pkt = Packet(0x8e, 0x4f, 0.1)             # Set PPS with to 0.1s
-      >>> pkt = Packet(0x8e4f, 0.1)                 # Set PPS with to 0.1s
 
     """
 
@@ -75,19 +73,6 @@ class Packet(object):
     fields = property(_get_fields, _set_fields)
 
 
-    # The packet structure depends `self.code` and `self.subcode`.
-    #
-    def _get_struct(self):
-        try:
-            return PACKET_STRUCTURES[self.code][self.subcode]
-        except KeyError:
-            try:
-                return PACKET_STRUCTURES[self.code]
-            except KeyError:
-                raise ValueError('Invalid packet code/subcode')
-
-    _struct = property(_get_struct)
-
     def pack(self):
         """Return binary format of packet.
 
@@ -95,11 +80,19 @@ class Packet(object):
            stuffing nor framing has been applied.
 
         """
+        
+        structs_ = get_structs(self.code, self.subcode)
 
-        if self.subcode:
-            return struct.pack('>BB', self.code, self.subcode) + self._struct.pack(self.fields)
-        else:
-            return struct.pack('>B', self.code) + self._struct.pack(self.fields)
+        for struct_ in structs_:
+            try:
+                if self.subcode:
+                    return struct.pack('>BB', self.code, self.subcode) + struct_.pack(*self.fields)
+                else:
+                    return struct.pack('>B', self.code) + struct_.pack(*self.fields)
+            except struct.error:
+                pass
+            
+        raise ValueError('unable to pack packet')
 
 
     @classmethod
@@ -122,34 +115,26 @@ class Packet(object):
 
         # Extract packet code and potential(!) subcode.
         #
-        if len(packet) >= 2:
-            (code, subcode) = struct.unpack('>BB', packet[0:2])
+        code = struct.unpack('>B', packet[0])[0]
+        if code in PACKETS_WITH_SUBCODE:
+            subcode = struct.unpack('>B', packet[1])[0]
         else:
-            (code) = struct.unpack('>B', packet)
             subcode = None
+            
+            
+        structs_ = get_structs(code, subcode)
 
-
-        # Try to find a matching struct.
-        #
-        try:
-            _struct = PACKET_STRUCTURES[code][subcode]
-        except KeyError:
-            subcode = None
+        
+        for struct_ in structs_:
             try:
-                _struct = PACKET_STRUCTURES[code]
-            except KeyError:
-                # Unable to unpack the packet properly. The entire
-                # content of `packet` (without the code) will 
-                # be the single field of `Packet`.
-                _struct = struct.Struct('%ds' % (len(packet)-1))
-
-
-        # Return an instance of `Packet`.
-        print _struct.format, len(packet), '%02x' % code
-        if subcode:
-            return cls(code, subcode, *_struct.unpack(packet[2:]))
-        else:
-            return cls(code, *_struct.unpack(packet[1:]))
+                if subcode:
+                    return cls(code, subcode, *struct_.unpack(packet[2:]))
+                else:
+                    return cls(code, *struct_.unpack(packet[1:]))
+            except struct.error:
+                pass
+            
+        raise ValueError('unable to unpack packet')
 
 
     def __repr__(self):
