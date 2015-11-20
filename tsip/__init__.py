@@ -6,7 +6,7 @@ LICENSE = 'BSD License'
 AUTHOR = 'Markus Juenemann'
 EMAIL = 'markus@juenemann.net'
 DESCRIPTION = 'Python package for parsing and creating TSIP packets'
-URL='https://github.com/mjuenema/python-TSIP'
+URL = 'https://github.com/mjuenema/python-TSIP'
 
 from tsip.config import *
 from tsip.structs import *

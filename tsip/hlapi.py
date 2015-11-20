@@ -86,7 +86,7 @@ class Packet(object):
 
         for struct_ in structs_:
             try:
-                if self.subcode:
+                if self.subcode is not None:
                     return struct.pack('>BB', self.code, self.subcode) + struct_.pack(*self.fields)
                 else:
                     return struct.pack('>B', self.code) + struct_.pack(*self.fields)
@@ -119,18 +119,20 @@ class Packet(object):
         # Extract pkt code and potential(!) subcode.
         #
         code = struct.unpack('>B', data[0])[0]
+        
         if code in PACKETS_WITH_SUBCODE:
             subcode = struct.unpack('>B', data[1])[0]
         else:
             subcode = None
             
+        
+            
             
         structs_ = get_structs(code, subcode)
-
-        
+                
         for struct_ in structs_:
             try:
-                if subcode:
+                if subcode is not None:
                     return cls(code, subcode, *struct_.unpack(data[2:]))
                 else:
                     return cls(code, *struct_.unpack(data[1:]))

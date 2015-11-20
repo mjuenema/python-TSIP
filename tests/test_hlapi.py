@@ -12,13 +12,14 @@ class PacketTest(object):
         else:
             self.pkt1 = Packet(self.code, *self.fields)
 
-    def test(self):
+    def test_pack(self):
         assert self.pkt1.code == self.code
         if self.subcode is not None:
             assert self.pkt1.subcode == self.subcode      
         assert self.pkt1.fields == self.fields
         assert self.pkt1.pack() == self.binary
     
+    def test_unpack(self):
         pkt2 = Packet.unpack(self.binary)
         assert pkt2.code == self.code
         if self.subcode is not None:
@@ -164,3 +165,188 @@ class Test0x84(PacketTest):
     
 class Test0xbb_1(PacketTest):
     (code, subcode, fields, binary) = (0xbb, 0x00, [], '\xbb\x00')
+    
+class PacketTest0xbb(PacketTest):
+    fields1 = []
+    fields2 = []
+    def test_pack(self):
+        assert self.pkt1.code == self.code
+        assert self.pkt1.subcode == self.subcode      
+        assert self.pkt1.fields == self.fields1
+        assert self.pkt1.pack() == self.binary
+      
+    def test_unpack(self):
+        pkt2 = Packet.unpack(self.binary)
+        assert pkt2.code == self.code
+        assert pkt2.subcode == self.subcode
+        assert pkt2.fields == self.fields2
+        assert pkt2.pack() == self.binary  
+    
+class Test0xbb_2(PacketTest0xbb):
+    (code, subcode, fields, binary) = (0xbb, 0x00, [0, 0xff, 1, 0xff, -1.0, -1.0, -1.0, -1.0, 0xff, 2], 
+                                       '\xbb\x00\x00\xff\x01\xff\xbf\x80\x00\x00\xbf\x80\x00\x00\xbf\x80\x00\x00\xbf\x80\x00\x00\xff\x02\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff')
+    fields1 = [0, 255, 1, 255, -1.0, -1.0, -1.0, -1.0, 255, 2]
+    fields2 = [0, 255, 1, 255, -1.0, -1.0, -1.0, -1.0, 255, 2, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+
+class Test0xbb_3(PacketTest0xbb):
+    (code, subcode, fields, binary) = (0xbb, 0x00, [0, 9, 1, 9, -1.0, -1.0, -1.0, -1.0, 9, 2], 
+                                       '\xbb\x00\x00\xff\x01\xff\xbf\x80\x00\x00\xbf\x80\x00\x00\xbf\x80\x00\x00\xbf\x80\x00\x00\xff\x02\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff')
+    fields1 = [0, 9, 1, 9, -1.0, -1.0, -1.0, -1.0, 9, 2]
+    fields2 = [0, 255, 1, 255, -1.0, -1.0, -1.0, -1.0, 255, 2, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+
+class Test0xbc_1(PacketTest):
+    (code, subcode, fields, binary) = (0xbc, None, [0], '\xbc\x00')
+    
+class Test0xbc_2(PacketTest):
+    (code, subcode, fields, binary) = (0xbc, None, [0, 6, 7, 3, 0, 0, 0, 2, 2, 0], '\xbc\x00\x06\x07\x03\x00\x00\x00\x02\x02\x00')
+
+# Superpacket commands
+#
+class Test0x8e15(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x15, [], '\x8e\x15')
+    
+class Test0x8e26(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x26, [], '\x8e\x26')
+    
+class Test0x8e41(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x41, [], '\x8e\x41')
+    
+class Test0x8e42(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x42, [], '\x8e\x42')
+    
+class Test0x8e45(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x45, [3], '\x8eE\x03')
+    
+class Test0x8e4a(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x4a, [1, 2, 1, 0.10000000000000001, 0.20000000298023224], 
+                                       '\x8eJ\x01\x02\x01?\xb9\x99\x99\x99\x99\x99\x9a>L\xcc\xcd')
+
+class Test0x8e4c(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x4c, [0xff], '\x8eL\xff')
+
+class Test0x8e4e(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x4e, [0x02], '\x8eN\x02')
+    
+class Test0x8ea0_1(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa0, [], '\x8e\xa0')
+    
+class Test0x8ea0_2(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa0, [0, 1.0], '\x8e\xa0\x00?\x80\x00\x00')
+    
+class Test0x8ea0_3(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa0, [1, 1000], '\x8e\xa0\x01\x00\x00\x03\xe8')
+    
+class Test0x8ea2(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa2, [2], '\x8e\xa2\x02')
+    
+class Test0x8ea3(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa3, [5], '\x8e\xa3\x05')
+    
+class Test0x8ea4_0(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa4, [0], '\x8e\xa4\x00')
+    
+class Test0x8ea4_1(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa4, [1, 1023, 604799], '\x8e\xa4\x01\x03\xff\x00\t:\x7f')
+    
+class Test0x8ea4_3(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa4, [3, 1.0, 2.0, -1, 1, 2, 3, 4, -5], 
+                                       '\x8e\xa4\x03?\x80\x00\x00@\x00\x00\x00\xff\xff\x00\x00\x00\x01\x00\x02\x00\x03\x00\x04\xff\xfb')
+    
+class Test0x8ea5(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa5, [1, 2], '\x8e\xa5\x00\x01\x00\x02')
+
+class Test0x8ea6(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa6, [0], '\x8e\xa6\x00')
+    
+class Test0x8ea8_0(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa8, [0, 1.0, 2.0], '\x8e\xa8\x00?\x80\x00\x00@\x00\x00\x00')
+    
+class Test0x8ea8_1(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa8, [1, 1.0, 2.0, 3.0], '\x8e\xa8\x01?\x80\x00\x00@\x00\x00\x00@@\x00\x00')
+    
+class Test0x8ea8_2(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa8, [2, 4.0, 5.0], '\x8e\xa8\x02@\x80\x00\x00@\xa0\x00\x00')
+    
+class Test0x8ea8_3(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa8, [3, 6.0], '\x8e\xa8\x03@\xc0\x00\x00')  
+    
+class Test0x8ea9(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xa9, [0, 1, 1000, 2000], '\x8e\xa9\x00\x01\x00\x00\x03\xe8\x00\x00\x07\xd0')
+    
+class Test0x8eab(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xab, [2], '\x8e\xab\x02')
+    
+class Test0x8eac(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0xac, [2], '\x8e\xac\x02')
+
+
+# Superpacket reports
+#
+class Test0x8f15(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0x15, [-1, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0], 
+                                       '\x8f\x15\xff\xff@\x8f@\x00\x00\x00\x00\x00@\x9f@\x00\x00\x00\x00\x00@\xa7p\x00\x00\x00\x00\x00@\xaf@\x00\x00\x00\x00\x00@\xb3\x88\x00\x00\x00\x00\x00')
+
+class Test0x8f41(PacketTest):
+    # TODO: is the year really an UINT8?
+    (code, subcode, fields, binary) = (0x8f, 0x41, [0, 98765, 15, 11, 20, 16, 0.0, 1],
+                                       '\x8fA\x00\x00\x00\x01\x81\xcd\x0f\x0b\x14\x10\x00\x00\x00\x00\x00\x01')
+    
+class Test0x8f42(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0x42, [1, 2, 3, 4, 5, 6, 7, 8],
+                                       '\x8fB\x01\x02\x00\x03\x00\x00\x00\x04\x00\x00\x00\x05\x00\x06\x00\x07\x00\x08')
+
+class Test0x8f4a(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0x4a, [1, 2, 1, 0.10000000000000001, 0.20000000298023224], 
+                                       '\x8fJ\x01\x02\x01?\xb9\x99\x99\x99\x99\x99\x9a>L\xcc\xcd')
+
+class Test0x8f4e(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0x4e, [0x02], '\x8fN\x02')
+
+class Test0x8fa0(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa0, [1234, 1.0, 0, 1, 2.0, 3.0],
+                                       '\x8f\xa0\x00\x00\x04\xd2?\x80\x00\x00\x00\x01@\x00\x00\x00@@\x00\x00')
+
+class Test0x8fa2(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa2, [2], '\x8f\xa2\x02') 
+
+class Test0x8fa3(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa3, [5], '\x8f\xa3\x05')
+
+class Test0x8fa4_0(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa4, [0], '\x8f\xa4\x00')
+    
+class Test0x8fa4_1(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa4, [1, 1023, 604799], '\x8f\xa4\x01\x03\xff\x00\t:\x7f')
+    
+class Test0x8fa4_3(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa4, [3, 1.0, 2.0, -1, 1, 2, 3, 4, -5], 
+                                       '\x8f\xa4\x03?\x80\x00\x00@\x00\x00\x00\xff\xff\x00\x00\x00\x01\x00\x02\x00\x03\x00\x04\xff\xfb') 
+
+class Test0x8fa5(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa5, [1, 2], '\x8f\xa5\x00\x01\x00\x02')
+    
+class Test0x8fa6(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa6, [0], '\x8f\xa6\x00')
+    
+class Test0x8fa8_0(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa8, [0, 1.0, 2.0], '\x8f\xa8\x00?\x80\x00\x00@\x00\x00\x00')
+    
+class Test0x8fa8_1(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa8, [1, 1.0, 2.0, 3.0], '\x8f\xa8\x01?\x80\x00\x00@\x00\x00\x00@@\x00\x00')
+    
+class Test0x8fa8_2(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa8, [2, 4.0, 5.0], '\x8f\xa8\x02@\x80\x00\x00@\xa0\x00\x00')
+    
+class Test0x8fa8_3(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa8, [3, 6.0], '\x8f\xa8\x03@\xc0\x00\x00')
+    
+class Test0x8fa9(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xa9, [0, 1, 1000, 2000], '\x8f\xa9\x00\x01\x00\x00\x03\xe8\x00\x00\x07\xd0')
+    
+class Test0x8fab(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xab, [1, 2, -1, 3, 4, 5, 6, 7, 8, 2015],
+                                       '\x8f\xab\x00\x00\x00\x01\x00\x02\xff\xff\x03\x04\x05\x06\x07\x08\x07\xdf')
+
+class Test0x8fac(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0xac, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11.0, 12.0, 13, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 0],
+                                       '\x8f\xac\x01\x02\x03\x00\x00\x00\x04\x00\x05\x00\x06\x07\x08\t\nA0\x00\x00A@\x00\x00\x00\x00\x00\rA`\x00\x00Ap\x00\x00@0\x00\x00\x00\x00\x00\x00@1\x00\x00\x00\x00\x00\x00@2\x00\x00\x00\x00\x00\x00A\x98\x00\x00\x00\x00\x00\x00')

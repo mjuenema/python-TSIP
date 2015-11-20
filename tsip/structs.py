@@ -32,7 +32,7 @@ class StructNone(object):
     
     """
     
-    def pack(self, f=[]):
+    def pack(self, *f):
         return ''
     
     def unpack(self, s=''):
@@ -128,12 +128,45 @@ class Struct0x6d(object):
         fields = struct.unpack('>Bffff', s[0:17])
         nsvs = (fields[0] & 0b11110000) >> 4
         return fields + struct.unpack('%db' % (nsvs), s[17:])
+    
+
+class Struct0xbb(object):
+    """Set/get receiver configuration.
+    
+       Packet 0xbb/subcode=0 may be used to either query the current receiver
+       configuration or change it. The packet contains fields that must contain
+       ``0xff``. 
+       
+    """
+    fmt = '>BBBBffffBBBBBBBBBBBBBBBBBBB'
+    
+    def pack(self, *f):
+        
+        # 
+        #
+        if not f:
+            # 0xbb query mode is handled by StructNone(); raise struct.error
+            # so the calling function can detect this.
+            #
+            raise struct.error
+        else:
+            # Ensure that fields 1, 3, 8 (index starts a zero!) and the trailing 
+            # bytes contain 0xff.
+            #    
+            f = list(f)     # Convert to list as tuples are immutable.
+            f[1] = f[3] = f[8] = 0xff
+            f = f[0:10] + [0xff] * 17
+            return struct.pack(self.fmt, *f)
+    
+    def unpack(self, s):
+        return struct.unpack(self.fmt, s)
+          
 
 
 class Struct0x8ea0(object):
     """Command Packet 0x8E-A0: Set DAC Value.
      
-       There are two variants of this packet: Without data, the packet
+       There are three variants of this packet: Without data, the packet
        is used to request the current DAC voltage. With data, the packet
        is used to set the DAC voltage or value. Furthermore depending
        on the value of byte 1, the DAC value may be set as a value or
@@ -141,8 +174,8 @@ class Struct0x8ea0(object):
      
     """
     
-    def pack(self, f):
-        if f == []:
+    def pack(self, *f):
+        if not f:
             return ''
         elif f[0] == 0:
             return struct.pack('>Bf', *f)
@@ -151,9 +184,56 @@ class Struct0x8ea0(object):
         else:
             raise ValueError
      
-    def unpack(self, s=''):
-        raise NotImplementedError()
+    def unpack(self, s):
+        
+        if s == '':
+            return []
+        else:
+            flag = struct.unpack('>B', s[0])[0]
+            
+            if flag == 0:
+                value = struct.unpack('>f', s[1:])[0]
+            elif flag == 1:
+                value = struct.unpack('>I', s[1:])[0]
+            else:
+                raise ValueError('Invalid flag in packet 0x8ea0')
+            
+            return [flag, value]
+        
+        
+class Struct0x8ea8(object):
+    fmt0 = '>Bff' 
+    fmt1 = '>Bfff'
+    fmt2 = '>Bff'
+    fmt3 = '>Bf'
     
+    def pack(self, *f):
+        if f[0] == 0:
+            return struct.pack(self.fmt0, *f)
+        elif f[0] == 1:
+            return struct.pack(self.fmt1, *f)
+        elif f[0] == 2:
+            return struct.pack(self.fmt2, *f)
+        elif f[0] == 3:
+            return struct.pack(self.fmt3, *f)
+        else:
+            raise ValueError('Invalid type in packet 0x8ea8')
+        
+    def unpack(self, s):
+        type_ = struct.unpack('>B', s[0])[0]
+        
+        if type_ == 0:
+            return struct.unpack(self.fmt0, s)
+        elif type_ == 1:
+            return struct.unpack(self.fmt1, s)
+        elif type_ == 2:
+            return struct.unpack(self.fmt2, s)
+        elif type_ == 3:
+            return struct.unpack(self.fmt3, s)
+        else:
+            raise ValueError('Invalid type in packet 0x8ea8')
+        
+Struct0x8fa8 = Struct0x8ea8
 
 # Packet structures.
 #
@@ -272,9 +352,11 @@ PACKET_STRUCTURES = {
     # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)
     0x84: [struct.Struct('ddddf')],
     # Command/Report Packet 0xBB: Set Receiver Configuration
-    0xbb: {0x00: [StructNone(), 
-                  struct.Struct('>BBBBBffffBBBBBBBBBBBBBBBBBB')]
-           },
+    0xbb: { 0x00 :[Struct0xbb(), StructNone()]
+          },
+#     0xbb: {0x00: [StructNone(), 
+#                   struct.Struct('>BBBBBffffBBBBBBBBBBBBBBBBBB')]
+#            },
     # Command/Report Packet 0xBC: Set Port Configuration
     0xbc: [struct.Struct('>B'), 
            struct.Struct('>BBBBBBBBBB')],
@@ -303,12 +385,13 @@ PACKET_STRUCTURES = {
             0xa3: [struct.Struct('>B')],
             # Command Packet 0x8E-A4: Test Modes
             0xa4: [struct.Struct('>B'), 
-                   struct.Struct('>BBHI'), 
-                   struct.Struct('>BBffhIHHHh')],
+                   struct.Struct('>BHI'), 
+                   struct.Struct('>BffhIHHHh')],
             # Command Packet 0x8E-A5: Packet Broadcast Mask
             0xa5: [struct.Struct('>HH')],
             # Command Packet 0x8E-A6: Self-Survey Command
             0xa6: [struct.Struct('>B')],
+            0xa8: [Struct0x8ea8()],
             # Command Packet 0x8E-A9: Self-Survey Parameters
             0xa9: [struct.Struct('>BBII'), 
                    StructNone()],
@@ -318,7 +401,7 @@ PACKET_STRUCTURES = {
             0xac: [struct.Struct('>B')]
           },
             # Report Packet 0x8F-15 Current Datum Values
-    0x8f: { 0x15: [struct.Struct('>Hddddd')],
+    0x8f: { 0x15: [struct.Struct('>hddddd')],
             # Report Packet 0x8F-41: Stored Manufacturing Operating Parameters
             0x41: [struct.Struct('>HIBBBBfH')],
             # Report Packet 0x8F-42: Stored Production Parameters
@@ -333,12 +416,16 @@ PACKET_STRUCTURES = {
             0xa2: [struct.Struct('>B')],
             # Report Packet 0x8F-A3: Oscillator Disciplining Command
             0xa3: [struct.Struct('>B')],
+            # Report Packet 0x8F-A4: Test Modes
+            0xa4: [struct.Struct('>B'), 
+                   struct.Struct('>BHI'), 
+                   struct.Struct('>BffhIHHHh')],
             # Report Packet 0x8F-A5: Packet Broadcast Mask
             0xa5: [struct.Struct('>HH')],
             # Report Packet 0x8F-A6: Self-Survey Command
             0xa6: [struct.Struct('>B')],
             # Report Packet 0x8F-A8: Oscillator Disciplining Parameters
-            # TODO
+            0xa8: [Struct0x8fa8()], 
             # Report Packet 0x8F-A9: Self-Survey Parameters
             0xa9: [struct.Struct('>BBII')],
             # Report Packet 0x8F-AB:Primary Timing Packet
