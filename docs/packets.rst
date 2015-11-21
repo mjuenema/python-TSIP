@@ -10,6 +10,34 @@ General description
 -------------------
 
 
+Command Packet 0x1C - Firmware Version 01
+-----------------------------------------
+
+.. csv-table:: 
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+   
+   "packet.code", "Packet ID (0x1c)", ""
+   "packet.subcode", "0x01", ""  
+
+
+Report packet 0x1C:81 - Report firmware version
+-----------------------------------------
+
+.. csv-table:: 
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+   
+   "packet.code", "Packet ID (0x1c)", ""
+   "packet.subcode", "0x81", ""
+   "packet[0]", "(reserved)", ""
+   "packet[1]", "major version", ""
+   "packet[2]", "minor version", ""
+   "packet[3]", "build number", ""
+   "packet[4]", "month", ""
+   "packet[5]", "day", ""
+   "packet[6]", "year", "as a four-digit number, e.g. 2015"
+   "packet[7]", "product name", "byte 10 ('length of first module name') is skipped"
 
 
 Packet 0xBB: Receiver Configuration

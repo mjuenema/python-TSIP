@@ -102,6 +102,7 @@ class gps(object):
         packet = ''
         dle_count = 0
 
+        last_b = None
         while True:
             b = self.conn.read(1)
 
@@ -112,12 +113,14 @@ class gps(object):
 
             if b == CHR_DLE:
                 dle_count += 1
-            elif b == CHR_ETX and (dle_count % 2) == 0:    # even, because leading DLE is counted!
+            elif b == CHR_ETX and last_b == CHR_DLE and (dle_count % 2) == 0:    # even, because leading DLE is counted!
                 return packet
                 packet = ''
                 dle_count = 0
             else:
                 pass
+            
+            last_b = b
 
 
     def next(self):

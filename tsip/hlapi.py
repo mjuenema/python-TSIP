@@ -5,6 +5,7 @@ High-level API.
 """
 
 import struct
+import binascii
 
 from tsip.config import *
 from tsip.llapi import *
@@ -46,6 +47,16 @@ class Packet(object):
         else:
             self.subcode = None
             self.fields = args
+            
+    
+    # Make self.fields accessible as indexes on the
+    # packet instance.
+    #            
+    def __getitem__(self, i):
+        return self.fields[i]
+    
+    def __setitem__(self, i, v):
+        self.fields[i] = v
 
 
     # The subcode can only be set on TSIP packets that do actually
@@ -108,14 +119,6 @@ class Packet(object):
 
         """
 
-        # The pkt must have leading DLE and trailing DLE/ETX removed
-        # 
-#         if is_framed(pkt):
-#             data = unstuff(unframe(pkt))
-#         else:
-#             data = pkt
-
-
         # Extract pkt code and potential(!) subcode.
         #
         code = struct.unpack('>B', data[0])[0]
@@ -138,8 +141,9 @@ class Packet(object):
                     return cls(code, *struct_.unpack(data[1:]))
             except struct.error:
                 pass
-            
-        raise ValueError('unable to unpack packet')
+        
+        return cls(0xff, data)  # TODO: decide how to deal with unpackable data.
+        raise ValueError('unable to unpack packet: %s' % (binascii.hexlify(data)))
 
 
     def __repr__(self):

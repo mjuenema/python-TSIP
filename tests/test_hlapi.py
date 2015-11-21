@@ -11,6 +11,8 @@ class PacketTest(object):
             self.pkt1 = Packet(self.code, self.subcode, *self.fields)
         else:
             self.pkt1 = Packet(self.code, *self.fields)
+            
+        self.pkt2 = Packet.unpack(self.binary)
 
     def test_pack(self):
         assert self.pkt1.code == self.code
@@ -20,12 +22,27 @@ class PacketTest(object):
         assert self.pkt1.pack() == self.binary
     
     def test_unpack(self):
-        pkt2 = Packet.unpack(self.binary)
-        assert pkt2.code == self.code
+        assert self.pkt2.code == self.code
         if self.subcode is not None:
-            assert pkt2.subcode == self.subcode      # may be None
-        assert pkt2.fields == self.fields
-        assert pkt2.pack() == self.binary
+            assert self.pkt2.subcode == self.subcode      # may be None
+        assert self.pkt2.fields == self.fields
+        assert self.pkt2.pack() == self.binary
+        
+    def test_fields(self):
+        for i in xrange(0, len(self.pkt1.fields)):
+            assert self.pkt1.fields[i] == self.pkt1[i]
+            self.pkt1[i] = i
+            assert self.pkt1[i] == self.pkt1.fields[i] == i 
+            
+        for i in xrange(0, len(self.pkt2.fields)):
+            assert self.pkt2.fields[i] == self.pkt2[i]
+            self.pkt2[i] = i
+            assert self.pkt2[i] == self.pkt2.fields[i] == i
+            
+    def test_repr(self):
+        assert str(self.pkt1) == str(self.pkt2) 
+            
+
     
     
 class Test0x1c01(PacketTest):
@@ -61,6 +78,9 @@ class Test0x27(PacketTest):
 class Test0x29(PacketTest):
     (code, subcode, fields, binary) = (0x29, None, [], '\x29')
     
+class Test0x2d(PacketTest):
+    (code, subcode, fields, binary) = (0x2d, None, [], '\x2d')
+    
 class Test0x31(PacketTest):
     (code, subcode, fields, binary) = (0x31, None, [10.0, 20.0, 30.0], 
                                        '1@$\x00\x00\x00\x00\x00\x00@4\x00\x00\x00\x00\x00\x00@>\x00\x00\x00\x00\x00\x00')
@@ -95,6 +115,10 @@ class Test0x3c(PacketTest):
     
 class Test0x3f(PacketTest):
     (code, subcode, fields, binary) = (0x3f, None, [1], '\x3f\x01')
+
+class Test0x41(PacketTest):
+    (code, subcode, fields, binary) = (0x41, None, [-10.0, -20, 30.0], 
+                                       'A\xc1 \x00\x00\xff\xecA\xf0\x00\x00')
     
 class Test0x42(PacketTest):
     (code, subcode, fields, binary) = (0x42, None, [-10.0, 20.0, 30.0, 40.0], 
@@ -112,11 +136,11 @@ class Test0x46(PacketTest):
     (code, subcode, fields, binary) = (0x46, None, [0, 1], 'F\x00\x01')
 
 class Test0x47_1(PacketTest):
-    (code, subcode, fields, binary) = (0x47, None, [1, 2, 20.0], 'G\x01\x02\x00\x00\x00\x00\xa0A')
+    (code, subcode, fields, binary) = (0x47, None, [1, 2, 20.0], 'G\x01\x02A\xa0\x00\x00')
     
 class Test0x47_2(PacketTest):
     (code, subcode, fields, binary) = (0x47, None, [3, 2, 20.0, 3, 30.0, 4, 40.0],
-                                       'G\x03\x02\x00\x00\x00\x00\xa0A\x03\x00\x00\x00\x00\x00\xf0A\x04\x00\x00\x00\x00\x00 B')
+                                       'G\x03\x02A\xa0\x00\x00\x03A\xf0\x00\x00\x04B \x00\x00')
     
 class Test0x49(PacketTest):
     (code, subcode, fields, binary) = (0x49, None, [0] * 32, 
@@ -128,6 +152,9 @@ class Test0x4a(PacketTest):
 
 class Test0x4b(PacketTest):
     (code, subcode, fields, binary) = (0x4b, None, [96, 1, 2], 'K`\x01\x02')
+    
+class Test0x4d(PacketTest):
+    (code, subcode, fields, binary) = (0x4d, None, [10.0], 'MA \x00\x00')
     
 class Test0x55(PacketTest):
     (code, subcode, fields, binary) = (0x55, None, [0, 1, 2, 3], 'U\x00\x01\x02\x03')
@@ -176,11 +203,14 @@ class PacketTest0xbb(PacketTest):
         assert self.pkt1.pack() == self.binary
       
     def test_unpack(self):
-        pkt2 = Packet.unpack(self.binary)
-        assert pkt2.code == self.code
-        assert pkt2.subcode == self.subcode
-        assert pkt2.fields == self.fields2
-        assert pkt2.pack() == self.binary  
+        assert self.pkt2.code == self.code
+        assert self.pkt2.subcode == self.subcode
+        assert self.pkt2.fields == self.fields2
+        assert self.pkt2.pack() == self.binary
+        
+    def test_repr(self):
+        # self.pkt2 has the trailing 0xff added!
+        pass 
     
 class Test0xbb_2(PacketTest0xbb):
     (code, subcode, fields, binary) = (0xbb, 0x00, [0, 0xff, 1, 0xff, -1.0, -1.0, -1.0, -1.0, 0xff, 2], 
@@ -204,6 +234,9 @@ class Test0xbc_2(PacketTest):
 #
 class Test0x8e15(PacketTest):
     (code, subcode, fields, binary) = (0x8e, 0x15, [], '\x8e\x15')
+    
+class Test0x8e23(PacketTest):
+    (code, subcode, fields, binary) = (0x8e, 0x23, [1], '\x8e#\x01')
     
 class Test0x8e26(PacketTest):
     (code, subcode, fields, binary) = (0x8e, 0x26, [], '\x8e\x26')
@@ -285,6 +318,10 @@ class Test0x8eac(PacketTest):
 class Test0x8f15(PacketTest):
     (code, subcode, fields, binary) = (0x8f, 0x15, [-1, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0], 
                                        '\x8f\x15\xff\xff@\x8f@\x00\x00\x00\x00\x00@\x9f@\x00\x00\x00\x00\x00@\xa7p\x00\x00\x00\x00\x00@\xaf@\x00\x00\x00\x00\x00@\xb3\x88\x00\x00\x00\x00\x00')
+
+class Test0x8f23(PacketTest):
+    (code, subcode, fields, binary) = (0x8f, 0x23, [1, 2, 3, 4, -37, 144, -10, 10, 20, 30, 5],
+                                       '\x8f#\x00\x00\x00\x01\x00\x02\x03\x04\xff\xff\xff\xdb\x00\x00\x00\x90\xff\xff\xff\xf6\x00\n\x00\x14\x00\x1e\x00\x05')    
 
 class Test0x8f41(PacketTest):
     # TODO: is the year really an UINT8?

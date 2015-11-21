@@ -272,6 +272,8 @@ PACKET_STRUCTURES = {
     0x27: [StructNone()],
     # Command Packet 0x29: Request Almanac Health
     0x29: [StructNone()],
+    # Command Packet 0x2d: request oscillator offset
+    0x2d: [StructNone()],
     # Command Packet 0x31: Accurate Initial Position (XYZ Cartesian ECEF)
     # Here this packet will always contain double precision values.
     0x31: [struct.Struct('>ddd')],
@@ -296,6 +298,8 @@ PACKET_STRUCTURES = {
     0x3c: [struct.Struct('>B')],
     # Command Packet 0x3F-11: Request EEPROM Segment Status
     0x3f: [struct.Struct('>B')],
+    # Report packet 0x41: GPS Time
+    0x41: [struct.Struct('>fhf')],
     # Report Packet 0x42: Single-precision Position Fix
     0x42: [struct.Struct('>ffff')],
     # Report Packet 0x43: Velocity Fix, XYZ ECEF
@@ -303,28 +307,22 @@ PACKET_STRUCTURES = {
     # Report Packet 0x45: Software Version Information
     0x45: [struct.Struct('>BBBBBBBBBB')],
     # Report Packet 0x46: Receiver Health
-    0x46: [struct.Struct('>BB')],
+    # In contradiction to the official documentation packet 0x46 may occur
+    # with only single unsigned integer field. 
+    0x46: [struct.Struct('>BB'),
+           struct.Struct('>B')],    
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by 
     # the count field
-    0x47: [struct.Struct('BBf'),                   
-           struct.Struct('BBfBf'),                   
-           struct.Struct('BBfBfBf'),
-           struct.Struct('BBfBfBfBf'),             
-           struct.Struct('BBfBfBfBfBf'),             
-           struct.Struct('BBfBfBfBfBfBf'),    
-           struct.Struct('BBfBfBfBfBfBfBf'),       
-           struct.Struct('BBfBfBfBfBfBfBfBf'),       
-           struct.Struct('BBfBfBfBfBfBfBfBfBf'),
-           struct.Struct('BBfBfBfBfBfBfBfBfBfBf'),
-           struct.Struct('BBfBfBfBfBfBfBfBfBfBfBf'), 
-           struct.Struct('BBfBfBfBfBfBfBfBfBfBfBfBf')],
+    0x47: [struct.Struct('>B' + 'Bf' * i) for i in xrange(1,13)],
     # Report Packet 0x49: Almanac Health
     0x49: [struct.Struct('>32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
     0x4a: [struct.Struct('>fffff')],
     # Report Packet 0x4B: Receiver Health
     0x4b: [struct.Struct('>BBB')],
+    # Report Packet 0x4d: Oscillator offset
+    0x4d: [struct.Struct('>f')],
     # Report Packet 0x55: I/O Options
     0x55: [struct.Struct('>BBBB')],
     # Report Packet 0x56: Velocity Fix, East-North-Up (ENU)
@@ -363,6 +361,8 @@ PACKET_STRUCTURES = {
     # TSIP super-packets:
             # Command Packet 0x8E-15: Request current Datum values
     0x8e: { 0x15: [StructNone()],
+            # Command Packet 0x8E-23 - Request Last Compact Fix Information
+            0x23: [struct.Struct('>B')],
             # Command Packet 0x8E-26: Write Configuration to NVS
             0x26: [StructNone()],
             # Command Packet 0x8E-41: Request Manufacturing Parameters
@@ -402,6 +402,8 @@ PACKET_STRUCTURES = {
           },
             # Report Packet 0x8F-15 Current Datum Values
     0x8f: { 0x15: [struct.Struct('>hddddd')],
+            # Report Packet 0x8F-23 - Request Last Compact Fix Information
+            0x23: [struct.Struct('>IHBBiIihhhh')],
             # Report Packet 0x8F-41: Stored Manufacturing Operating Parameters
             0x41: [struct.Struct('>HIBBBBfH')],
             # Report Packet 0x8F-42: Stored Production Parameters
