@@ -1,6 +1,8 @@
 
 from struct import Struct
 
+from nose.tools import raises
+
 from tsip import *
 
 class PacketTest(object):
@@ -43,7 +45,36 @@ class PacketTest(object):
         assert str(self.pkt1) == str(self.pkt2) 
             
 
-    
+@raises(ValueError)
+def test_wrong_subcode():
+    packet = Packet(0x1e)
+    packet.subcode = 0xff
+
+
+@raises(ValueError)
+def test_pack_valueerror():
+    packet = Packet(0x1e, 1, 2)
+    packet.pack()
+
+
+def test_unpack_unknown_packet():
+    packet = Packet.unpack('\x1e\x01\x02')
+    assert packet.code == 0xff
+    assert packet[0] == '\x1e\x01\x02'
+
+
+def test_gps():
+    import StringIO
+    conn = StringIO.StringIO()
+    conn.write('\x10\x1c\x81\x00\x03\x02\x01\x0b\x11\x07\xdf\x0bproductname\x10\03')
+    conn.seek(0)
+    gps = GPS(conn)
+    packet = gps.read()
+    assert packet.code == 0x1c
+
+    packet = Packet.unpack('\x1e\x01')
+    gps.write(packet)
+
     
 class Test0x1c01(PacketTest):
     (code, subcode, fields, binary) = (0x1c, 0x01, [], '\x1c\x01')

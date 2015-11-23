@@ -101,4 +101,3 @@ class TestGPS(object):
             # with DLE. It does not with the TSIP capture used here.
             assert not data.startswith(CHR_DLE)
             assert not data.endswith(CHR_DLE + CHR_ETX)
-        

@@ -1,5 +1,9 @@
 .PHONY: clean-pyc clean-build docs clean
 
+# ---------------------------------------------------------
+#  
+#  help
+#
 help:
 	@echo "clean - remove all build, test, coverage and Python artifacts"
 	@echo "clean-build - remove build artifacts"
@@ -13,6 +17,11 @@ help:
 	@echo "release - package and upload a release"
 	@echo "dist - package"
 
+
+# ---------------------------------------------------------
+#  
+# clean
+# 
 clean: clean-build clean-pyc clean-test
 
 clean-build:
@@ -31,31 +40,36 @@ clean-test:
 	rm -f .coverage
 	rm -fr htmlcov/
 
+# ---------------------------------------------------------
+#  
+#  lint
+#
+flakes: lint
 lint:
-#	flake8 python-TSIP tests
-	pylint -E tsip/*.py tests/*.py
+	pyflakes tsip/*.py tests/*.py
 
-test: test_packets test_gps test_captures
 
-test_copernicus_file: 
+# ---------------------------------------------------------
+#  
+#  test
+#
+test: 
+	nosetests -x -v tests/test_llapi.py tests/test_hlapi.py
 
-test_packets:
+test_llapi:
 	nosetests -x -v tests/$@.py
 
-test_gps:
-	nosetests -x -v tests/$@.py
-
-test_captures:
+test_hlapi:
 	nosetests -x -v tests/$@.py
 
 test-all:
 	tox
 
-coverage:
-	coverage run --source python-TSIP setup.py test
-	coverage report -m
-	coverage html
-	open htmlcov/index.html
+#coverage:
+#	coverage run --source python-TSIP setup.py test
+#	coverage report -m
+#	coverage html
+#	open htmlcov/index.html
 
 docs:
 #	rm -f docs/python-TSIP.rst
@@ -69,10 +83,14 @@ release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
 
-dist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
+sdist: clean
+	python setup.py $@
+
+bdist: sdist
+	python setup.py $@
+
+rpm: bdist
+	python setup.py bdist_rpm
 
 build: clean
 	python setup.py build

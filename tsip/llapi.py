@@ -115,8 +115,6 @@ class gps(object):
                 dle_count += 1
             elif b == CHR_ETX and last_b == CHR_DLE and (dle_count % 2) == 0:    # even, because leading DLE is counted!
                 return packet
-                packet = ''
-                dle_count = 0
             else:
                 pass
             

@@ -143,7 +143,7 @@ class Packet(object):
                 pass
         
         return cls(0xff, data)  # TODO: decide how to deal with unpackable data.
-        raise ValueError('unable to unpack packet: %s' % (binascii.hexlify(data)))
+        #raise ValueError('unable to unpack packet: %s' % (binascii.hexlify(data)))
 
 
     def __repr__(self):
