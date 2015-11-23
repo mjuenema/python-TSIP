@@ -11,15 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   readme
-   installation
-   usage
    packets
-   packets_table
-   01_packets_version_information
-   02_clear_battery_backup.rst
-   api
-   contributing
    authors
    history
 
