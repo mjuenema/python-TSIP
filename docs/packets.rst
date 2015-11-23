@@ -15,6 +15,13 @@ binary strings.
 
 In most cases a developer will only use the two classes of the high-level API.
 
+.. important:: Neither API is fully stable yet. I am currently contemplating 
+               removing the `Packet.code` and `Packet.subcode` attributes and
+               making them accessible as `Packet[0]` and `Packet[1]` (if
+               applicable) instead. The actual packet data fields would then
+               be shifted accordingly, e.g. `Packet[2]`, `Packet[3]`, etc. This
+               would make the implementation much cleaner.
+
 
 High-level API
 ==============
@@ -41,6 +48,14 @@ to a Trimble GPS and reading `tsip.Packet()` reports from the GPS.
    ...             print 'GPS UTC offset .........: %f' % (report[2])
    ...             break
 
+Instances of `tsip.GPS` can also be iterated over.
+
+.. code-block:: python
+
+   >>> for packet in gps_conn:
+   ...     print packet.code
+
+
 TSIP Packets (`tsip.Packet` class)
 ----------------------------------
 
@@ -58,17 +73,50 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet.code", "0x1c", ""
-   "packet.subcode", "None", "" 
+   "packet.subcode", "0x01", "" 
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x1c)
-   >>> packet.code     # 0x1c
+   >>> command = Packet(0x1c, 0x01)
+   >>> command.code     # 0x1c
    28
-   >>> packet.subcode  # None
-   None
+   >>> command.subcode  # 0x01
+   1
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x1c and report.subcode == 0x81:
+   ...         print report
+   ...         break
+   Packet(0x1c, 0x81
+   
 
+0x1C - Firmware Version 03
+..........................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet.code", "0x1c", ""
+   "packet.subcode", "0x03", "" 
+
+
+.. code-block:: python
+
+   >>> command = Packet(0x1c, 0x03)
+   >>> command.code     # 0x1c
+   28
+   >>> command.subcode  # 0x03
+   3
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x1c and report.subcode == 0x83:
+   ...         print report
+   ...         break
+   Packet(0x1c, 0x83
 
  
 0x1E - Clear Battery Backup, then Reset
@@ -80,17 +128,17 @@ Command Packets
 
    "packet.code", "0x1e", ""
    "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "Reset type", ""
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x1e, 100)
-   >>> packet.code     # 0x1e
+   >>> command = Packet(0x1e, 0x46)    # 0x46 = factory reset
+   >>> command.code     # 0x1e
    30
-   >>> packet.subcode  # None
+   >>> command.subcode  # None
    None
-
+   >>> gps_conn.write(command)
 
  
 0x1F - Request Software Versions
@@ -111,7 +159,13 @@ Command Packets
    31
    >>> packet.subcode  # None
    None
-
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x45:
+   ...         print report
+   ...         break
+   Packet(0x45
 
  
 0x21 - Request Current Time
@@ -157,7 +211,6 @@ Command Packets
    >>> packet.subcode  # None
    None
 
-
  
 0x24 - Request GPS Receiver Position Fix Mode
 .............................................
@@ -172,12 +225,18 @@ Command Packets
 
 .. code-block:: python
 
-   >>> packet = Packet(0x24)
-   >>> packet.code     # 0x24
+   >>> command = Packet(0x24)
+   >>> command.code     # 0x24
    36
-   >>> packet.subcode  # None
+   >>> command.subcode  # None
    None
-
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x6d:
+   ...         print report
+   ...         break
+   Packet(0x6d
 
  
 0x25 - Initiate Soft Reset & Self Test
@@ -193,12 +252,12 @@ Command Packets
 
 .. code-block:: python
 
-   >>> packet = Packet(0x25)
-   >>> packet.code     # 0x25
+   >>> command = Packet(0x25)
+   >>> command.code     # 0x25
    37
-   >>> packet.subcode  # None
+   >>> command.subcode  # None
    None
-
+   >>> gps_conn.write(command)
 
  
 0x26 - Request Health
@@ -214,11 +273,18 @@ Command Packets
 
 .. code-block:: python
 
-   >>> packet = Packet(0x26)
-   >>> packet.code     # 0x26
+   >>> command = Packet(0x26)
+   >>> command.code     # 0x26
    38
-   >>> packet.subcode  # None
+   >>> command.subcode  # None
    None
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x46 or report.code == 0x4b:
+   ...         print report
+   ...         break
+   Packet(0x4b
 
 
  
@@ -235,11 +301,18 @@ Command Packets
 
 .. code-block:: python
 
-   >>> packet = Packet(0x27)
-   >>> packet.code     # 0x27
+   >>> command = Packet(0x27)
+   >>> command.code     # 0x27
    39
-   >>> packet.subcode  # None
+   >>> command.subcode  # None
    None
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report.code == 0x47:
+   ...         print report
+   ...         break
+   Packet(0x47
 
 
  
@@ -1626,6 +1699,13 @@ Report Packets
    >>> if packet.code == 0x8f:
    ...     packet.subcode      # 0x4f 
    79
+
+Adding new TSIP packets
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The high-level API provides a simple mechanism for adding new TSIP
+packets. TODO: Describe this!
+
 
 Low-Level API
 =============
