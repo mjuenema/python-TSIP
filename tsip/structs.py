@@ -19,6 +19,10 @@ from tsip.config import *
 
 
 MAX_PRODUCTNAME_LEN = 30
+"""Maximum lenght of the GPS's product name."""
+
+MAX_CHANNELS = 12
+"""Maximum number of channels a GPS model supports."""
 
 
 # Classes for packing/unpacking TSIP packets whose structure
@@ -113,23 +117,23 @@ class Struct0x58(object):
         raise NotImplementedError
     
 
-class Struct0x6d(object):
-    """Report Packet 0x6D: Satellite Selection List.
-    
-       This packet is of variable length equal to 17+nsvs where "nsvs" is 
-       the number of satellites used in the solution.
-       
-    """
-    
-    
-    def pack(self, *f):
-        fmt = '>Bffff' + 'b' * (len(f) - 5)
-        return struct.pack(fmt, *f)
-    
-    def unpack(self, s):
-        fields = struct.unpack('>Bffff', s[0:17])
-        nsvs = (fields[0] & 0b11110000) >> 4
-        return fields + struct.unpack('%db' % (nsvs), s[17:])
+# class Struct0x6d(object):
+#     """Report Packet 0x6D: Satellite Selection List.
+#     
+#        This packet is of variable length equal to 17+nsvs where "nsvs" is 
+#        the number of satellites used in the solution.
+#        
+#     """
+#     
+#     
+#     def pack(self, *f):
+#         fmt = '>Bffff' + 'b' * (len(f) - 5)
+#         return struct.pack(fmt, *f)
+#     
+#     def unpack(self, s):
+#         fields = struct.unpack('>Bffff', s[0:17])
+#         nsvs = (fields[0] & 0b11110000) >> 4
+#         return fields + struct.unpack('%db' % (nsvs), s[17:])
     
 
 class Struct0xbb(object):
@@ -314,7 +318,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by 
     # the count field
-    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in xrange(1,13)],
+    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in xrange(0, MAX_CHANNELS)],
     # Report Packet 0x49: Almanac Health
     0x49:   [struct.Struct('>B32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
@@ -342,9 +346,12 @@ PACKET_STRUCTURES = {
     # Report Packet 0x5F-11: EEPROM Segment Status
     0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d:   [Struct0x6d()],
+    0x6d:   [struct.Struct('>BBffff' + 'b' * i) for i in xrange(0, MAX_CHANNELS)],  
+    #[Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
     0x70:   [struct.Struct('>BBBBB')],
+    # Report Packet 0x82: SBAS correction status
+    0x82:   [struct.Struct('>BB')],
     # Report Packet 0x83: Double Precision XYZ
     0x83:   [struct.Struct('>Bddddf')],
     # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)

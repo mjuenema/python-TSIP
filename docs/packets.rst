@@ -68,25 +68,12 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x1c", ""
-   "packet[1]", "0x01", "" 
+   "0", "0x1c", ""
+   "1", "0x01", "" 
 
+.. literalinclude:: examples/0x1c01.py
+   :lines: 3-
 
-.. code-block:: python
-
-   >>> command = Packet(0x1c, 0x01)
-   >>> command[0]   # 0x1c
-   28
-   >>> command[1]  # 0x01
-   1
-   >>> gps_conn.write(command)
-   >>> while True:
-   ...     report = gps_conn.read()
-   ...     if report[0] == 0x1c and report.subcode == 0x81:
-   ...         print report
-   ...         break
-   Packet(0x1c, 0x81, ...)
-   
 
 0x1C - Firmware Version 03
 ..........................
@@ -95,8 +82,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x1c", ""
-   "packet[1]", "0x03", "" 
+   "0", "0x1c", ""
+   "1", "0x03", "" 
 
 
 .. code-block:: python
@@ -122,8 +109,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x1e", ""
-   "packet[1]", "Reset type", ""
+   "0", "0x1e", ""
+   "1", "Reset type", ""
 
 
 .. code-block:: python
@@ -143,7 +130,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x1f", ""
+   "0", "0x1f", ""
 
 
 .. code-block:: python
@@ -167,7 +154,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x21", ""
+   "0", "0x21", ""
 
 
 .. code-block:: python
@@ -191,10 +178,10 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x23", ""
-   "packet[1]", "X", ""
-   "packet[2]", "Y", ""
-   "packet[3]", "Z", ""
+   "0", "0x23", ""
+   "1", "X", ""
+   "2", "Y", ""
+   "3", "Z", ""
 
 
 .. code-block:: python
@@ -218,7 +205,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x24", ""
+   "0", "0x24", ""
 
 
 .. code-block:: python
@@ -242,7 +229,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x25", ""
+   "0", "0x25", ""
 
 
 .. code-block:: python
@@ -260,7 +247,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x26", ""
+   "0", "0x26", ""
 
 
 .. code-block:: python
@@ -284,7 +271,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x27", ""
+   "0", "0x27", ""
 
 
 .. code-block:: python
@@ -309,10 +296,10 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x2b", ""
-   "packet[1]", "Latitude", ""
-   "packet[2]", "Longitude", ""
-   "packet[3]", "Alitude", ""
+   "0", "0x2b", ""
+   "1", "Latitude", ""
+   "2", "Longitude", ""
+   "3", "Alitude", ""
 
 
 .. code-block:: python
@@ -337,7 +324,7 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x2d", ""
+   "0", "0x2d", ""
 
 
 .. code-block:: python
@@ -361,9 +348,9 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x2e", ""
-   "packet[1]", "GPS time of week", "" 
-   "packet[2]", "Extended GPS week number", ""
+   "0", "0x2e", ""
+   "1", "GPS time of week", "" 
+   "2", "Extended GPS week number", ""
 
 
 .. code-block:: python
@@ -381,10 +368,10 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x31", ""
-   "packet[1]", "Latitude", ""
-   "packet[2]", "Longitude", ""
-   "packet[3]", "Alitude", ""
+   "0", "0x31", ""
+   "1", "Latitude", ""
+   "2", "Longitude", ""
+   "3", "Alitude", ""
 
 .. code-block:: python
 
@@ -409,11 +396,11 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x32", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "0", "0x32", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
 
 
 .. code-block:: python
@@ -430,12 +417,12 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x35", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
+   "0", "0x35", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
 
 
 .. code-block:: python
@@ -452,8 +439,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x37", ""
-   "packet[1]", "None", "" 
+   "0", "0x37", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -470,11 +457,11 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x38", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "0", "0x38", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
 
 
 .. code-block:: python
@@ -491,9 +478,9 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x3a", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
+   "0", "0x3a", ""
+   "1", "None", "" 
+   "2", "DESC", ""
 
 
 .. code-block:: python
@@ -510,9 +497,9 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x3c", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
+   "0", "0x3c", ""
+   "1", "None", "" 
+   "2", "DESC", ""
 
 
 .. code-block:: python
@@ -529,8 +516,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x69", ""
-   "packet[1]", "None", "" 
+   "0", "0x69", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -547,8 +534,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x7e", ""
-   "packet[1]", "None", "" 
+   "0", "0x7e", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -565,8 +552,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x17", "" 
+   "0", "0x8e", ""
+   "1", "0x17", "" 
 
 
 .. code-block:: python
@@ -586,8 +573,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x20", "" 
+   "0", "0x8e", ""
+   "1", "0x20", "" 
 
 
 .. code-block:: python
@@ -607,8 +594,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x21", "" 
+   "0", "0x8e", ""
+   "1", "0x21", "" 
 
 
 .. code-block:: python
@@ -628,9 +615,9 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x23", "" 
-   "packet[2]", "DESC", ""
+   "0", "0x8e", ""
+   "1", "0x23", "" 
+   "2", "DESC", ""
 
 
 .. code-block:: python
@@ -650,8 +637,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x26", "" 
+   "0", "0x8e", ""
+   "1", "0x26", "" 
 
 
 .. code-block:: python
@@ -671,8 +658,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x2a", "" 
+   "0", "0x8e", ""
+   "1", "0x2a", "" 
 
 
 .. code-block:: python
@@ -692,8 +679,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x2b", "" 
+   "0", "0x8e", ""
+   "1", "0x2b", "" 
 
 
 .. code-block:: python
@@ -713,8 +700,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8e", ""
-   "packet[1]", "0x4f", "" 
+   "0", "0x8e", ""
+   "1", "0x4f", "" 
 
 
 .. code-block:: python
@@ -734,8 +721,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0xbb", ""
-   "packet[1]", "None", "" 
+   "0", "0xbb", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -752,9 +739,9 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0xbc", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
+   "0", "0xbc", ""
+   "1", "None", "" 
+   "2", "DESC", ""
 
 
 .. code-block:: python
@@ -771,8 +758,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0xc0", ""
-   "packet[1]", "None", "" 
+   "0", "0xc0", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -789,8 +776,8 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0xc2", ""
-   "packet[1]", "None", "" 
+   "0", "0xc2", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -809,11 +796,11 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x41", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "0", "0x41", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
 
 
 .. code-block:: python
@@ -836,12 +823,12 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x42", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
+   "0", "0x42", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
 
 
 .. code-block:: python
@@ -866,13 +853,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x43", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
+   "0", "0x43", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
 
 
 .. code-block:: python
@@ -899,17 +886,17 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x45", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
-   "packet[8]", "DESC", ""
-   "packet[9]", "DESC", ""
-   "packet[10]", "DESC", ""
+   "0", "0x45", ""
+   "1", "DESC", ""
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
+   "7", "DESC", ""
+   "8", "DESC", ""
+   "9", "DESC", ""
+   "10", "DESC", ""
 
 
 .. code-block:: python
@@ -946,10 +933,10 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x46", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
+   "0", "0x46", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
 
 
 .. code-block:: python
@@ -972,11 +959,11 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x47", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "0", "0x47", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
 
 
 .. code-block:: python
@@ -1001,13 +988,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x4a", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
+   "0", "0x4a", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
 
 
 .. code-block:: python
@@ -1036,11 +1023,11 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x4b", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "0", "0x4b", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
 
 
 .. code-block:: python
@@ -1065,9 +1052,9 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x4d", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
+   "0", "0x4d", ""
+   "1", "None", "" 
+   "2", "DESC", ""
 
 
 .. code-block:: python
@@ -1088,8 +1075,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x4e", ""
-   "packet[1]", "None", "" 
+   "0", "0x4e", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -1108,12 +1095,12 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x55", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
+   "0", "0x55", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
 
 
 .. code-block:: python
@@ -1140,13 +1127,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x56", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
+   "0", "0x56", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
 
 
 .. code-block:: python
@@ -1175,12 +1162,12 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x57", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
+   "0", "0x57", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
 
 
 .. code-block:: python
@@ -1207,8 +1194,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x58", ""
-   "packet[1]", "None", "" 
+   "0", "0x58", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -1227,14 +1214,14 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x5a", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
+   "0", "0x5a", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
+   "7", "DESC", ""
 
 
 .. code-block:: python
@@ -1265,20 +1252,20 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x5c", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
-   "packet[8]", "DESC", ""
-   "packet[9]", "DESC", ""
-   "packet[10]", "DESC", ""
-   "packet[11]", "DESC", ""
-   "packet[12]", "DESC", ""
-   "packet[11]", "DESC", ""
+   "0", "0x5c", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
+   "7", "DESC", ""
+   "8", "DESC", ""
+   "9", "DESC", ""
+   "10", "DESC", ""
+   "11", "DESC", ""
+   "12", "DESC", ""
+   "11", "DESC", ""
 
 
 .. code-block:: python
@@ -1321,8 +1308,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x5f", ""
-   "packet[1]", "None", "" 
+   "0", "0x5f", ""
+   "1", "None", "" 
 
 
 .. code-block:: python
@@ -1336,23 +1323,31 @@ Report Packets
  
 0x6D - All-In-View Satellite Selection
 ......................................
+  
 
 .. csv-table::
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x6d", ""
-   "packet[1]", "None", "" 
+   "0", "0x6d", ""
+   "1", "Dimension", "" 
+   "2", "PDOP", ""
+   "3", "HDOP", ""
+   "4", "VDOP", ""
+   "5", "TDOP", ""
+   "x", "SV PRN", ""
 
 
 .. code-block:: python
 
-   >>> packet = gps.read()
+   >>> report = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet[0] == 0x6d:
-   ...     packet[1]      # None 
-   None
+   >>> if report[0] == 0x6d:
+   ...     print report      
+   Packet(0x6d, 3, 10.0, 20.0, 30.0, 40.0, -1, -2, 3)
+   ...     print 'SV in view: %s' % (report[6:])
+   SV in view: [-1, -2, 3]
  
 0x82 - SBAS Correction Status
 .............................
@@ -1361,8 +1356,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x82", ""
-   "packet[1]", "None", "" 
+   "0", "0x82", ""
+   "1", "SBAS status bits", "" 
 
 
 .. code-block:: python
@@ -1371,8 +1366,8 @@ Report Packets
    >>> isinstance(packet, tsip.Packet)
    True
    >>> if packet[0] == 0x82:
-   ...     packet[1]      # None 
-   None
+   ...     packet[1]
+   2
  
 0x83 - Double-Precision XYZ Position Fix and Bias Information
 .............................................................
@@ -1381,13 +1376,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x83", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
+   "0", "0x83", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
 
 
 .. code-block:: python
@@ -1416,13 +1411,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x84", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
+   "0", "0x84", ""
+   "1", "None", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
 
 
 .. code-block:: python
@@ -1451,14 +1446,14 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x15", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
+   "0", "0x8f", ""
+   "1", "0x15", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
+   "7", "DESC", ""
 
 
 .. code-block:: python
@@ -1489,8 +1484,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x20", "" 
+   "0", "0x8f", ""
+   "1", "0x20", "" 
 
 
 .. code-block:: python
@@ -1509,8 +1504,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x21", "" 
+   "0", "0x8f", ""
+   "1", "0x21", "" 
 
 
 .. code-block:: python
@@ -1529,19 +1524,19 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x23", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
-   "packet[8]", "DESC", ""
-   "packet[9]", "DESC", ""
-   "packet[10]", "DESC", ""
-   "packet[11]", "DESC", ""
-   "packet[12]", "DESC", ""
+   "0", "0x8f", ""
+   "1", "0x23", "" 
+   "2", "DESC", ""
+   "3", "DESC", ""
+   "4", "DESC", ""
+   "5", "DESC", ""
+   "6", "DESC", ""
+   "7", "DESC", ""
+   "8", "DESC", ""
+   "9", "DESC", ""
+   "10", "DESC", ""
+   "11", "DESC", ""
+   "12", "DESC", ""
 
 
 .. code-block:: python
@@ -1582,8 +1577,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x26", "" 
+   "0", "0x8f", ""
+   "1", "0x26", "" 
 
 
 .. code-block:: python
@@ -1602,8 +1597,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x2a", "" 
+   "0", "0x8f", ""
+   "1", "0x2a", "" 
 
 
 .. code-block:: python
@@ -1622,8 +1617,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x2b", "" 
+   "0", "0x8f", ""
+   "1", "0x2b", "" 
 
 
 .. code-block:: python
@@ -1642,8 +1637,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet[0]", "0x8f", ""
-   "packet[1]", "0x4f", "" 
+   "0", "0x8f", ""
+   "1", "0x4f", "" 
 
 
 .. code-block:: python

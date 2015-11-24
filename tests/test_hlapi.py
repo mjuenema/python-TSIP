@@ -190,12 +190,16 @@ class Test0x5c(PacketTest):
 # class Test0x5f(PacketTest):
 #     (fields, rawpacket) = ([0x5f, 0x11, 1000], '_\x11\x00\x00\x03\xe8')
     
-# class Test0x6d(PacketTest):
-#     (fields, rawpacket) = ([0x6d, 3, 10.0, 20.0, 30.0, 40.0, -1, -2, -3], 
-#                                        'm\x03A \x00\x00A\xa0\x00\x00A\xf0\x00\x00B \x00\x00\xff\xfe\xfd')
+class Test0x6d(PacketTest):
+    (fields, rawpacket) = ([0x6d, 3, 10.0, 20.0, 30.0, 40.0, -1, -2, -3],
+                           'm\x03A \x00\x00A\xa0\x00\x00A\xf0\x00\x00B \x00\x00\xff\xfe\xfd') 
+
 
 class Test0x70(PacketTest):
     (fields, rawpacket) = ([0x70, 0, 1, 0, 1], 'p\x00\x01\x00\x01')
+    
+class Test0x82(PacketTest):
+    (fields, rawpacket) = ([0x82, 2], '\x82\x02')
 
 class Test0x83(PacketTest):
     (fields, rawpacket) = ([0x83, 10.0, 20.0, 30.0, 40.0, 50.0],
