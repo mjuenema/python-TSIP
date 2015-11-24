@@ -11,6 +11,14 @@ from tsip.config import *
 from tsip.llapi import *
 from tsip.structs import *
 
+class PackError(Exception):
+    def __init__(self, packet):
+        self.packet = packet
+        
+    def __repr__(self):
+        return 'unable to pack packet %s' % (self.packet)
+    
+
 class Packet(object):
     """
     TSIP packet.
@@ -21,59 +29,34 @@ class Packet(object):
     Examples::
 
       >>> pkt = Packet(0x1f)                        # Request software versions.
-      
       >>> pkt = Packet(0x1e, 0x4b)                  # Request cold-start.
-      
       >>> pkt = Packet(0x23, -37.1, 144.1, 10.0)    # Set initial position.
-      
       >>> pkt = Packet(0x8e, 0x4f, 0.1)             # Set PPS with to 0.1s
 
     """
 
-    code = None
-    """The code of the packet. This is always 1 byte, 0x8e or 0x8f with "super-packets"."""
-
-    fields = []
+    _fields = []
     """The data fields of the packet."""
 
 
-    def __init__(self, code, *args, **kwargs):
-
-        self.code = code
-
-        if self.code in PACKETS_WITH_SUBCODE:
-            self.subcode = args[0]
-            self.fields = args[1:]
-        else:
-            self.subcode = None
-            self.fields = args
+    def __init__(self, *fields):
+        self.fields = fields
             
     
     # Make self.fields accessible as indexes on the
     # packet instance.
     #            
-    def __getitem__(self, i):
-        return self.fields[i]
+    def __getitem__(self, index):
+        return self.fields[index]
     
-    def __setitem__(self, i, v):
-        self.fields[i] = v
-
-
-    # The subcode can only be set on TSIP packets that do actually
-    # have a subcode. These include all super-packets (0x8e, 0x8f)
-    # and a small number of other packets.
-    #
-    def _set_subcode(self, subcode):
-        if subcode is None or self.code in PACKETS_WITH_SUBCODE:
-            self._subcode = subcode
-        else:
-            raise ValueError('Packet %x does not have a sub-code')
-
-    def _get_subcode(self):
-        return self._subcode
-
-    subcode = property(_get_subcode, _set_subcode)
+    def __setitem__(self, index, value):
+        self.fields[index] = value
+        
+    def __iter__(self):     # TODO: tests for __iter__
+        return iter(self.fields)
     
+    def __len__(self):      # TODO: tests for __len__
+        return len(self.fields)
     
     def _set_fields(self, fields):
         self._fields = list(fields)
@@ -93,65 +76,68 @@ class Packet(object):
 
         """
         
-        structs_ = get_structs(self.code, self.subcode)
+        # Possible structs for packet ID.
+        #
+        try:
+            structs_ = get_structs_for_fields([self.fields[0]])
+        except (TypeError):
+            # TypeError, if self.fields[0] is a wrong argument to `chr()`.
+            raise PackError(self)
+    
+        
+        # Possible structs for packet ID + subcode
+        #
+        if structs_ == []:
+            try:
+                structs_ = get_structs_for_fields([self.fields[0], self.fields[1]])
+            except (IndexError, TypeError):
+                # IndexError, if no self.fields[1]
+                # TypeError, if self.fields[1] is a wrong argument to `chr()`.
+                raise PackError(self)
+            
 
+        # Try to pack the packet with any of the possible structs.
+        #
         for struct_ in structs_:
             try:
-                if self.subcode is not None:
-                    return struct.pack('>BB', self.code, self.subcode) + struct_.pack(*self.fields)
-                else:
-                    return struct.pack('>B', self.code) + struct_.pack(*self.fields)
+                return struct_.pack(*self.fields)
             except struct.error:
                 pass
-            
-        raise ValueError('unable to pack packet')
+        
+        # We only get here if the ``return`` inside the``for`` loop 
+        # above wasn't reached, i.e. none of the `structs_` matched.   
+        #
+        raise PackError(self)
 
 
     @classmethod
-    def unpack(cls, data):
+    def unpack(cls, rawpacket):
         """Instantiate `Packet` from binary string.
 
-           :param pkt: TSIP pkt in binary format.
-           :type pkt: String.
+           :param rawpacket: TSIP pkt in binary format.
+           :type rawpacket: String.
 
-           `pkt` may already have framing (DLE...DLE/ETX) removed and
+           `rawpacket` must already have framing (DLE...DLE/ETX) removed and
            byte stuffing reversed.
 
         """
-
-        # Extract pkt code and potential(!) subcode.
-        #
-        code = struct.unpack('>B', data[0])[0]
-        
-        if code in PACKETS_WITH_SUBCODE:
-            subcode = struct.unpack('>B', data[1])[0]
-        else:
-            subcode = None
             
-        
-            
-            
-        structs_ = get_structs(code, subcode)
+        structs_ = get_structs_for_rawpacket(rawpacket)
                 
         for struct_ in structs_:
             try:
-                if subcode is not None:
-                    return cls(code, subcode, *struct_.unpack(data[2:]))
-                else:
-                    return cls(code, *struct_.unpack(data[1:]))
+                return cls(*struct_.unpack(rawpacket))
             except struct.error:
                 pass
         
-        return cls(0xff, data)  # TODO: decide how to deal with unpackable data.
-        #raise ValueError('unable to unpack packet: %s' % (binascii.hexlify(data)))
+        # Packet ID 0xff is a pseudo-packet representing
+        # packets unknown to `python-TSIP` in their raw format.
+        #
+        return cls(0xff, rawpacket)
 
 
     def __repr__(self):
-        if self.subcode:
-            return 'Packet_%02x/%02x' % (self.code, self.subcode) + str(self.fields)
-        else:
-            return 'Packet_%02x' % (self.code) + str(self.fields)
- 
+        return 'Packet%s' % (str(tuple(self.fields)))
     
 
 class GPS(gps):

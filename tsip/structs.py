@@ -18,26 +18,29 @@ import types
 from tsip.config import *
 
 
+MAX_PRODUCTNAME_LEN = 30
+
+
 # Classes for packing/unpacking TSIP packets whose structure
 # cannot be expressed as `struct.Struct()` instances. These 
 # mostly deal with packets of variable size/structure/content.
 #
-class StructNone(object):
-    """Structure of packets without payload.
-    
-       This class represents the strcuture of packets that don't
-       have any payload. It provides "dummy" `pack()` and `unpack()`
-       methods to maintain the standard interface for managing
-       TSIP packet structures. 
-    
-    """
-    
-    def pack(self, *f):
-        return ''
-    
-    def unpack(self, s=''):
-        return []
-    
+# class StructNone(object):
+#     """Structure of packets without payload.
+#     
+#        This class represents the strcuture of packets that don't
+#        have any payload. It provides "dummy" `pack()` and `unpack()`
+#        methods to maintain the standard interface for managing
+#        TSIP packet structures. 
+#     
+#     """
+#     
+#     def pack(self, *f):
+#         return ''
+#     
+#     def unpack(self, s=''):
+#         return []
+#     
     
 class StructRaw(object):
     """Structure of packets that are interpreted as raw data.
@@ -53,7 +56,7 @@ class StructRaw(object):
         raise NotImplementedError()
     
     def unpack(self, s):
-        return struct.unpack('%ds' % (len(s)), s)
+        return struct.unpack('>%ds' % (len(s)), s)
     
     
 class Struct0x1c81(object):
@@ -63,22 +66,21 @@ class Struct0x1c81(object):
     
     """
     
-    fmt = '>BBBBBBH'
+    format = '>BBBBBBBBH'
     def pack(self, *f):
-        return struct.pack(self.fmt, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
+        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
      
-    def unpack(self, s):
-        print s[9:]
-        return struct.unpack(self.fmt, s[:8]) + (s[9:],)
+    def unpack(self, rawpacket):
+        return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:],)
     
     
 class Struct0x1c83(object):
-    fmt = '>IBBHBH'
+    format = '>BBIBBHBH'
     def pack(self, *f):
-        return struct.pack(self.fmt, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
+        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
      
     def unpack(self, s):
-        return struct.unpack(self.fmt, s[:11]) + (s[12:],)
+        return struct.unpack(self.format, s[:13]) + (s[14:],)
          
     
     
@@ -138,13 +140,13 @@ class Struct0xbb(object):
        ``0xff``. 
        
     """
-    fmt = '>BBBBffffBBBBBBBBBBBBBBBBBBB'
+    format = '>BBBBBBffffBBBBBBBBBBBBBBBBBBB'
     
-    def pack(self, *f):
+    def pack(self, *fields):
         
         # 
         #
-        if not f:
+        if not fields:
             # 0xbb query mode is handled by StructNone(); raise struct.error
             # so the calling function can detect this.
             #
@@ -153,13 +155,13 @@ class Struct0xbb(object):
             # Ensure that fields 1, 3, 8 (index starts a zero!) and the trailing 
             # bytes contain 0xff.
             #    
-            f = list(f)     # Convert to list as tuples are immutable.
-            f[1] = f[3] = f[8] = 0xff
-            f = f[0:10] + [0xff] * 17
-            return struct.pack(self.fmt, *f)
+            fields = list(fields)         # Convert to list as tuples are immutable.
+            fields[3] = fields[5] = fields[10] = 0xff
+            fields = fields[0:12] + [0xff] * 17
+            return struct.pack(self.format, *fields)
     
-    def unpack(self, s):
-        return struct.unpack(self.fmt, s)
+    def unpack(self, rawpacket):
+        return struct.unpack(self.format, rawpacket)
           
 
 
@@ -174,62 +176,62 @@ class Struct0x8ea0(object):
      
     """
     
-    def pack(self, *f):
-        if not f:
-            return ''
-        elif f[0] == 0:
-            return struct.pack('>Bf', *f)
-        elif f[0] == 1:
-            return struct.pack('>BI', *f)
+    def pack(self, *fields):
+        if fields == (0x8e, 0xa0):
+            return struct.pack('>BB', *fields)
+        elif fields[2] == 0:
+            return struct.pack('>BBBf', *fields)
+        elif fields[2] == 1:
+            return struct.pack('>BBBI', *fields)
         else:
             raise ValueError
      
-    def unpack(self, s):
+    def unpack(self, rawpacket):
         
-        if s == '':
-            return []
+        try:
+            flag = struct.unpack('>B', rawpacket[2])[0]
+        except IndexError:
+            return struct.unpack('>BB', rawpacket)
+        
+        if flag == 0:
+            return struct.unpack('>BBBf', rawpacket)
+        elif flag == 1:
+            return struct.unpack('>BBBI', rawpacket)
         else:
-            flag = struct.unpack('>B', s[0])[0]
-            
-            if flag == 0:
-                value = struct.unpack('>f', s[1:])[0]
-            elif flag == 1:
-                value = struct.unpack('>I', s[1:])[0]
-            else:
-                raise ValueError('Invalid flag in packet 0x8ea0')
-            
-            return [flag, value]
+            raise ValueError('Invalid flag in packet 0x8ea0')
         
         
 class Struct0x8ea8(object):
-    fmt0 = '>Bff' 
-    fmt1 = '>Bfff'
-    fmt2 = '>Bff'
-    fmt3 = '>Bf'
+    fmt0 = '>BBBff' 
+    fmt1 = '>BBBfff'
+    fmt2 = '>BBBff'
+    fmt3 = '>BBBf'
     
-    def pack(self, *f):
-        if f[0] == 0:
-            return struct.pack(self.fmt0, *f)
-        elif f[0] == 1:
-            return struct.pack(self.fmt1, *f)
-        elif f[0] == 2:
-            return struct.pack(self.fmt2, *f)
-        elif f[0] == 3:
-            return struct.pack(self.fmt3, *f)
+    def pack(self, *fields):
+        type_ = fields[2]
+        
+        if type_ == 0:
+            return struct.pack(self.fmt0, *fields)
+        elif type_ == 1:
+            return struct.pack(self.fmt1, *fields)
+        elif type_ == 2:
+            return struct.pack(self.fmt2, *fields)
+        elif type_ == 3:
+            return struct.pack(self.fmt3, *fields)
         else:
             raise ValueError('Invalid type in packet 0x8ea8')
         
-    def unpack(self, s):
-        type_ = struct.unpack('>B', s[0])[0]
+    def unpack(self, rawpacket):
+        type_ = struct.unpack('>B', rawpacket[2])[0]
         
         if type_ == 0:
-            return struct.unpack(self.fmt0, s)
+            return struct.unpack(self.fmt0, rawpacket)
         elif type_ == 1:
-            return struct.unpack(self.fmt1, s)
+            return struct.unpack(self.fmt1, rawpacket)
         elif type_ == 2:
-            return struct.unpack(self.fmt2, s)
+            return struct.unpack(self.fmt2, rawpacket)
         elif type_ == 3:
-            return struct.unpack(self.fmt3, s)
+            return struct.unpack(self.fmt3, rawpacket)
         else:
             raise ValueError('Invalid type in packet 0x8ea8')
         
@@ -237,260 +239,227 @@ Struct0x8fa8 = Struct0x8ea8
 
 # Packet structures.
 #
-# Keys are the packet codes. Values are lists(!) of instances
+# Keys are the packet codes/subcodes. Values are lists(!) of instances
 # of `struct.Struct()` or class instances providing custom `pack()` 
 # and `unpack()` methods for a particular TSIP packet. The values 
 # must be lists even if it contains only a single item.
-# 
-# Packets with sub-codes are two tiered: [code][subcode].
 #
 PACKET_STRUCTURES = {
+    # Report packet 0X13 unparsable packet
+    # TODO: Report packet 0X13 unparsable packe
     # Command Packet 0x1C - Firmware Version
-    0x1c: { 0x01: [StructNone()],
+    0x1c01: [struct.Struct('>BB')],
     # Report Packet 0x1C - Firmware Version
-            0x81: [Struct0x1c81()],
+    0x1c81: [Struct0x1c81()],
     # Command Packet 0x1C - Hardware Component Version Information
-            0x03: [StructNone()],
+    0x1c03: [struct.Struct('>BB')],
     # Report Packet 0x1C - Hardware Component Version Information
-            0x83: [Struct0x1c83()], 
-          },
+    0x1c83: [Struct0x1c83()], 
     # Command Packet 0x1E - Clear Battery Backup, then Reset
-    0x1e: [struct.Struct('>B')],
+    0x1e:   [struct.Struct('>BB')],
     # Command Packet 0x1F - Request Software Versions
-    0x1f: [StructNone()],
+    0x1f:   [struct.Struct('>B')],
     # Command Packet 0x21 - Request Current Time
-    0x21: [StructNone()],
+    0x21:   [struct.Struct('>B')],
     # Command Packet 0x23 - Initial Position (XYZ ECEF)
-    0x23: [struct.Struct('>fff')],
+    0x23:   [struct.Struct('>Bfff')],
     # Command Packet 0x24: Request GPS Satellite Selection
-    0x24: [StructNone()],
+    0x24:   [struct.Struct('>B')],
     # Command Packet 0x25: Initiate Hot Reset
-    0x25: [StructNone()],
+    0x25:   [struct.Struct('>B')],
     # Command Packet 0x26: Request Receiver Health
-    0x26: [StructNone()],
+    0x26:   [struct.Struct('>B')],
     # Command Packet 0x27: Request Signal Levels
-    0x27: [StructNone()],
+    0x27:   [struct.Struct('>B')],
     # Command Packet 0x29: Request Almanac Health
-    0x29: [StructNone()],
+    0x29:   [struct.Struct('>B')],
     # Command Packet 0x2d: request oscillator offset
-    0x2d: [StructNone()],
+    0x2d:   [struct.Struct('>B')],
     # Command Packet 0x31: Accurate Initial Position (XYZ Cartesian ECEF)
     # Here this packet will always contain double precision values.
-    0x31: [struct.Struct('>ddd')],
+    0x31:   [struct.Struct('>Bddd')],
     # Command Packet 0x32: Accurate Initial Position (LLA)
     # Here this packet will always contain double precision values.
-    0x32: [struct.Struct('>ddd')],
+    0x32:   [struct.Struct('>Bddd')],
     # Command Packet 0x34: Satellite Selection For One-Satellite Mode
-    0x34: [struct.Struct('>B')],
+    0x34:   [struct.Struct('>BB')],
     # Command Packet 0x35: Set or Request I/O Options
-    0x35: [struct.Struct('>BBBB')],
+    0x35:   [struct.Struct('>BBBBB')],
     # Command Packet 0x37: Request Status and Values of Last Position
-    0x37: [StructNone()],
+    0x37:   [struct.Struct('>B')],
     # Command Packet 0x38: Request Satellite System Data
-    0x38: [struct.Struct('>BBB')],
+    0x38:   [struct.Struct('>BBBB')],
     # Command Packet 0x39: Set or Request SV Disable and Health Use
-    0x39: [struct.Struct('>BB')],
+    0x39:   [struct.Struct('>BBB')],
     # Command Packet 0x3A: Request Last Raw Measurement
-    0x3a: [struct.Struct('>B')],
+    0x3a:   [struct.Struct('>BB')],
     # Command Packet 0x3B: Request Ephemeris Status
-    0x3b: [struct.Struct('>B')],
+    0x3b:   [struct.Struct('>BB')],
     # Command Packet 0x3C: Request Satellite Tracking Status
-    0x3c: [struct.Struct('>B')],
+    0x3c:   [struct.Struct('>BB')],
     # Command Packet 0x3F-11: Request EEPROM Segment Status
-    0x3f: [struct.Struct('>B')],
+    0x3f:   [struct.Struct('>BB')],
     # Report packet 0x41: GPS Time
-    0x41: [struct.Struct('>fhf')],
+    0x41:   [struct.Struct('>Bfhf')],
     # Report Packet 0x42: Single-precision Position Fix
-    0x42: [struct.Struct('>ffff')],
+    0x42:   [struct.Struct('>Bffff')],
     # Report Packet 0x43: Velocity Fix, XYZ ECEF
-    0x43: [struct.Struct('>fffff')],
+    0x43:   [struct.Struct('>Bfffff')],
     # Report Packet 0x45: Software Version Information
-    0x45: [struct.Struct('>BBBBBBBBBB')],
+    0x45:   [struct.Struct('>BBBBBBBBBBB')],
     # Report Packet 0x46: Receiver Health
     # In contradiction to the official documentation packet 0x46 may occur
     # with only single unsigned integer field. 
-    0x46: [struct.Struct('>BB'),
-           struct.Struct('>B')],    
+    0x46:   [struct.Struct('>BBB'), struct.Struct('>B')],    
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by 
     # the count field
-    0x47: [struct.Struct('>B' + 'Bf' * i) for i in xrange(1,13)],
+    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in xrange(1,13)],
     # Report Packet 0x49: Almanac Health
-    0x49: [struct.Struct('>32B')],
+    0x49:   [struct.Struct('>B32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
-    0x4a: [struct.Struct('>fffff')],
+    0x4a:   [struct.Struct('>Bfffff')],
     # Report Packet 0x4B: Receiver Health
-    0x4b: [struct.Struct('>BBB')],
+    0x4b:   [struct.Struct('>BBBB')],
     # Report Packet 0x4d: Oscillator offset
-    0x4d: [struct.Struct('>f')],
+    0x4d:   [struct.Struct('>Bf')],
     # Report Packet 0x55: I/O Options
-    0x55: [struct.Struct('>BBBB')],
+    0x55:   [struct.Struct('>BBBBB')],
     # Report Packet 0x56: Velocity Fix, East-North-Up (ENU)
-    0x56: [struct.Struct('>fffff')],
+    0x56:   [struct.Struct('>Bfffff')],
     # Report Packet 0x57: Information about Last Computed Fix
-    0x57: [struct.Struct('>BBfI')],
+    0x57:   [struct.Struct('>BBBfI')],
     # Report Packet 0x58: GPS System Data from the Receiver
-    0x58: [Struct0x58()], 
+    0x58:   [Struct0x58()], 
     # Report Packet 0x59: Status of Satellite Disable or Ignore Health
-    0x59: [struct.Struct('>B32B')],
+    0x59:   [struct.Struct('>BB32B')],
     # Report Packet 0x5A: Raw Data Measurement Data
-    0x5a: [struct.Struct('>Bffffd')],
+    0x5a:   [struct.Struct('>BBffffd')],
     # Report Packet 0x5B: Satellite Ephemeris Status
-    0x5b: [struct.Struct('>BfBBfBf')],
+    0x5b:   [struct.Struct('>BfBBfBf')],
     # Report Packet 0x5C: Satellite Tracking Status
-    0x5c: [struct.Struct('>BBBBffffBBBB')],
+    0x5c:   [struct.Struct('>BBBBBffffBBBB')],
     # Report Packet 0x5F-11: EEPROM Segment Status
-    0x5f: [StructRaw()],
+    0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d: [Struct0x6d()],
+    0x6d:   [Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
-    0x70: [struct.Struct('>BBBB')],
+    0x70:   [struct.Struct('>BBBBB')],
     # Report Packet 0x83: Double Precision XYZ
-    0x83: [struct.Struct('>ddddf')],
+    0x83:   [struct.Struct('>Bddddf')],
     # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)
-    0x84: [struct.Struct('ddddf')],
+    0x84:   [struct.Struct('>Bddddf')],
     # Command/Report Packet 0xBB: Set Receiver Configuration
-    0xbb: { 0x00 :[Struct0xbb(), StructNone()]
-          },
-#     0xbb: {0x00: [StructNone(), 
-#                   struct.Struct('>BBBBBffffBBBBBBBBBBBBBBBBBB')]
-#            },
+    0xbb00 :[struct.Struct('>BB'), Struct0xbb()],
     # Command/Report Packet 0xBC: Set Port Configuration
-    0xbc: [struct.Struct('>B'), 
-           struct.Struct('>BBBBBBBBBB')],
-    # TSIP super-packets:
-            # Command Packet 0x8E-15: Request current Datum values
-    0x8e: { 0x15: [StructNone()],
-            # Command Packet 0x8E-23 - Request Last Compact Fix Information
-            0x23: [struct.Struct('>B')],
-            # Command Packet 0x8E-26: Write Configuration to NVS
-            0x26: [StructNone()],
-            # Command Packet 0x8E-41: Request Manufacturing Parameters
-            0x41: [StructNone()],
-            # Command Packet 0x8E-42: Stored Production Parameters
-            0x42: [StructNone()],
-            # Command Packet 0x8E-45: Revert Configuration Segment to Default Settings and Write to NVS
-            0x45: [struct.Struct('>B')],
-            # Command Packet 0x8E-4A: Set PPS Characteristics
-            0x4a: [struct.Struct('>BBBdf')],
-            # Command Packet 0x8E-4C: Write Configuration Segment to NVS
-            0x4c: [struct.Struct('>B')],
-            # Command Packet 0x8E-4E: Set PPS output option
-            0x4e: [struct.Struct('>B')],
-            # Command Packet 0x8E-A0: Set DAC Value
-            0xa0: [Struct0x8ea0()],
-            # Command Packet 0x8E-A2: UTC/GPS Timing
-            0xa2: [struct.Struct('>B')],
-            # Command Packet 0x8E-A3: Issue Oscillator Disciplining Command
-            0xa3: [struct.Struct('>B')],
-            # Command Packet 0x8E-A4: Test Modes
-            0xa4: [struct.Struct('>B'), 
-                   struct.Struct('>BHI'), 
-                   struct.Struct('>BffhIHHHh')],
-            # Command Packet 0x8E-A5: Packet Broadcast Mask
-            0xa5: [struct.Struct('>HH')],
-            # Command Packet 0x8E-A6: Self-Survey Command
-            0xa6: [struct.Struct('>B')],
-            0xa8: [Struct0x8ea8()],
-            # Command Packet 0x8E-A9: Self-Survey Parameters
-            0xa9: [struct.Struct('>BBII'), 
-                   StructNone()],
-            # Command Packet 0x8E-AB: Request Primary Timing Packet
-            0xab: [struct.Struct('>B')],
-            # Command Packet 0x8E-AC: Request Supplementary Timing Packet
-            0xac: [struct.Struct('>B')]
-          },
-            # Report Packet 0x8F-15 Current Datum Values
-    0x8f: { 0x15: [struct.Struct('>hddddd')],
-            # Report Packet 0x8F-23 - Request Last Compact Fix Information
-            0x23: [struct.Struct('>IHBBiIihhhh')],
-            # Report Packet 0x8F-41: Stored Manufacturing Operating Parameters
-            0x41: [struct.Struct('>HIBBBBfH')],
-            # Report Packet 0x8F-42: Stored Production Parameters
-            0x42: [struct.Struct('>BBHIIHHH')],
-            # Report Packet 0x8F-4A: Set PPS Characteristics
-            0x4a: [struct.Struct('>BBBdf')],
-            # Report Packet 0x8F-4E: PPS Output
-            0x4e: [struct.Struct('>B')],
-            # Report Packet 0x8F-A0: DAC Value
-            0xa0: [struct.Struct('>IfBBff')],
-            # Report Packet 0x8F-A2: UTC/GPS Timing
-            0xa2: [struct.Struct('>B')],
-            # Report Packet 0x8F-A3: Oscillator Disciplining Command
-            0xa3: [struct.Struct('>B')],
-            # Report Packet 0x8F-A4: Test Modes
-            0xa4: [struct.Struct('>B'), 
-                   struct.Struct('>BHI'), 
-                   struct.Struct('>BffhIHHHh')],
-            # Report Packet 0x8F-A5: Packet Broadcast Mask
-            0xa5: [struct.Struct('>HH')],
-            # Report Packet 0x8F-A6: Self-Survey Command
-            0xa6: [struct.Struct('>B')],
-            # Report Packet 0x8F-A8: Oscillator Disciplining Parameters
-            0xa8: [Struct0x8fa8()], 
-            # Report Packet 0x8F-A9: Self-Survey Parameters
-            0xa9: [struct.Struct('>BBII')],
-            # Report Packet 0x8F-AB:Primary Timing Packet
-            0xab: [struct.Struct('>IHhBBBBBBH')],
-            # Report Packet 0x8F-AC: Supplemental Timing Packet
-            0xac: [struct.Struct('>BBBIHHBBBBffIffdddfI')]
-          }    
+    0xbc:   [struct.Struct('>BB'), struct.Struct('>BBBBBBBBBBB')],
+    # Command Packet 0x8E-15: Request current Datum values
+    0x8e15: [struct.Struct('>BB')],
+    # Command Packet 0x8E-23 - Request Last Compact Fix Information
+    0x8e23: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-26: Write Configuration to NVS
+    0x8e26: [struct.Struct('>BB')],
+    # Command Packet 0x8E-41: Request Manufacturing Parameters
+    0x8e41: [struct.Struct('>BB')],
+    # Command Packet 0x8E-42: Stored Production Parameters
+    0x8e42: [struct.Struct('>BB')],
+    # Command Packet 0x8E-45: Revert Configuration Segment to Default Settings and Write to NVS
+    0x8e45: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-4A: Set PPS Characteristics
+    0x8e4a: [struct.Struct('>BBBBBdf')],
+    # Command Packet 0x8E-4C: Write Configuration Segment to NVS
+    0x8e4c: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-4E: Set PPS output option
+    0x8e4e: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-A0: Set DAC Value
+    0x8ea0: [Struct0x8ea0()],
+    # Command Packet 0x8E-A2: UTC/GPS Timing
+    0x8ea2: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-A3: Issue Oscillator Disciplining Command
+    0x8ea3: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-A4: Test Modes
+    0x8ea4: [struct.Struct('>BBB'), struct.Struct('>BBBHI'), struct.Struct('>BBBffhIHHHh')],
+    # Command Packet 0x8E-A5: Packet Broadcast Mask
+    0x8ea5: [struct.Struct('>BBHH')],
+    # Command Packet 0x8E-A6: Self-Survey Command
+    0x8ea6: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-A8: Set or Request Disciplining Parameters
+    0x8ea8: [Struct0x8ea8()],
+    # Command Packet 0x8E-A9: Self-Survey Parameters
+    0x8ea9: [struct.Struct('>BBBBII'), struct.Struct('>BBB')],
+    # Command Packet 0x8E-AB: Request Primary Timing Packet
+    0x8eab: [struct.Struct('>BBB')],
+    # Command Packet 0x8E-AC: Request Supplementary Timing Packet
+    0x8eac: [struct.Struct('>BBB')],
+    # Report Packet 0x8F-15 Current Datum Values
+    0x8f15: [struct.Struct('>BBhddddd')],
+    # Report Packet 0x8F-23 - Request Last Compact Fix Information
+    0x8f23: [struct.Struct('>BBIHBBiIihhhh')],
+    # Report Packet 0x8F-41: Stored Manufacturing Operating Parameters
+    0x8f41: [struct.Struct('>BBHIBBBBfH')],
+    # Report Packet 0x8F-42: Stored Production Parameters
+    0x8f42: [struct.Struct('>BBBBHIIHHH')],
+    # Report Packet 0x8F-4A: Set PPS Characteristics
+    0x8f4a: [struct.Struct('>BBBBBdf')],
+    # Report Packet 0x8F-4E: PPS Output
+    0x8f4e: [struct.Struct('>BBB')],
+    # Report Packet 0x8F-A0: DAC Value
+    0x8fa0: [struct.Struct('>BBIfBBff')],
+    # Report Packet 0x8F-A2: UTC/GPS Timing
+    0x8fa2: [struct.Struct('>BBB')],
+    # Report Packet 0x8F-A3: Oscillator Disciplining Command
+    0x8fa3: [struct.Struct('>BBB')],
+    # Report Packet 0x8F-A4: Test Modes
+    0x8fa4: [struct.Struct('>BBB'), struct.Struct('>BBBHI'), struct.Struct('>BBBffhIHHHh')],
+    # Report Packet 0x8F-A5: Packet Broadcast Mask
+    0x8fa5: [struct.Struct('>BBHH')],
+    # Report Packet 0x8F-A6: Self-Survey Command
+    0x8fa6: [struct.Struct('>BBB')],
+    # Report Packet 0x8F-A8: Oscillator Disciplining Parameters
+    0x8fa8: [Struct0x8fa8()], 
+    # Report Packet 0x8F-A9: Self-Survey Parameters
+    0x8fa9: [struct.Struct('>BBBBII')],
+    # Report Packet 0x8F-AB:Primary Timing Packet
+    0x8fab: [struct.Struct('>BBIHhBBBBBBH')],
+    # Report Packet 0x8F-AC: Supplemental Timing Packet
+    0x8fac: [struct.Struct('>BBBBBIHHBBBBffIffdddfI')]
 }
 
 
-# List of packets which have a sub-code.
-#
-PACKETS_WITH_SUBCODE = []
-for (key, value) in PACKET_STRUCTURES.items():
-    if isinstance(value, types.DictType):
-        PACKETS_WITH_SUBCODE.append(key)
-
-def get_structs(code, subcode=None):
+def get_structs_for_rawpacket(rawpacket):
     """
     
-       :param code: Packet code.
-       :type code: Integer.
-       :param subcode: Packet subcode or ``None``.
-       :type code: Integer or ``None``.
-       :return: Possible structures of this packet.
+       :param rawpacket: Packet code.
+       :type rawpacket: Binary string.
+       :return: Possible structures of this packet. May be an empty list. 
        :rtype: List.
     
     """
     
-    if code in PACKETS_WITH_SUBCODE:
-        return PACKET_STRUCTURES[code][subcode]
-    else:
-        return PACKET_STRUCTURES.get(code, [StructRaw()])
-        
-#         
-#     if PACKET_STRUCTURES.has_key(code):
-#         if PACKET_STRUCTURES[code].has_key(subcode):
-#             return PACKET_STRUCTURES[code][subcode]
-#         else:
-#             return PACKET_STRUCTURES[code]
-#     else:
-#         return [StructRaw()]
+    key = struct.unpack('>B', rawpacket[0])[0]
     
+    try:
+        return PACKET_STRUCTURES[key]
+    except KeyError:
+        try:
+            key = struct.unpack('>H', rawpacket[0:2])[0]
+            return PACKET_STRUCTURES[key]
+        except (struct.error, KeyError):
+            return []
     
+            
+def get_structs_for_fields(fields):
     
-#     try:
-#         return PACKET_STRUCTURES[code].get(subcode)
-#     except KeyError:
-#         return PACKET_STRUCTURES.get(code)
-#     except KeyError:
-#         return [StructRaw()]
+    key = fields[0]
     
-#     if isinstance(value, types.ListType):
-#         return value
-#     elif isinstance(value, types.DictType):
-#         structs_ = value.get(subcode)
-#     else:
-#         structs_ = [StructRaw()]
-#     
-#     if not isinstance(structs_, types.ListType):
-#         raise ValueError('Invalid packet code/subcode')
-#     else:
-#         return structs_
+    try:
+        return PACKET_STRUCTURES[key]
+    except KeyError:
+        try:
+            key = fields[0] * 256 + fields[1]
+            return PACKET_STRUCTURES[key]
+        except (IndexError, KeyError):
+            return []
 
 
 
