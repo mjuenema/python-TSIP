@@ -15,14 +15,6 @@ binary strings.
 
 In most cases a developer will only use the two classes of the high-level API.
 
-.. important:: Neither API is fully stable yet. I am currently contemplating 
-               removing the `Packet.code` and `Packet.subcode` attributes and
-               making them accessible as `Packet[0]` and `Packet[1]` (if
-               applicable) instead. The actual packet data fields would then
-               be shifted accordingly, e.g. `Packet[2]`, `Packet[3]`, etc. This
-               would make the implementation much cleaner.
-
-
 High-level API
 ==============
 
@@ -42,10 +34,10 @@ to a Trimble GPS and reading `tsip.Packet()` reports from the GPS.
    >>> gps_conn.write(command)
    >>> while True:      # should implement timeout here!!!
    ...     report = gps_conn.read()
-   ...         if report.code == 0x41:
-   ...             print 'GPS time of week .......: %f' % (report[0])
-   ...             print 'Extended GPS week number: %d' % (report[1])
-   ...             print 'GPS UTC offset .........: %f' % (report[2])
+   ...         if report[0] == 0x41:
+   ...             print 'GPS time of week .......: %f' % (report[1])
+   ...             print 'Extended GPS week number: %d' % (report[2])
+   ...             print 'GPS UTC offset .........: %f' % (report[3])
    ...             break
 
 Instances of `tsip.GPS` can also be iterated over.
@@ -53,7 +45,8 @@ Instances of `tsip.GPS` can also be iterated over.
 .. code-block:: python
 
    >>> for packet in gps_conn:
-   ...     print packet.code
+   ...     print packet[0]
+   
 
 
 TSIP Packets (`tsip.Packet` class)
@@ -61,6 +54,9 @@ TSIP Packets (`tsip.Packet` class)
 
 Not all Trimble GPS receivers support all TSIP packets.
 Check the official documentation for more details and additional information.
+
+.. warning:: This section is not up-to-date.
+
 
 Command Packets
 ~~~~~~~~~~~~~~~
@@ -72,16 +68,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x1c", ""
-   "packet.subcode", "0x01", "" 
+   "packet[0]", "0x1c", ""
+   "packet[1]", "0x01", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x1c, 0x01)
-   >>> command.code     # 0x1c
+   >>> command[0]   # 0x1c
    28
-   >>> command.subcode  # 0x01
+   >>> command[1]  # 0x01
    1
    >>> gps_conn.write(command)
    >>> while True:
@@ -99,16 +95,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x1c", ""
-   "packet.subcode", "0x03", "" 
+   "packet[0]", "0x1c", ""
+   "packet[1]", "0x03", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x1c, 0x03)
-   >>> command.code     # 0x1c
+   >>> command[0]  # 0x1c
    28
-   >>> command.subcode  # 0x03
+   >>> command[1]  # 0x03
    3
    >>> gps_conn.write(command)
    >>> while True:
@@ -126,18 +122,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x1e", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "Reset type", ""
+   "packet[0]", "0x1e", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "Reset type", ""
 
 
 .. code-block:: python
 
    >>> command = Packet(0x1e, 0x46)    # 0x46 = factory reset
-   >>> command.code     # 0x1e
+   >>> command[0]  # 0x1e
    30
-   >>> command.subcode  # None
-   None
    >>> gps_conn.write(command)
 
  
@@ -148,16 +142,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x1f", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x1f", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x1f)
-   >>> packet.code     # 0x1f
+   >>> packet[0]  # 0x1f
    31
-   >>> packet.subcode  # None
+   >>> packet[1]  # None
    None
    >>> gps_conn.write(command)
    >>> while True:
@@ -175,17 +169,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x21", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x21", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x21)
-   >>> packet.code     # 0x21
+   >>> packet[0]  # 0x21
    33
-   >>> packet.subcode  # None
-   None
 
 
  
@@ -196,20 +188,18 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x23", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x23", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x23, 1.0, 1.0, 1.0)
-   >>> packet.code     # 0x23
+   >>> packet[0]  # 0x23
    35
-   >>> packet.subcode  # None
-   None
 
  
 0x24 - Request GPS Receiver Position Fix Mode
@@ -219,17 +209,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x24", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x24", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x24)
-   >>> command.code     # 0x24
+   >>> command[0]  # 0x24
    36
-   >>> command.subcode  # None
-   None
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
@@ -246,17 +234,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x25", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x25", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x25)
-   >>> command.code     # 0x25
+   >>> command[0]     # 0x25
    37
-   >>> command.subcode  # None
-   None
    >>> gps_conn.write(command)
 
  
@@ -267,17 +253,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x26", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x26", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x26)
-   >>> command.code     # 0x26
+   >>> command[0]     # 0x26
    38
-   >>> command.subcode  # None
-   None
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
@@ -295,17 +279,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x27", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x27", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x27)
-   >>> command.code     # 0x27
+   >>> command[0]     # 0x27
    39
-   >>> command.subcode  # None
-   None
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
@@ -323,17 +305,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x2b", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x2b", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x2b)
-   >>> packet.code     # 0x2b
+   >>> packet[0]     # 0x2b
    43
-   >>> packet.subcode  # None
-   None
 
 
  
@@ -344,18 +324,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x2d", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x2d", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x2d)
-   >>> packet.code     # 0x2d
+   >>> packet[0]     # 0x2d
    45
-   >>> packet.subcode  # None
-   None
-
 
  
 0x2E - Set GPS Time
@@ -365,18 +342,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x2e", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x2e", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x2e)
-   >>> packet.code     # 0x2e
+   >>> packet[0]     # 0x2e
    46
-   >>> packet.subcode  # None
-   None
-
 
  
 0x31 - Accurate Initial Position (XYZ ECEF)
@@ -386,21 +360,18 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x31", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x31", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x31, 1.0, 1.0, 1.0)
-   >>> packet.code     # 0x31
+   >>> packet[0]     # 0x31
    49
-   >>> packet.subcode  # None
-   None
-
 
  
 0x32 - Accurate Initial Position, (Latitude, Longitude, Altitude)
@@ -410,21 +381,18 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x32", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x32", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x32, 1.0, 1.0, 1.0)
-   >>> packet.code     # 0x32
+   >>> packet[0]     # 0x32
    50
-   >>> packet.subcode  # None
-   None
-
 
  
 0x35 - Set Request I/O Options
@@ -434,22 +402,19 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x35", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x35", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x35, 100, 100, 100, 100)
-   >>> packet.code     # 0x35
+   >>> packet[0]     # 0x35
    53
-   >>> packet.subcode  # None
-   None
-
 
  
 0x37 - Request Status and Values of Last Position and Velocity
@@ -459,18 +424,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x37", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x37", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x37)
-   >>> packet.code     # 0x37
+   >>> packet[0]     # 0x37
    55
-   >>> packet.subcode  # None
-   None
-
 
  
 0x38 - Request/Load Satellite System Data
@@ -480,21 +442,18 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x38", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x38", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x38, 100, 100, 100)
-   >>> packet.code     # 0x38
+   >>> packet[0]     # 0x38
    56
-   >>> packet.subcode  # None
-   None
-
 
  
 0x3A - Request Last Raw Measurement
@@ -504,19 +463,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x3a", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "0x3a", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x3a, 100)
-   >>> packet.code     # 0x3a
+   >>> packet[0]     # 0x3a
    58
-   >>> packet.subcode  # None
-   None
-
 
  
 0x3C - Request Current Satellite Tracking Status
@@ -526,19 +482,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x3c", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "0x3c", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x3c, 100)
-   >>> packet.code     # 0x3c
+   >>> packet[0]     # 0x3c
    60
-   >>> packet.subcode  # None
-   None
-
 
  
 0x69 - Receiver Acquisition Sensitivity Mode
@@ -548,18 +501,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x69", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x69", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x69)
-   >>> packet.code     # 0x69
+   >>> packet[0]     # 0x69
    105
-   >>> packet.subcode  # None
-   None
-
 
  
 0x7E - TAIP Message Output
@@ -569,18 +519,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x7e", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x7e", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x7e)
-   >>> packet.code     # 0x7e
+   >>> packet[0]     # 0x7e
    126
-   >>> packet.subcode  # None
-   None
-
 
  
 0x8E-17 - Request Last Position or Auto-Report Position in UTM Single Precision Format
@@ -590,16 +537,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x17", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x17", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x17)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x17
+   >>> packet[1]  # 0x17
    23
 
 
@@ -611,16 +558,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x20", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x20", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x20)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x20
+   >>> packet[1]  # 0x20
    32
 
 
@@ -632,16 +579,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x21", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x21", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x21)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x21
+   >>> packet[1]  # 0x21
    33
 
 
@@ -653,17 +600,17 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x23", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x23", "" 
+   "packet[2]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x23, 100)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x23
+   >>> packet[1]  # 0x23
    35
 
 
@@ -675,16 +622,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x26", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x26", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x26)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x26
+   >>> packet[1]  # 0x26
    38
 
 
@@ -696,16 +643,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x2a", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x2a", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x2a)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x2a
+   >>> packet[1]  # 0x2a
    42
 
 
@@ -717,16 +664,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x2b", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x2b", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x2b)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x2b
+   >>> packet[1]  # 0x2b
    43
 
 
@@ -738,16 +685,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8e", ""
-   "packet.subcode", "0x4f", "" 
+   "packet[0]", "0x8e", ""
+   "packet[1]", "0x4f", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0x8e, 0x4f)
-   >>> packet.code     # 0x8e
+   >>> packet[0]     # 0x8e
    142
-   >>> packet.subcode  # 0x4f
+   >>> packet[1]  # 0x4f
    79
 
 
@@ -759,18 +706,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0xbb", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0xbb", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0xbb)
-   >>> packet.code     # 0xbb
+   >>> packet[0]     # 0xbb
    187
-   >>> packet.subcode  # None
-   None
-
 
  
 0xBC - Protocol Configuration
@@ -780,19 +724,16 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0xbc", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "0xbc", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
 
 
 .. code-block:: python
 
    >>> packet = Packet(0xbc, 100)
-   >>> packet.code     # 0xbc
+   >>> packet[0]     # 0xbc
    188
-   >>> packet.subcode  # None
-   None
-
 
  
 0xC0 - Graceful Shutdown and Go To Standby Mode
@@ -802,18 +743,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0xc0", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0xc0", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0xc0)
-   >>> packet.code     # 0xc0
+   >>> packet[0]     # 0xc0
    192
-   >>> packet.subcode  # None
-   None
-
 
  
 0xC2 - SBAS SV Mask.
@@ -823,17 +761,15 @@ Command Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0xc2", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0xc2", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> packet = Packet(0xc2)
-   >>> packet.code     # 0xc2
+   >>> packet[0]     # 0xc2
    194
-   >>> packet.subcode  # None
-   None
 
 Report Packets
 ~~~~~~~~~~~~~~
@@ -845,11 +781,11 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x41", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x41", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
 
 
 .. code-block:: python
@@ -857,14 +793,12 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x41:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
+   >>> if packet[0] == 0x41:
    ...     packet[1]	#
-   100
+   1.0
    ...     packet[2]	#
+   100
+   ...     packet[3]	#
    1.0
  
 0x42 - Single-Precision Position Fix, XYZ ECEF
@@ -874,12 +808,12 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x42", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x42", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
 
 
 .. code-block:: python
@@ -887,16 +821,14 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x42:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
+   >>> if packet[0] == 0x42:
    ...     packet[1]	#
    1.0
    ...     packet[2]	#
    1.0
    ...     packet[3]	#
+   1.0
+   ...     packet[4]	#
    1.0
  
 0x43 - Velocity Fix, XYZ ECEF
@@ -906,13 +838,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x43", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x43", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
    "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
 
 
 .. code-block:: python
@@ -920,11 +852,7 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x43:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
+   >>> if packet[0] == 0x43:
    ...     packet[1]	#
    1.0
    ...     packet[2]	#
@@ -932,6 +860,8 @@ Report Packets
    ...     packet[3]	#
    1.0
    ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
    1.0
  
 0x45 - Software Version Information
@@ -941,378 +871,7 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x45", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-   "packet[6]", "DESC", ""
-   "packet[7]", "DESC", ""
-   "packet[8]", "DESC", ""
-   "packet[9]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x45:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
-   ...     packet[2]	#
-   100
-   ...     packet[3]	#
-   100
-   ...     packet[4]	#
-   100
-   ...     packet[5]	#
-   100
-   ...     packet[6]	#
-   100
-   ...     packet[7]	#
-   100
-   ...     packet[8]	#
-   100
-   ...     packet[9]	#
-   100
- 
-0x46 - Health of Receiver
-.........................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x46", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x46:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
- 
-0x47 - Signal Levels for all Satellites
-.......................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x47", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x47:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
-   ...     packet[2]	#
-   1.0
- 
-0x4A - Single Precision LLA Position Fix
-........................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x4a", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x4a:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
-   ...     packet[1]	#
-   1.0
-   ...     packet[2]	#
-   1.0
-   ...     packet[3]	#
-   1.0
-   ...     packet[4]	#
-   1.0
- 
-0x4B - Machine/Code ID and Additional Status
-............................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x4b", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x4b:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
-   ...     packet[2]	#
-   100
- 
-0x4D - Oscillator Offset
-........................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x4d", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x4d:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
- 
-0x4E - Response to Set GPS Time
-...............................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x4e", ""
-   "packet.subcode", "None", "" 
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x4e:
-   ...     packet.subcode      # None 
-   None
- 
-0x55 - I/O Options
-..................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x55", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x55:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
-   ...     packet[2]	#
-   100
-   ...     packet[3]	#
-   100
- 
-0x56 - Velocity Fix, East-North-Up (ENU)
-........................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x56", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x56:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   1.0
-   ...     packet[1]	#
-   1.0
-   ...     packet[2]	#
-   1.0
-   ...     packet[3]	#
-   1.0
-   ...     packet[4]	#
-   1.0
- 
-0x57 - Information About Last Computed Fix
-..........................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x57", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x57:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
-   ...     packet[2]	#
-   1.0
-   ...     packet[3]	#
-   100
- 
-0x58 - Satellite System Data/Acknowledge from Receiver
-......................................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x58", ""
-   "packet.subcode", "None", "" 
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x58:
-   ...     packet.subcode      # None 
-   None
- 
-0x5A - Raw Measurement Data
-...........................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x5a", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-   "packet[5]", "DESC", ""
-
-
-.. code-block:: python
-
-   >>> packet = gps.read()
-   >>> isinstance(packet, tsip.Packet)
-   True
-   >>> if packet.code == 0x5a:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   1.0
-   ...     packet[2]	#
-   1.0
-   ...     packet[3]	#
-   1.0
-   ...     packet[4]	#
-   1.0
-   ...     packet[5]	#
-   1.0
- 
-0x5C - Satellite Tracking Status
-................................
-
-.. csv-table::
-   :header: "Field", "Description", "Notes"
-   :widths: 10, 20, 30
-
-   "packet.code", "0x5c", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
+   "packet[0]", "0x45", ""
    "packet[1]", "DESC", ""
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
@@ -1323,7 +882,6 @@ Report Packets
    "packet[8]", "DESC", ""
    "packet[9]", "DESC", ""
    "packet[10]", "DESC", ""
-   "packet[11]", "DESC", ""
 
 
 .. code-block:: python
@@ -1331,17 +889,338 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x5c:
-   ...     packet.subcode      # None 
-   None
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
+   >>> if packet[0] == 0x45:
+   ...     packet[1]    # 
    100
    ...     packet[2]	#
    100
    ...     packet[3]	#
    100
+   ...     packet[4]	#
+   100
+   ...     packet[5]	#
+   100
+   ...     packet[6]	#
+   100
+   ...     packet[7]	#
+   100
+   ...     packet[8]	#
+   100
+   ...     packet[9]	#
+   100
+   ...     packet[10]	#
+   100
+ 
+0x46 - Health of Receiver
+.........................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x46", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x46:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+ 
+0x47 - Signal Levels for all Satellites
+.......................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x47", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x47:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+   ...     packet[4]	#
+   1.0
+ 
+0x4A - Single Precision LLA Position Fix
+........................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x4a", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x4a:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   1.0
+   ...     packet[3]	#
+   1.0
+   ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
+   1.0
+   ...     packet[6]	#
+   1.0
+ 
+0x4B - Machine/Code ID and Additional Status
+............................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x4b", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x4b:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+   ...     packet[4]	#
+   100
+ 
+0x4D - Oscillator Offset
+........................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x4d", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x4d:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   1.0
+ 
+0x4E - Response to Set GPS Time
+...............................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x4e", ""
+   "packet[1]", "None", "" 
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x4e:
+   ...     packet[1]      # None 
+   None
+ 
+0x55 - I/O Options
+..................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x55", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x55:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+   ...     packet[4]	#
+   100
+   ...     packet[5]	#
+   100
+ 
+0x56 - Velocity Fix, East-North-Up (ENU)
+........................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x56", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x56:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   1.0
+   ...     packet[3]	#
+   1.0
+   ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
+   1.0
+   ...     packet[6]	#
+   1.0
+ 
+0x57 - Information About Last Computed Fix
+..........................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x57", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x57:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+   ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
+   100
+ 
+0x58 - Satellite System Data/Acknowledge from Receiver
+......................................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x58", ""
+   "packet[1]", "None", "" 
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x58:
+   ...     packet[1]      # None 
+   None
+ 
+0x5A - Raw Measurement Data
+...........................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x5a", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
+   "packet[7]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x5a:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   1.0
    ...     packet[4]	#
    1.0
    ...     packet[5]	#
@@ -1350,11 +1229,59 @@ Report Packets
    1.0
    ...     packet[7]	#
    1.0
+ 
+0x5C - Satellite Tracking Status
+................................
+
+.. csv-table::
+   :header: "Field", "Description", "Notes"
+   :widths: 10, 20, 30
+
+   "packet[0]", "0x5c", ""
+   "packet[1]", "None", "" 
+   "packet[2]", "DESC", ""
+   "packet[3]", "DESC", ""
+   "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
+   "packet[7]", "DESC", ""
+   "packet[8]", "DESC", ""
+   "packet[9]", "DESC", ""
+   "packet[10]", "DESC", ""
+   "packet[11]", "DESC", ""
+   "packet[12]", "DESC", ""
+   "packet[11]", "DESC", ""
+
+
+.. code-block:: python
+
+   >>> packet = gps.read()
+   >>> isinstance(packet, tsip.Packet)
+   True
+   >>> if packet[0] == 0x5c:
+   ...     packet[1]      # None 
+   None
+   ...     packet[2]	#
+   100
+   ...     packet[3]	#
+   100
+   ...     packet[4]	#
+   100
+   ...     packet[5]	#
+   100
+   ...     packet[6]	#
+   1.0
+   ...     packet[7]	#
+   1.0
    ...     packet[8]	#
-   100
+   1.0
    ...     packet[9]	#
-   100
+   1.0
    ...     packet[10]	#
+   100
+   ...     packet[11]	#
+   100
+   ...     packet[12]	#
    100
    ...     packet[11]	#
    100
@@ -1366,8 +1293,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x5f", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x5f", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
@@ -1375,8 +1302,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x5f:
-   ...     packet.subcode      # None 
+   >>> if packet[0] == 0x5f:
+   ...     packet[1]      # None 
    None
  
 0x6D - All-In-View Satellite Selection
@@ -1386,8 +1313,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x6d", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x6d", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
@@ -1395,8 +1322,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x6d:
-   ...     packet.subcode      # None 
+   >>> if packet[0] == 0x6d:
+   ...     packet[1]      # None 
    None
  
 0x82 - SBAS Correction Status
@@ -1406,8 +1333,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x82", ""
-   "packet.subcode", "None", "" 
+   "packet[0]", "0x82", ""
+   "packet[1]", "None", "" 
 
 
 .. code-block:: python
@@ -1415,8 +1342,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x82:
-   ...     packet.subcode      # None 
+   >>> if packet[0] == 0x82:
+   ...     packet[1]      # None 
    None
  
 0x83 - Double-Precision XYZ Position Fix and Bias Information
@@ -1426,13 +1353,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x83", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x83", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
    "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
 
 
 .. code-block:: python
@@ -1440,18 +1367,18 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x83:
-   ...     packet.subcode      # None 
+   >>> if packet[0] == 0x83:
+   ...     packet[1]      # None 
    None
-   ...     packet[0]	#
-   1.0
-   ...     packet[1]	#
-   1.0
    ...     packet[2]	#
    1.0
    ...     packet[3]	#
    1.0
    ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
+   1.0
+   ...     packet[6]	#
    1.0
  
 0x84 - Double-Precision LLA Position Fix and Bias Information
@@ -1461,13 +1388,13 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x84", ""
-   "packet.subcode", "None", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x84", ""
+   "packet[1]", "None", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
    "packet[4]", "DESC", ""
+   "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
 
 
 .. code-block:: python
@@ -1475,18 +1402,18 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x84:
-   ...     packet.subcode      # None 
+   >>> if packet[0] == 0x84:
+   ...     packet[1]      # None 
    None
-   ...     packet[0]	#
-   1.0
-   ...     packet[1]	#
-   1.0
    ...     packet[2]	#
    1.0
    ...     packet[3]	#
    1.0
    ...     packet[4]	#
+   1.0
+   ...     packet[5]	#
+   1.0
+   ...     packet[6]	#
    1.0
  
 0x8F-15 - Current Datum Values
@@ -1496,14 +1423,14 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x15", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x15", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
    "packet[4]", "DESC", ""
    "packet[5]", "DESC", ""
+   "packet[6]", "DESC", ""
+   "packet[7]", "DESC", ""
 
 
 .. code-block:: python
@@ -1511,20 +1438,20 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x15 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x15 
    21
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   1.0
    ...     packet[2]	#
-   1.0
+   100
    ...     packet[3]	#
    1.0
    ...     packet[4]	#
    1.0
    ...     packet[5]	#
+   1.0
+   ...     packet[6]	#
+   1.0
+   ...     packet[7]	#
    1.0
  
 0x8F-20 - Last Fix with Extra Information (binary fixed point)
@@ -1534,8 +1461,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x20", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x20", "" 
 
 
 .. code-block:: python
@@ -1543,8 +1470,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x20 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x20 
    32
  
 0x8F-21 - Request Accuracy Information
@@ -1554,8 +1481,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x21", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x21", "" 
 
 
 .. code-block:: python
@@ -1563,8 +1490,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x21 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x21 
    33
  
 0x8F-23 - Request Last Compact Fix Information
@@ -1574,10 +1501,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x23", "" 
-   "packet[0]", "DESC", ""
-   "packet[1]", "DESC", ""
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x23", "" 
    "packet[2]", "DESC", ""
    "packet[3]", "DESC", ""
    "packet[4]", "DESC", ""
@@ -1587,6 +1512,8 @@ Report Packets
    "packet[8]", "DESC", ""
    "packet[9]", "DESC", ""
    "packet[10]", "DESC", ""
+   "packet[11]", "DESC", ""
+   "packet[12]", "DESC", ""
 
 
 .. code-block:: python
@@ -1594,13 +1521,9 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x23 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x23 
    35
-   ...     packet[0]	#
-   100
-   ...     packet[1]	#
-   100
    ...     packet[2]	#
    100
    ...     packet[3]	#
@@ -1619,6 +1542,10 @@ Report Packets
    100
    ...     packet[10]	#
    100
+   ...     packet[11]	#
+   100
+   ...     packet[12]	#
+   100
  
 0x8F-26 - Non-Volatile Memory Status
 ....................................
@@ -1627,8 +1554,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x26", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x26", "" 
 
 
 .. code-block:: python
@@ -1636,8 +1563,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x26 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x26 
    38
  
 0x8F-2A - Fix and Channel Tracking Info, Type 1
@@ -1647,8 +1574,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x2a", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x2a", "" 
 
 
 .. code-block:: python
@@ -1656,8 +1583,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x2a 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x2a 
    42
  
 0x8F-2B - Fix and Channel Tracking Info, Type 2
@@ -1667,8 +1594,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x2b", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x2b", "" 
 
 
 .. code-block:: python
@@ -1676,8 +1603,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x2b 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x2b 
    43
  
 0x8F-4F - Set PPS Width
@@ -1687,8 +1614,8 @@ Report Packets
    :header: "Field", "Description", "Notes"
    :widths: 10, 20, 30
 
-   "packet.code", "0x8f", ""
-   "packet.subcode", "0x4f", "" 
+   "packet[0]", "0x8f", ""
+   "packet[1]", "0x4f", "" 
 
 
 .. code-block:: python
@@ -1696,8 +1623,8 @@ Report Packets
    >>> packet = gps.read()
    >>> isinstance(packet, tsip.Packet)
    True
-   >>> if packet.code == 0x8f:
-   ...     packet.subcode      # 0x4f 
+   >>> if packet[0] == 0x8f:
+   ...     packet[1]      # 0x4f 
    79
 
 Adding new TSIP packets
