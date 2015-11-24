@@ -82,10 +82,10 @@ Command Packets
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x1c and report.subcode == 0x81:
+   ...     if report[0] == 0x1c and report.subcode == 0x81:
    ...         print report
    ...         break
-   Packet(0x1c, 0x81
+   Packet(0x1c, 0x81, ...)
    
 
 0x1C - Firmware Version 03
@@ -109,10 +109,10 @@ Command Packets
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x1c and report.subcode == 0x83:
+   ...     if report[0] == 0x1c and report.subcode == 0x83:
    ...         print report
    ...         break
-   Packet(0x1c, 0x83
+   Packet(0x1c, 0x83, ...)
 
  
 0x1E - Clear Battery Backup, then Reset
@@ -123,8 +123,7 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x1e", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "Reset type", ""
+   "packet[1]", "Reset type", ""
 
 
 .. code-block:: python
@@ -132,6 +131,8 @@ Command Packets
    >>> command = Packet(0x1e, 0x46)    # 0x46 = factory reset
    >>> command[0]  # 0x1e
    30
+   >>> command[1]  # 0x46
+   70
    >>> gps_conn.write(command)
 
  
@@ -143,23 +144,20 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x1f", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x1f)
-   >>> packet[0]  # 0x1f
+   >>> command = Packet(0x1f)
+   >>> command[0]  # 0x1f
    31
-   >>> packet[1]  # None
-   None
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x45:
+   ...     if report[0] == 0x45:
    ...         print report
    ...         break
-   Packet(0x45
+   Packet(0x45, ...)
 
  
 0x21 - Request Current Time
@@ -170,15 +168,20 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x21", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x21)
-   >>> packet[0]  # 0x21
+   >>> command = Packet(0x21)
+   >>> command[0]  # 0x21
    33
-
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report[0] == 0x41:
+   ...         print report
+   ...         break
+   Packet(0x41, ...)
 
  
 0x23 - Initial Position (XYZ ECEF)
@@ -189,17 +192,23 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x23", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
+   "packet[1]", "X", ""
+   "packet[2]", "Y", ""
+   "packet[3]", "Z", ""
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x23, 1.0, 1.0, 1.0)
-   >>> packet[0]  # 0x23
+   >>> packet = Packet(0x23, -4130.889, 2896.451, -3889.139)
+   >>> packet[0]        # 0x23
    35
+   >>> packet[1]        # X
+   -4130.889
+   >>> packet[2]        # Y
+   2896.451
+   >>> packet[3]        # Z
+   -3889.139
+   >>> gps_conn.write(command)
 
  
 0x24 - Request GPS Receiver Position Fix Mode
@@ -210,18 +219,17 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x24", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x24)
-   >>> command[0]  # 0x24
+   >>> command[0]       # 0x24
    36
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x6d:
+   ...     if report[0] == 0x6d:
    ...         print report
    ...         break
    Packet(0x6d
@@ -235,13 +243,12 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x25", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x25)
-   >>> command[0]     # 0x25
+   >>> command[0]       # 0x25
    37
    >>> gps_conn.write(command)
 
@@ -254,22 +261,20 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x26", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
 
    >>> command = Packet(0x26)
-   >>> command[0]     # 0x26
+   >>> command[0]       # 0x26
    38
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x46 or report.code == 0x4b:
+   ...     if report[0] == 0x46 or report[0] == 0x4b:
    ...         print report
    ...         break
    Packet(0x4b
-
 
  
 0x27 - Request Signal Levels
@@ -280,7 +285,6 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x27", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
@@ -291,7 +295,7 @@ Command Packets
    >>> gps_conn.write(command)
    >>> while True:
    ...     report = gps_conn.read()
-   ...     if report.code == 0x47:
+   ...     if report[0] == 0x47:
    ...         print report
    ...         break
    Packet(0x47
@@ -306,15 +310,24 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x2b", ""
-   "packet[1]", "None", "" 
+   "packet[1]", "Latitude", ""
+   "packet[2]", "Longitude", ""
+   "packet[3]", "Alitude", ""
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x2b)
+   >>> import maths
+   >>> packet = Packet(0x2b, math.radians(-37.813611), math.radians(144.963056), 30.0)
    >>> packet[0]     # 0x2b
    43
-
+   >>> packet[1]     # radians
+   -0.6599720140183456
+   >>> packet[2]     # radians
+   2.5300826209529208
+   >>> packet[0]     # metres
+   30.0
+   >>> gps_conn.write(command)
 
  
 0x2D - Request Oscillator Offset
@@ -325,7 +338,6 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x2d", ""
-   "packet[1]", "None", "" 
 
 
 .. code-block:: python
@@ -333,6 +345,13 @@ Command Packets
    >>> packet = Packet(0x2d)
    >>> packet[0]     # 0x2d
    45
+   >>> gps_conn.write(command)
+   >>> while True:
+   ...     report = gps_conn.read()
+   ...     if report[0] == 0x4d:
+   ...         print report
+   ...         break
+   Packet(0x4d
 
  
 0x2E - Set GPS Time
@@ -343,14 +362,16 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x2e", ""
-   "packet[1]", "None", "" 
+   "packet[1]", "GPS time of week", "" 
+   "packet[2]", "Extended GPS week number", ""
 
 
 .. code-block:: python
 
-   >>> packet = Packet(0x2e)
+   >>> packet = Packet(0x2e,
    >>> packet[0]     # 0x2e
    46
+   >>> gps_conn.write(command)
 
  
 0x31 - Accurate Initial Position (XYZ ECEF)
@@ -361,17 +382,24 @@ Command Packets
    :widths: 10, 20, 30
 
    "packet[0]", "0x31", ""
-   "packet[1]", "None", "" 
-   "packet[2]", "DESC", ""
-   "packet[3]", "DESC", ""
-   "packet[4]", "DESC", ""
-
+   "packet[1]", "Latitude", ""
+   "packet[2]", "Longitude", ""
+   "packet[3]", "Alitude", ""
 
 .. code-block:: python
 
-   >>> packet = Packet(0x31, 1.0, 1.0, 1.0)
+   >>> packet = Packet(0x2b, math.radians(-37.813611), math.radians(144.963056), 30.0)
    >>> packet[0]     # 0x31
    49
+   >>> packet[1]     # radians
+   -0.6599720140183456
+   >>> packet[2]     # radians
+   2.5300826209529208
+   >>> packet[0]     # metres
+   30.0
+   >>> gps_conn.write(command)
+
+.. TODO continue here
 
  
 0x32 - Accurate Initial Position, (Latitude, Longitude, Altitude)
