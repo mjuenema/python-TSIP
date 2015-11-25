@@ -11,9 +11,18 @@ Status
 Almost the full set of TSIP command and report packets understood by the Copernicus II receiver has been implemented but 
 so far only some of them have been tested against the actual GPS. Implementing a complete set of tests against an actual
 Copernicus II receiver is currently work in progress. Presumably Trimble Thunderbolt and Thunderbolt-E are also 
-supported as they appear to implement a subset of the commands/reports of the (newer) Copernicus II receiver. i don't have access to any other Trimble products.
+supported as they appear to implement a subset of the commands/reports of the (newer) Copernicus II receiver. 
+I don't have access to any other Trimble products.
 
 Documentation is way behind and largely reflects an obsolete implementation of this project. 
+
+`python-TSIP` has been tested against the following Python versions.
+
+* Python 2.6
+* Python 2.7
+* Python 3.3
+* Python 3.4
+* Python 3.5
 
 Example
 =======
@@ -33,7 +42,7 @@ The following code shows how to receive the current GPS time from the receiver.
    gps_conn = tsip.GPS(serial_conn)
    
    # Prepare and send command packet 0x21
-   command = Packet(0x21)
+   command = tsip.Packet(0x21)
    gps_conn.write(command)
    
    while True:      # should implement timeout here!!!

@@ -92,7 +92,7 @@ class Struct0x1c83(object):
 #     def pack(self, *f):
 #         s = struct.pack('>B', len(f)/2)
 #         
-#         for i in xrange(1, len(f), 2):
+#         for i in range(1, len(f), 2):
 #             s += struct.pack('>Bf', f[i], f[i+1])
 #             
 #         return s 
@@ -102,7 +102,7 @@ class Struct0x1c83(object):
 #         count = struct.unpack('>B', s[0])[0]
 #         fields = [count]
 # 
-#         for i in xrange(0, count):
+#         for i in range(0, count):
 #             (satnum, siglevel) = struct.unpack('>Bf', s[i+1:i+6])
 #             fields.append(satnum)
 #             fields.append(siglevel)
@@ -318,7 +318,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by 
     # the count field
-    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in xrange(0, MAX_CHANNELS)],
+    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in range(0, MAX_CHANNELS)],
     # Report Packet 0x49: Almanac Health
     0x49:   [struct.Struct('>B32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
@@ -346,7 +346,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x5F-11: EEPROM Segment Status
     0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d:   [struct.Struct('>BBffff' + 'b' * i) for i in xrange(0, MAX_CHANNELS)],  
+    0x6d:   [struct.Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],  
     #[Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
     0x70:   [struct.Struct('>BBBBB')],

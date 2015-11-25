@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 NAME = 'tsip'
-VERSION = '0.0.1'
+VERSION = '0.2.0'
 LICENSE = 'BSD License'
 AUTHOR = 'Markus Juenemann'
 EMAIL = 'markus@juenemann.net'

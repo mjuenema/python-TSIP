@@ -54,7 +54,7 @@ lint:
 #  test
 #
 test: 
-	nosetests -x -v tests/test_llapi.py tests/test_hlapi.py
+	nosetests -x -v tests/test_structs.py tests/test_llapi.py tests/test_hlapi.py
 
 test_llapi:
 	nosetests -x -v tests/$@.py
@@ -62,8 +62,18 @@ test_llapi:
 test_hlapi:
 	nosetests -x -v tests/$@.py
 
-test-all:
-	tox
+tox: tox26 tox27 tox33
+
+tox26:
+	python2.6 -m nose -x -v tests/test_structs.py tests/test_llapi.py tests/test_hlapi.py
+
+tox27:
+	python2.7 -m tox -e py27
+
+tox33:
+	python3.3 `which tox` -e py33
+
+	
 
 #coverage:
 #	coverage run --source python-TSIP setup.py test

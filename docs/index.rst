@@ -11,9 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   readme
    packets
+   api
    authors
+   contributing
    history
+   
 
 Indices and tables
 ==================
