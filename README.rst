@@ -16,13 +16,26 @@ I don't have access to any other Trimble products.
 
 Documentation is way behind and largely reflects an obsolete implementation of this project. 
 
-`python-TSIP` has been tested against the following Python versions.
+`python-TSIP` is automatically tested against the following Python versions on Travis-CI:
 
 * Python 2.6
 * Python 2.7
+* Python 3.2
 * Python 3.3
 * Python 3.4
 * Python 3.5
+* PyPy
+* "nightly" 
+
+Test status of `master` branch:
+
+.. image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=master
+    :target: https://travis-ci.org/mjuenema/python-TSIP
+ 
+Test status of `develop` branch:
+ 
+.. image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=develop
+    :target: https://travis-ci.org/mjuenema/python-TSIP
 
 Example
 =======
