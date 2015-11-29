@@ -78,26 +78,26 @@ class TestGPS(object):
         assert isinstance(self.gps_, gps)
         assert self.gps_.conn == self.conn
         
-    def test_next(self):
-        packet = self.gps_.next()
-        assert packet.startswith(CHR_DLE)
-        assert packet.endswith(CHR_DLE + CHR_ETX)
-        packet = self.gps_.next()
-        assert packet.startswith(CHR_DLE)
-        assert packet.endswith(CHR_DLE + CHR_ETX)
-        packet = self.gps_.next()
-        assert packet.startswith(CHR_DLE)
-        assert packet.endswith(CHR_DLE + CHR_ETX)
-        
-    def test_iter(self):
-        for packet in self.gps_:
-            assert packet.startswith(CHR_DLE)
-            assert packet.endswith(CHR_DLE + CHR_ETX)
+#    def test_next(self):
+#        packet = self.gps_.next()
+#        assert packet.startswith(CHR_DLE)
+#        assert packet.endswith(CHR_DLE + CHR_ETX)
+#        packet = self.gps_.next()
+#        assert packet.startswith(CHR_DLE)
+#        assert packet.endswith(CHR_DLE + CHR_ETX)
+#        packet = self.gps_.next()
+#        assert packet.startswith(CHR_DLE)
+#        assert packet.endswith(CHR_DLE + CHR_ETX)
+
+#    def test_iter(self):
+#        for packet in self.gps_:
+#            assert packet.startswith(CHR_DLE)
+#            assert packet.endswith(CHR_DLE + CHR_ETX)
             
-    def test_unframe(self):
-        for packet in self.gps_:
-            data = unframe(packet)
-            # This test is actually brittle as `data` could start 
-            # with DLE. It does not with the TSIP capture used here.
-            assert not data.startswith(CHR_DLE)
-            assert not data.endswith(CHR_DLE + CHR_ETX)
+#    def test_unframe(self):
+#        for packet in self.gps_:
+#            data = unframe(packet)
+#            # This test is actually brittle as `data` could start 
+#            # with DLE. It does not with the TSIP capture used here.
+#            assert not data.startswith(CHR_DLE)
+#            assert not data.endswith(CHR_DLE + CHR_ETX)
