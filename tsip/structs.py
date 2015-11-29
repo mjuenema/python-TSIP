@@ -45,6 +45,27 @@ MAX_CHANNELS = 12
 #     def unpack(self, s=''):
 #         return []
 #     
+
+class Struct(struct.Struct):
+    """Custom `struct.Struct` class.
+
+       This class implements the following changes to the original
+       `struct.Struct` class.
+
+       * the return value of `unpack()` is a list instead of a tuple.
+
+         >>> s = Struct('BB')
+         >>> s.unpack('\x01\x02')
+         [1, 2]	# not (1, 2,)
+
+       * some issues regarding Python 2 strings versus Python 3 unicode strings
+         and byte-arrays are dealt with transparently.
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(Struct, self).__init__(*args, **kwargs)
+
     
 class StructRaw(object):
     """Structure of packets that are interpreted as raw data.
@@ -244,7 +265,7 @@ Struct0x8fa8 = Struct0x8ea8
 # Packet structures.
 #
 # Keys are the packet codes/subcodes. Values are lists(!) of instances
-# of `struct.Struct()` or class instances providing custom `pack()` 
+# of `Struct()` or class instances providing custom `pack()` 
 # and `unpack()` methods for a particular TSIP packet. The values 
 # must be lists even if it contains only a single item.
 #
@@ -252,184 +273,184 @@ PACKET_STRUCTURES = {
     # Report packet 0X13 unparsable packet
     # TODO: Report packet 0X13 unparsable packe
     # Command Packet 0x1C - Firmware Version
-    0x1c01: [struct.Struct('>BB')],
+    0x1c01: [Struct('>BB')],
     # Report Packet 0x1C - Firmware Version
     0x1c81: [Struct0x1c81()],
     # Command Packet 0x1C - Hardware Component Version Information
-    0x1c03: [struct.Struct('>BB')],
+    0x1c03: [Struct('>BB')],
     # Report Packet 0x1C - Hardware Component Version Information
     0x1c83: [Struct0x1c83()], 
     # Command Packet 0x1E - Clear Battery Backup, then Reset
-    0x1e:   [struct.Struct('>BB')],
+    0x1e:   [Struct('>BB')],
     # Command Packet 0x1F - Request Software Versions
-    0x1f:   [struct.Struct('>B')],
+    0x1f:   [Struct('>B')],
     # Command Packet 0x21 - Request Current Time
-    0x21:   [struct.Struct('>B')],
+    0x21:   [Struct('>B')],
     # Command Packet 0x23 - Initial Position (XYZ ECEF)
-    0x23:   [struct.Struct('>Bfff')],
+    0x23:   [Struct('>Bfff')],
     # Command Packet 0x24: Request GPS Satellite Selection
-    0x24:   [struct.Struct('>B')],
+    0x24:   [Struct('>B')],
     # Command Packet 0x25: Initiate Hot Reset
-    0x25:   [struct.Struct('>B')],
+    0x25:   [Struct('>B')],
     # Command Packet 0x26: Request Receiver Health
-    0x26:   [struct.Struct('>B')],
+    0x26:   [Struct('>B')],
     # Command Packet 0x27: Request Signal Levels
-    0x27:   [struct.Struct('>B')],
+    0x27:   [Struct('>B')],
     # Command Packet 0x29: Request Almanac Health
-    0x29:   [struct.Struct('>B')],
+    0x29:   [Struct('>B')],
     # Command Packet 0x2d: request oscillator offset
-    0x2d:   [struct.Struct('>B')],
+    0x2d:   [Struct('>B')],
     # Command Packet 0x31: Accurate Initial Position (XYZ Cartesian ECEF)
     # Here this packet will always contain double precision values.
-    0x31:   [struct.Struct('>Bddd')],
+    0x31:   [Struct('>Bddd')],
     # Command Packet 0x32: Accurate Initial Position (LLA)
     # Here this packet will always contain double precision values.
-    0x32:   [struct.Struct('>Bddd')],
+    0x32:   [Struct('>Bddd')],
     # Command Packet 0x34: Satellite Selection For One-Satellite Mode
-    0x34:   [struct.Struct('>BB')],
+    0x34:   [Struct('>BB')],
     # Command Packet 0x35: Set or Request I/O Options
-    0x35:   [struct.Struct('>BBBBB')],
+    0x35:   [Struct('>BBBBB')],
     # Command Packet 0x37: Request Status and Values of Last Position
-    0x37:   [struct.Struct('>B')],
+    0x37:   [Struct('>B')],
     # Command Packet 0x38: Request Satellite System Data
-    0x38:   [struct.Struct('>BBBB')],
+    0x38:   [Struct('>BBBB')],
     # Command Packet 0x39: Set or Request SV Disable and Health Use
-    0x39:   [struct.Struct('>BBB')],
+    0x39:   [Struct('>BBB')],
     # Command Packet 0x3A: Request Last Raw Measurement
-    0x3a:   [struct.Struct('>BB')],
+    0x3a:   [Struct('>BB')],
     # Command Packet 0x3B: Request Ephemeris Status
-    0x3b:   [struct.Struct('>BB')],
+    0x3b:   [Struct('>BB')],
     # Command Packet 0x3C: Request Satellite Tracking Status
-    0x3c:   [struct.Struct('>BB')],
+    0x3c:   [Struct('>BB')],
     # Command Packet 0x3F-11: Request EEPROM Segment Status
-    0x3f:   [struct.Struct('>BB')],
+    0x3f:   [Struct('>BB')],
     # Report packet 0x41: GPS Time
-    0x41:   [struct.Struct('>Bfhf')],
+    0x41:   [Struct('>Bfhf')],
     # Report Packet 0x42: Single-precision Position Fix
-    0x42:   [struct.Struct('>Bffff')],
+    0x42:   [Struct('>Bffff')],
     # Report Packet 0x43: Velocity Fix, XYZ ECEF
-    0x43:   [struct.Struct('>Bfffff')],
+    0x43:   [Struct('>Bfffff')],
     # Report Packet 0x45: Software Version Information
-    0x45:   [struct.Struct('>BBBBBBBBBBB')],
+    0x45:   [Struct('>BBBBBBBBBBB')],
     # Report Packet 0x46: Receiver Health
     # In contradiction to the official documentation packet 0x46 may occur
     # with only single unsigned integer field. 
-    0x46:   [struct.Struct('>BBB'), struct.Struct('>B')],    
+    0x46:   [Struct('>BBB'), Struct('>B')],    
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by 
     # the count field
-    0x47:   [struct.Struct('>BB' + 'Bf' * i) for i in range(0, MAX_CHANNELS)],
+    0x47:   [Struct('>BB' + 'Bf' * i) for i in range(0, MAX_CHANNELS)],
     # Report Packet 0x49: Almanac Health
-    0x49:   [struct.Struct('>B32B')],
+    0x49:   [Struct('>B32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
-    0x4a:   [struct.Struct('>Bfffff')],
+    0x4a:   [Struct('>Bfffff')],
     # Report Packet 0x4B: Receiver Health
-    0x4b:   [struct.Struct('>BBBB')],
+    0x4b:   [Struct('>BBBB')],
     # Report Packet 0x4d: Oscillator offset
-    0x4d:   [struct.Struct('>Bf')],
+    0x4d:   [Struct('>Bf')],
     # Report Packet 0x55: I/O Options
-    0x55:   [struct.Struct('>BBBBB')],
+    0x55:   [Struct('>BBBBB')],
     # Report Packet 0x56: Velocity Fix, East-North-Up (ENU)
-    0x56:   [struct.Struct('>Bfffff')],
+    0x56:   [Struct('>Bfffff')],
     # Report Packet 0x57: Information about Last Computed Fix
-    0x57:   [struct.Struct('>BBBfI')],
+    0x57:   [Struct('>BBBfI')],
     # Report Packet 0x58: GPS System Data from the Receiver
     0x58:   [Struct0x58()], 
     # Report Packet 0x59: Status of Satellite Disable or Ignore Health
-    0x59:   [struct.Struct('>BB32B')],
+    0x59:   [Struct('>BB32B')],
     # Report Packet 0x5A: Raw Data Measurement Data
-    0x5a:   [struct.Struct('>BBffffd')],
+    0x5a:   [Struct('>BBffffd')],
     # Report Packet 0x5B: Satellite Ephemeris Status
-    0x5b:   [struct.Struct('>BfBBfBf')],
+    0x5b:   [Struct('>BfBBfBf')],
     # Report Packet 0x5C: Satellite Tracking Status
-    0x5c:   [struct.Struct('>BBBBBffffBBBB')],
+    0x5c:   [Struct('>BBBBBffffBBBB')],
     # Report Packet 0x5F-11: EEPROM Segment Status
     0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d:   [struct.Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],  
+    0x6d:   [Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],  
     #[Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
-    0x70:   [struct.Struct('>BBBBB')],
+    0x70:   [Struct('>BBBBB')],
     # Report Packet 0x82: SBAS correction status
-    0x82:   [struct.Struct('>BB')],
+    0x82:   [Struct('>BB')],
     # Report Packet 0x83: Double Precision XYZ
-    0x83:   [struct.Struct('>Bddddf')],
+    0x83:   [Struct('>Bddddf')],
     # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)
-    0x84:   [struct.Struct('>Bddddf')],
+    0x84:   [Struct('>Bddddf')],
     # Command/Report Packet 0xBB: Set Receiver Configuration
-    0xbb00 :[struct.Struct('>BB'), Struct0xbb()],
+    0xbb00 :[Struct('>BB'), Struct0xbb()],
     # Command/Report Packet 0xBC: Set Port Configuration
-    0xbc:   [struct.Struct('>BB'), struct.Struct('>BBBBBBBBBBB')],
+    0xbc:   [Struct('>BB'), Struct('>BBBBBBBBBBB')],
     # Command Packet 0x8E-15: Request current Datum values
-    0x8e15: [struct.Struct('>BB')],
+    0x8e15: [Struct('>BB')],
     # Command Packet 0x8E-23 - Request Last Compact Fix Information
-    0x8e23: [struct.Struct('>BBB')],
+    0x8e23: [Struct('>BBB')],
     # Command Packet 0x8E-26: Write Configuration to NVS
-    0x8e26: [struct.Struct('>BB')],
+    0x8e26: [Struct('>BB')],
     # Command Packet 0x8E-41: Request Manufacturing Parameters
-    0x8e41: [struct.Struct('>BB')],
+    0x8e41: [Struct('>BB')],
     # Command Packet 0x8E-42: Stored Production Parameters
-    0x8e42: [struct.Struct('>BB')],
+    0x8e42: [Struct('>BB')],
     # Command Packet 0x8E-45: Revert Configuration Segment to Default Settings and Write to NVS
-    0x8e45: [struct.Struct('>BBB')],
+    0x8e45: [Struct('>BBB')],
     # Command Packet 0x8E-4A: Set PPS Characteristics
-    0x8e4a: [struct.Struct('>BBBBBdf')],
+    0x8e4a: [Struct('>BBBBBdf')],
     # Command Packet 0x8E-4C: Write Configuration Segment to NVS
-    0x8e4c: [struct.Struct('>BBB')],
+    0x8e4c: [Struct('>BBB')],
     # Command Packet 0x8E-4E: Set PPS output option
-    0x8e4e: [struct.Struct('>BBB')],
+    0x8e4e: [Struct('>BBB')],
     # Command Packet 0x8E-A0: Set DAC Value
     0x8ea0: [Struct0x8ea0()],
     # Command Packet 0x8E-A2: UTC/GPS Timing
-    0x8ea2: [struct.Struct('>BBB')],
+    0x8ea2: [Struct('>BBB')],
     # Command Packet 0x8E-A3: Issue Oscillator Disciplining Command
-    0x8ea3: [struct.Struct('>BBB')],
+    0x8ea3: [Struct('>BBB')],
     # Command Packet 0x8E-A4: Test Modes
-    0x8ea4: [struct.Struct('>BBB'), struct.Struct('>BBBHI'), struct.Struct('>BBBffhIHHHh')],
+    0x8ea4: [Struct('>BBB'), Struct('>BBBHI'), Struct('>BBBffhIHHHh')],
     # Command Packet 0x8E-A5: Packet Broadcast Mask
-    0x8ea5: [struct.Struct('>BBHH')],
+    0x8ea5: [Struct('>BBHH')],
     # Command Packet 0x8E-A6: Self-Survey Command
-    0x8ea6: [struct.Struct('>BBB')],
+    0x8ea6: [Struct('>BBB')],
     # Command Packet 0x8E-A8: Set or Request Disciplining Parameters
     0x8ea8: [Struct0x8ea8()],
     # Command Packet 0x8E-A9: Self-Survey Parameters
-    0x8ea9: [struct.Struct('>BBBBII'), struct.Struct('>BBB')],
+    0x8ea9: [Struct('>BBBBII'), Struct('>BBB')],
     # Command Packet 0x8E-AB: Request Primary Timing Packet
-    0x8eab: [struct.Struct('>BBB')],
+    0x8eab: [Struct('>BBB')],
     # Command Packet 0x8E-AC: Request Supplementary Timing Packet
-    0x8eac: [struct.Struct('>BBB')],
+    0x8eac: [Struct('>BBB')],
     # Report Packet 0x8F-15 Current Datum Values
-    0x8f15: [struct.Struct('>BBhddddd')],
+    0x8f15: [Struct('>BBhddddd')],
     # Report Packet 0x8F-23 - Request Last Compact Fix Information
-    0x8f23: [struct.Struct('>BBIHBBiIihhhh')],
+    0x8f23: [Struct('>BBIHBBiIihhhh')],
     # Report Packet 0x8F-41: Stored Manufacturing Operating Parameters
-    0x8f41: [struct.Struct('>BBHIBBBBfH')],
+    0x8f41: [Struct('>BBHIBBBBfH')],
     # Report Packet 0x8F-42: Stored Production Parameters
-    0x8f42: [struct.Struct('>BBBBHIIHHH')],
+    0x8f42: [Struct('>BBBBHIIHHH')],
     # Report Packet 0x8F-4A: Set PPS Characteristics
-    0x8f4a: [struct.Struct('>BBBBBdf')],
+    0x8f4a: [Struct('>BBBBBdf')],
     # Report Packet 0x8F-4E: PPS Output
-    0x8f4e: [struct.Struct('>BBB')],
+    0x8f4e: [Struct('>BBB')],
     # Report Packet 0x8F-A0: DAC Value
-    0x8fa0: [struct.Struct('>BBIfBBff')],
+    0x8fa0: [Struct('>BBIfBBff')],
     # Report Packet 0x8F-A2: UTC/GPS Timing
-    0x8fa2: [struct.Struct('>BBB')],
+    0x8fa2: [Struct('>BBB')],
     # Report Packet 0x8F-A3: Oscillator Disciplining Command
-    0x8fa3: [struct.Struct('>BBB')],
+    0x8fa3: [Struct('>BBB')],
     # Report Packet 0x8F-A4: Test Modes
-    0x8fa4: [struct.Struct('>BBB'), struct.Struct('>BBBHI'), struct.Struct('>BBBffhIHHHh')],
+    0x8fa4: [Struct('>BBB'), Struct('>BBBHI'), Struct('>BBBffhIHHHh')],
     # Report Packet 0x8F-A5: Packet Broadcast Mask
-    0x8fa5: [struct.Struct('>BBHH')],
+    0x8fa5: [Struct('>BBHH')],
     # Report Packet 0x8F-A6: Self-Survey Command
-    0x8fa6: [struct.Struct('>BBB')],
+    0x8fa6: [Struct('>BBB')],
     # Report Packet 0x8F-A8: Oscillator Disciplining Parameters
     0x8fa8: [Struct0x8fa8()], 
     # Report Packet 0x8F-A9: Self-Survey Parameters
-    0x8fa9: [struct.Struct('>BBBBII')],
+    0x8fa9: [Struct('>BBBBII')],
     # Report Packet 0x8F-AB:Primary Timing Packet
-    0x8fab: [struct.Struct('>BBIHhBBBBBBH')],
+    0x8fab: [Struct('>BBIHhBBBBBBH')],
     # Report Packet 0x8F-AC: Supplemental Timing Packet
-    0x8fac: [struct.Struct('>BBBBBIHHBBBBffIffdddfI')]
+    0x8fac: [Struct('>BBBBBIHHBBBBffIffdddfI')]
 }
 
 
