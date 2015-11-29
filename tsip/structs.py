@@ -46,6 +46,26 @@ MAX_CHANNELS = 12
 #         return []
 #     
 
+def tobytes(s):
+    try:
+        return bytes(s.encode())   
+    except AttributeError:
+        return s
+    except UnicodeDecodeError:
+        return bytes(s)             # a no-op in Python 2
+
+
+def unpack(fmt, x):
+
+    # In Python 3 extracting a single index out of a bytes "string"
+    # returns an integer whereas Python 2 returned a single-character
+    # string (see tsip/structs.py", line 498, in get_structs_for_rawpacket).
+    if isinstance(x, int):
+        return [x]
+    else:
+        return list(struct.unpack(fmt, tobytes(x)))
+
+
 class Struct(struct.Struct):
     """Custom `struct.Struct` class.
 
@@ -61,10 +81,30 @@ class Struct(struct.Struct):
        * some issues regarding Python 2 strings versus Python 3 unicode strings
          and byte-arrays are dealt with transparently.
 
+       * add `unpack_slice()` method which transparently deals 
+         with Python 2 and Python 3 differences (strings vs. bytes).
+
     """
 
     def __init__(self, *args, **kwargs):
         super(Struct, self).__init__(*args, **kwargs)
+
+    def unpack(self, x):
+#        try:
+#            x = bytes(x.encode())          # Python 3
+#        except UnicodeDecodeError:
+#            pass                           # Python 2
+
+        return list(super(Struct, self).unpack(tobytes(x)))
+
+#    def unpack_slice(x, i, j):
+#        try:
+#            y = x[i:j]         # Python 2
+#        except TypeError:
+#            y = bytes(x)[i:j]  # Python 2
+#
+#        return list(super(Struct, self).unpack(y))
+        
 
     
 class StructRaw(object):
@@ -93,19 +133,19 @@ class Struct0x1c81(object):
     
     format = '>BBBBBBBBH'
     def pack(self, *f):
-        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
+        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
      
     def unpack(self, rawpacket):
-        return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:],)
+        return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:].decode(),)
     
     
 class Struct0x1c83(object):
     format = '>BBIBBHBH'
     def pack(self, *f):
-        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + f[-1]
+        return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
      
     def unpack(self, s):
-        return struct.unpack(self.format, s[:13]) + (s[14:],)
+        return struct.unpack(self.format, s[:13]) + (s[14:].decode(),)
          
     
     
@@ -214,14 +254,14 @@ class Struct0x8ea0(object):
     def unpack(self, rawpacket):
         
         try:
-            flag = struct.unpack('>B', rawpacket[2])[0]
+            flag = unpack('>B', rawpacket[2])[0]
         except IndexError:
-            return struct.unpack('>BB', rawpacket)
+            return unpack('>BB', rawpacket)
         
         if flag == 0:
-            return struct.unpack('>BBBf', rawpacket)
+            return unpack('>BBBf', rawpacket)
         elif flag == 1:
-            return struct.unpack('>BBBI', rawpacket)
+            return unpack('>BBBI', rawpacket)
         else:
             raise ValueError('Invalid flag in packet 0x8ea0')
         
@@ -247,16 +287,16 @@ class Struct0x8ea8(object):
             raise ValueError('Invalid type in packet 0x8ea8')
         
     def unpack(self, rawpacket):
-        type_ = struct.unpack('>B', rawpacket[2])[0]
+        type_ = unpack('>B', rawpacket[2])[0]
         
         if type_ == 0:
-            return struct.unpack(self.fmt0, rawpacket)
+            return unpack(self.fmt0, rawpacket)
         elif type_ == 1:
-            return struct.unpack(self.fmt1, rawpacket)
+            return unpack(self.fmt1, rawpacket)
         elif type_ == 2:
-            return struct.unpack(self.fmt2, rawpacket)
+            return unpack(self.fmt2, rawpacket)
         elif type_ == 3:
-            return struct.unpack(self.fmt3, rawpacket)
+            return unpack(self.fmt3, rawpacket)
         else:
             raise ValueError('Invalid type in packet 0x8ea8')
         
@@ -464,13 +504,13 @@ def get_structs_for_rawpacket(rawpacket):
     
     """
     
-    key = struct.unpack('>B', rawpacket[0])[0]
+    key = unpack('>B', rawpacket[0])[0]
     
     try:
         return PACKET_STRUCTURES[key]
     except KeyError:
         try:
-            key = struct.unpack('>H', rawpacket[0:2])[0]
+            key = unpack('>H', rawpacket[0:2])[0]
             return PACKET_STRUCTURES[key]
         except (struct.error, KeyError):
             return []
