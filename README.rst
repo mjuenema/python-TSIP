@@ -14,13 +14,7 @@ Copernicus II receiver is currently work in progress. Presumably Trimble Thunder
 supported as they appear to implement a subset of the commands/reports of the (newer) Copernicus II receiver. 
 I don't have access to any other Trimble products.
 
-Documentation
--------------
-
 Documentation is way behind and largely reflects an obsolete implementation of this project. 
-
-Testing
--------
 
 `python-TSIP` is automatically tested against the following Python versions.
 
@@ -33,9 +27,14 @@ Testing
 * pypy
 * pypy3
 
-Latest release (*master* branch): |travismaster|
+=========   ===================
+Branch      Travis-CI          
+=========   ===================
+master      |travismaster|     
+develop     |travisdevelop|
+=========   ===================
 
-Development (*develop* branch): |travisdevelop|
+The *master* branch equals the latest release!
 
 .. |travismaster| image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=master
     :target: https://travis-ci.org/mjuenema/python-TSIP
