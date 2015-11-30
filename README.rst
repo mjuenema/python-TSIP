@@ -21,11 +21,12 @@ Documentation is way behind and largely reflects an obsolete implementation of t
 * Python 2.6
 * Python 2.7
 * Python 3.3
-* Python 3.3
 * Python 3.4
 * Python 3.5
 * pypy
 * pypy3
+
+.. note:: Python 3.2 is not officially supported as the automatic test on Travis-CI fails.
 
 =========   ===================   ==============   =================
 Branch      Travis-CI             Codacy           Codecov
@@ -78,9 +79,9 @@ The following code shows how to receive the current GPS time from the receiver.
    
    while True:      # should implement timeout here!!!
        report = gps.read()
-       if report.code == 0x41:
-           print 'GPS time of week .......: %f' % (report[0])
-           print 'Extended GPS week number: %d' % (report[1])
-           print 'GPS UTC offset .........: %f' % (report[2])
+       if report[0] == 0x41:
+           print 'GPS time of week .......: %f' % (report[1])
+           print 'Extended GPS week number: %d' % (report[2])
+           print 'GPS UTC offset .........: %f' % (report[3])
            break
    
