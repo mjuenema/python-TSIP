@@ -38,12 +38,12 @@ Python-TSIP is automatically tested against the following Python versions.
 * pypy3
 * jython (not supported by Travis-CI but passes my local Tox tests)
 
-=========   ===================   ==============   =================
-Branch      Travis-CI             Codacy           Codecov
-=========   ===================   ==============   =================
-master      |travismaster|        |codacymaster|   |codecovmaster|
-develop     |travisdevelop|                        |codecovdevelop|
-=========   ===================   ==============   =================
+====================   ===================   ==============   =================
+Branch                 Travis-CI             Codacy           Codecov
+====================   ===================   ==============   =================
+master                 |travismaster|        |codacymaster|   |codecovmaster|
+develop                |travisdevelop|                        |codecovdevelop|
+====================   ===================   ==============   =================
 
 The *master* branch equals the latest release. The *develop* branch represents the latest development but may not always pass all tests. I use the gitflow_ plugin to follow this `Git branching model`_.
 
@@ -65,6 +65,8 @@ The *master* branch equals the latest release. The *develop* branch represents t
     
 .. |codecovdevelop| image:: https://codecov.io/github/mjuenema/python-TSIP/coverage.svg?branch=develop
     :target: https://codecov.io/github/mjuenema/python-TSIP?branch=develop
+    
+.. |githubtag| image:: https://img.shields.io/github/tag/mjuenema/docker-eclipse-pydev.svg
 
 Example
 =======
