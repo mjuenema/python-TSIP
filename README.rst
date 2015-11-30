@@ -27,20 +27,33 @@ Documentation is way behind and largely reflects an obsolete implementation of t
 * pypy
 * pypy3
 
-=========   ===================
-Branch      Travis-CI          
-=========   ===================
-master      |travismaster|     
-develop     |travisdevelop|
-=========   ===================
+=========   ===================   ==============   =================
+Branch      Travis-CI             Codacy           Codecov
+=========   ===================   ==============   =================
+master      |travismaster|        |codacymaster|   |codecovmaster|
+develop     |travisdevelop|                        |codecovdevelop|
+=========   ===================   ==============   =================
 
-The *master* branch equals the latest release!
+The *master* branch equals the latest release. The *develop* branch represents the latest development but may not always pass all tests. I use the gitflow_ plugin to follow this `Git branching model`_.
+
+.. _gitflow: https://github.com/nvie/gitflow
+
+.. _`Git branching model`: http://nvie.com/posts/a-successful-git-branching-model/
 
 .. |travismaster| image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=master
     :target: https://travis-ci.org/mjuenema/python-TSIP
     
 .. |travisdevelop| image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=develop
     :target: https://travis-ci.org/mjuenema/python-TSIP
+    
+.. |codacymaster| image:: https://api.codacy.com/project/badge/grade/91b7ca0231a24e3288ac88ff5085af42
+    :target: https://www.codacy.com/app/markus_2/python-TSIP
+    
+.. |codecovmaster| image:: https://codecov.io/github/mjuenema/python-TSIP/coverage.svg?branch=master
+    :target: https://codecov.io/github/mjuenema/python-TSIP?branch=master
+    
+.. |codecovdevelop| image:: https://codecov.io/github/mjuenema/python-TSIP/coverage.svg?branch=develop
+    :target: https://codecov.io/github/mjuenema/python-TSIP?branch=develop
 
 Example
 =======
