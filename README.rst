@@ -26,7 +26,7 @@ Documentation is way behind and largely reflects an obsolete implementation of t
 * pypy
 * pypy3
 
-.. note:: Python 3.2 is not officially supported as the automatic test on Travis-CI fails.
+Python 3.2 is not officially supported as the automatic test on Travis-CI fails.
 
 =========   ===================   ==============   =================
 Branch      Travis-CI             Codacy           Codecov
