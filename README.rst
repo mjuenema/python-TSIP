@@ -1,9 +1,19 @@
+|pypiversions| |pypistatus| |pythontsiplicense|
+ 
+.. |pypiversions| image:: https://img.shields.io/pypi/pyversions/python-TSIP.svg
+
+.. |pypistatus| image::  https://img.shields.io/pypi/status/python-TSIP.svg
+
+.. |pythontsiplicense| image:: https://img.shields.io/github/license/mjuenema/python-TSIP.svg
+
 About Python-TSIP
 =================
 
 Python-TSIP is a Python package for parsing and creating TSIP packets. The Trimble Standard 
 Interface Protocol (TSIP) is the binary protocol spoken by the GPS receivers sold by Trimble Navigation Ltd. 
 (http://www.trimble.com).
+
+Python-TSIP is available under the "BSD 2-Clause Simplified License".
 
 Status
 ======
@@ -16,17 +26,17 @@ I don't have access to any other Trimble products.
 
 Documentation is way behind and largely reflects an obsolete implementation of this project. 
 
-`python-TSIP` is automatically tested against the following Python versions.
+Python-TSIP is automatically tested against the following Python versions.
 
 * Python 2.6
 * Python 2.7
+* Python 3.2 (fails on Travis-CI but passes my local Tox tests)
 * Python 3.3
 * Python 3.4
 * Python 3.5
 * pypy
 * pypy3
-
-Python 3.2 is not officially supported as the automatic test on Travis-CI fails.
+* jython (not supported by Travis-CI but passes my local Tox tests)
 
 =========   ===================   ==============   =================
 Branch      Travis-CI             Codacy           Codecov
