@@ -45,7 +45,11 @@ master                 |travismaster|        |codacymaster|   |codecovmaster|
 develop                |travisdevelop|                        |codecovdevelop|
 ====================   ===================   ==============   =================
 
-The *master* branch equals the latest release. The *develop* branch represents the latest development but may not always pass all tests. I use the gitflow_ plugin to follow this `Git branching model`_.
+The master_ branch equals the latest release. The develop_ branch represents the latest development but may not always pass all tests. I use the gitflow_ plugin to follow this `Git branching model`_.
+
+.. _master: https://github.com/mjuenema/python-TSIP/tree/master
+
+.. _develop: https://github.com/mjuenema/python-TSIP/tree/develop
 
 .. _gitflow: https://github.com/nvie/gitflow
 
