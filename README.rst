@@ -30,13 +30,16 @@ Python-TSIP is automatically tested against the following Python versions.
 
 * Python 2.6
 * Python 2.7
-* Python 3.2 (fails on Travis-CI but passes my local Tox tests)
 * Python 3.3
 * Python 3.4
 * Python 3.5
 * pypy
 * pypy3
-* jython (not supported by Travis-CI but passes my local Tox tests)
+
+The tests currently fail on the following Python versions. 
+
+* Python 3.2 (syntax error in the coverage module, it may work otherwise)
+* Jython (can't get Tox to work with jython)
 
 ====================   ===================   ==============   =================
 Branch                 Travis-CI             Codacy           Codecov
