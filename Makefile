@@ -107,3 +107,7 @@ info:
 build: 
 	$(PYTHON) setup.py build
 
+.PHONY:
+upload: sdist bdist wheel
+	twine upload dist/*
+
