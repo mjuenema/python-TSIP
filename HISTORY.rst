@@ -3,7 +3,7 @@
 History
 =======
 
-0.2.0 (??-Dec-2015)
+0.2.0 (03-Dec-2015)
 -------------------
 
 * Rewritten from scratch.

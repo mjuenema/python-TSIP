@@ -1,5 +1,7 @@
 .PHONY: clean-pyc clean-build docs clean
 
+PYTHON := python2.7
+
 # ---------------------------------------------------------
 #  
 #  help
@@ -62,18 +64,9 @@ test_llapi:
 test_hlapi:
 	nosetests -x -v tests/$@.py
 
-tox: tox26 tox27 tox33
+tox: 
+	tox
 
-tox26:
-	python2.6 -m nose -x -v tests/test_structs.py tests/test_llapi.py tests/test_hlapi.py
-
-tox27:
-	python2.7 -m tox -e py27
-
-tox33:
-	python3.3 `which tox` -e py33
-
-	
 
 #coverage:
 #	coverage run --source python-TSIP setup.py test
@@ -89,26 +82,28 @@ docs:
 #	$(MAKE) -C docs html
 #	open docs/_build/html/index.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+.PHONY: sdist
+sdist: 
+	$(PYTHON) setup.py $@
 
-sdist: clean
-	python setup.py $@
+.PHONY: bdist
+bdist:
+	$(PYTHON) setup.py $@
 
-bdist: sdist
-	python setup.py $@
-
-rpm: bdist
+.PHONY: rpm
+rpm:
+	# native python version
 	python setup.py bdist_rpm
 
-build: clean
-	python setup.py build
+.PHONY: wheel
+wheel:
+	$(PYTHON) setup.py bdist_wheel --universal
 
-sdist: clean
-	python setup.py sdist
+.PHONY: info
+info:
+	$(PYTHON) setup.py egg_info
 
-bdist: clean
-	python setup.py bdist
-
+.PHONY: build
+build: 
+	$(PYTHON) setup.py build
 
