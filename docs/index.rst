@@ -12,14 +12,12 @@ Contents:
    :maxdepth: 2
 
    readme
-   installation
-   usage
    packets
-   packets_table
    api
-   contributing
    authors
+   contributing
    history
+   
 
 Indices and tables
 ==================

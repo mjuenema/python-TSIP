@@ -1,5 +1,11 @@
 .PHONY: clean-pyc clean-build docs clean
 
+PYTHON := python2.7
+
+# ---------------------------------------------------------
+#  
+#  help
+#
 help:
 	@echo "clean - remove all build, test, coverage and Python artifacts"
 	@echo "clean-build - remove build artifacts"
@@ -13,6 +19,11 @@ help:
 	@echo "release - package and upload a release"
 	@echo "dist - package"
 
+
+# ---------------------------------------------------------
+#  
+# clean
+# 
 clean: clean-build clean-pyc clean-test
 
 clean-build:
@@ -31,31 +42,37 @@ clean-test:
 	rm -f .coverage
 	rm -fr htmlcov/
 
+# ---------------------------------------------------------
+#  
+#  lint
+#
+flakes: lint
 lint:
-#	flake8 python-TSIP tests
-	pylint -E tsip/*.py tests/*.py
+	pyflakes tsip/*.py tests/*.py
 
-test: test_packets test_gps test_captures
 
-test_copernicus_file: 
+# ---------------------------------------------------------
+#  
+#  test
+#
+test: 
+	nosetests -x -v tests/test_structs.py tests/test_llapi.py tests/test_hlapi.py
 
-test_packets:
+test_llapi:
 	nosetests -x -v tests/$@.py
 
-test_gps:
+test_hlapi:
 	nosetests -x -v tests/$@.py
 
-test_captures:
-	nosetests -x -v tests/$@.py
-
-test-all:
+tox: 
 	tox
 
-coverage:
-	coverage run --source python-TSIP setup.py test
-	coverage report -m
-	coverage html
-	open htmlcov/index.html
+
+#coverage:
+#	coverage run --source python-TSIP setup.py test
+#	coverage report -m
+#	coverage html
+#	open htmlcov/index.html
 
 docs:
 #	rm -f docs/python-TSIP.rst
@@ -65,11 +82,32 @@ docs:
 #	$(MAKE) -C docs html
 #	open docs/_build/html/index.html
 
-release: clean
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+.PHONY: sdist
+sdist: 
+	$(PYTHON) setup.py $@
 
-dist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
+.PHONY: bdist
+bdist:
+	$(PYTHON) setup.py $@
+
+.PHONY: rpm
+rpm:
+	# native python version
+	python setup.py bdist_rpm
+
+.PHONY: wheel
+wheel:
+	$(PYTHON) setup.py bdist_wheel --universal
+
+.PHONY: info
+info:
+	$(PYTHON) setup.py egg_info
+
+.PHONY: build
+build: 
+	$(PYTHON) setup.py build
+
+.PHONY:
+upload: sdist bdist wheel
+	twine upload dist/*
+

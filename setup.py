@@ -10,7 +10,7 @@ except ImportError:
 from os.path import join, dirname
 
 
-from python-TSIP.config import NAME, VERSION, LICENSE
+from tsip import NAME, VERSION, LICENSE, AUTHOR, EMAIL, DESCRIPTION, URL
 
 readme = open(join(dirname(__file__), 'README.rst')).read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
@@ -27,33 +27,34 @@ test_requirements = [
 setup(
     name=NAME,
     version=VERSION,
-    description='Python package for parsing and creating TSIP packets',
+    description=DESCRIPTION,
     long_description=readme + '\n\n' + history,
-    author='Markus Juenemann',
-    author_email='markus@juenemann.net',
-    url='https://github.com/mjuenema/python-TSIP',
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
     packages=[
-        'python-TSIP',
+        NAME,
     ],
-    package_dir={'python-TSIP':
-                 'python-TSIP'},
+    package_dir={'tsip':
+                 'tsip'},
     include_package_data=True,
     install_requires=requirements,
     license=LICENSE,
     zip_safe=False,
-
-    keywords='python-TSIP',
+    keywords='TSIP, Trimble, GPS',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
+        'Topic :: Software Development :: Libraries',
+        'Topic :: System :: Hardware',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: Implementation :: PyPy',
     ],
     test_suite='tests',
     tests_require=test_requirements
@@ -64,3 +65,4 @@ setup(
 #
 # - https://pythonhosted.org/setuptools/index.html
 # - http://foobar.lu/wp/2012/05/13/a-comprehensive-step-through-python-packaging-a-k-a-setup-scripts/
+# - https://pypi.python.org/pypi?%3Aaction=list_classifiers

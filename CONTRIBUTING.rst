@@ -56,7 +56,10 @@ If you are proposing a feature:
 Get Started!
 ============
 
-Ready to contribute? Here's how to set up `python-TSIP` for local development.
+.. note:: Some of the steps described below may not work yet.
+
+Ready to contribute? Here's how to set up `python-TSIP` for local development. Most of the commands
+are accessible through the ``mMkefile``.
 
 1. Install the gitflow_ Git add-on. Gitflow implements the work-flow described
    in `A successful Git branching model`_.
@@ -67,37 +70,45 @@ Ready to contribute? Here's how to set up `python-TSIP` for local development.
 
     $ git clone git@github.com:your_name_here/python-TSIP.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+4. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
     $ mkvirtualenv python-TSIP
     $ cd python-TSIP/
     $ python setup.py develop
 
-4. Initialise Gitflow::
+5. Initialise Gitflow::
 
    $ git flow init -d
 
-5. Start a new feature or branch::
+6. Start a new feature or branch::
 
     $ git flow feature start <name-of-your-feature>
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
+7. When you're done making changes, check that your changes pass flake8 and the tests::
 
-    $ flake8 python-TSIP tests
-    $ python setup.py test
-    $ tox
+    $ make flake8
+    $ make test
+   
+8. If you have other Python versions installed, use the `tox` tool to test `python-TSIP` against them, too. You may have to 
+   adjust ``tox.ini`` to match your environment but please don't ``git add tox.ini``.
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+    $ make tox
+    
+   To get flake8 and tox, just pip install them into your virtualenv. You may have to adjust your ``PATH`` before running
+   ``make tox`` so that the respective Python interpreters are found. In my setup I the different Python versions are
+   installed under ``/opt/Python-<version``::
+   
+    $ export PATH=$PATH:`echo /opt/Python-*/bin | tr ' ' ':'`
 
-6. Commit your changes and push your branch to GitHub::
+9. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin feature/<name-of-your-feature>
 
-7. Submit a pull request through the GitHub website.
+10. Submit a pull request through the GitHub website.
 
 .. _gitflow: https://github.com/nvie/gitflow
 .. _`A successful Git branching model`: http://nvie.com/posts/a-successful-git-branching-model/
@@ -120,4 +131,4 @@ Tips
 
 To run a subset of tests::
 
-    $ python -m unittest tests.test_python-TSIP
+    $ nosetests tests/test_<name>.py
