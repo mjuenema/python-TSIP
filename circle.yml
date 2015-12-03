@@ -1,0 +1,12 @@
+#
+# Configuration for https://circleci.com/gh/mjuenema/python-TSIP
+#
+
+dependencies:
+  pre:
+    - pip install -r requirements.txt
+    - pip install coverage
+
+test:
+  override:
+    - make test
