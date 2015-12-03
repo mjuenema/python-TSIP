@@ -65,9 +65,9 @@ class TestGPS(object):
     
     def setup(self):
         try:
-            self.conn = open(TSIPFILE)
+            self.conn = open(TSIPFILE, 'rb')
         except IOError:
-            self.conn = open(os.path.join('tests', TSIPFILE))
+            self.conn = open(os.path.join('tests', TSIPFILE), 'rb')
             
         self.gps_ = gps(self.conn)
         
@@ -89,10 +89,10 @@ class TestGPS(object):
 #        assert packet.startswith(CHR_DLE)
 #        assert packet.endswith(CHR_DLE + CHR_ETX)
 
-#    def test_iter(self):
-#        for packet in self.gps_:
-#            assert packet.startswith(CHR_DLE)
-#            assert packet.endswith(CHR_DLE + CHR_ETX)
+    def test_iter(self):
+        for packet in self.gps_:
+            assert packet.startswith(CHR_DLE)
+            assert packet.endswith(CHR_DLE + CHR_ETX)
             
 #    def test_unframe(self):
 #        for packet in self.gps_:

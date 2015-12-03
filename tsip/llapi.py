@@ -106,10 +106,10 @@ class gps(object):
         while True:
             b = self.conn.read(1)
 
-            if b == '':
+            if len(b) == 0:
                 return None
 
-            packet += b
+            packet += chr(ord(b))	# Python 3 work-around
 
             if b == CHR_DLE:
                 dle_count += 1
@@ -128,6 +128,9 @@ class gps(object):
             raise StopIteration()
         else:
             return packet
+
+    def __next__(self):
+        return self.next()
         
     
     def write(self, packet):
