@@ -108,6 +108,6 @@ build:
 	$(PYTHON) setup.py build
 
 .PHONY:
-upload: sdist bdist wheel
+upload: clean sdist wheel
 	twine upload dist/*
 
