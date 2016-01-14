@@ -111,3 +111,17 @@ build:
 upload: clean sdist wheel
 	twine upload dist/*
 
+# Code test tools
+#
+.PHONY: clonedigger
+clonedigger:
+	clonedigger -l python -o clonedigger.html tsip
+
+.PHONY: flake8
+flake8:
+	flake8 --statistics --exit-zero tsip
+
+.PHONY: pyntch
+pyntch:
+	tchecker.py tsip/*.py
+
