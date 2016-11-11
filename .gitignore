@@ -45,3 +45,6 @@ docs/_build
 
 # Eclipse/PyDev
 .settings
+
+# Misc
+clonedigger.html
