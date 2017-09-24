@@ -3,6 +3,11 @@
 History
 =======
 
+0.2.1 (22-Sep-2017)
+-------------------
+
+* Modified hlapi.py to support superpacket command formats.
+
 0.2.0 (03-Dec-2015)
 -------------------
 
