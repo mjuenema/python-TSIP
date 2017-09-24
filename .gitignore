@@ -45,3 +45,7 @@ docs/_build
 
 # Eclipse/PyDev
 .settings
+
+# Intellij
+.idea
+*.iml

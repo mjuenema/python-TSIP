@@ -14,10 +14,10 @@ from tsip.structs import *
 class PackError(Exception):
     def __init__(self, packet):
         self.packet = packet
-        
+
     def __repr__(self):
         return 'unable to pack packet %s' % (self.packet)
-    
+
 
 class Packet(object):
     """
@@ -41,29 +41,29 @@ class Packet(object):
 
     def __init__(self, *fields):
         self.fields = fields
-            
-    
+
+
     # Make self.fields accessible as indexes on the
     # packet instance.
-    #            
+    #
     def __getitem__(self, index):
         return self.fields[index]
-    
+
     def __setitem__(self, index, value):
         self.fields[index] = value
-        
+
     def __iter__(self):     # TODO: tests for __iter__
         return iter(self.fields)
-    
+
     def __len__(self):      # TODO: tests for __len__
         return len(self.fields)
-    
+
     def _set_fields(self, fields):
         self._fields = list(fields)
-    
+
     def _get_fields(self):
         return self._fields
-    
+
     fields = property(_get_fields, _set_fields)
 
 
@@ -75,7 +75,7 @@ class Packet(object):
            the GPS.
 
         """
-        
+
         # Possible structs for packet ID.
         #
         try:
@@ -83,29 +83,32 @@ class Packet(object):
         except (TypeError):
             # TypeError, if self.fields[0] is a wrong argument to `chr()`.
             raise PackError(self)
-    
-        
+
+
         # Possible structs for packet ID + subcode
         #
         if structs_ == []:
             try:
-                structs_ = get_structs_for_fields([self.fields[0], self.fields[1]])
+                structs_ = get_structs_for_fields([self.fields[0][0], self.fields[0][1]])
             except (IndexError, TypeError):
                 # IndexError, if no self.fields[1]
                 # TypeError, if self.fields[1] is a wrong argument to `chr()`.
                 raise PackError(self)
-            
+
 
         # Try to pack the packet with any of the possible structs.
         #
         for struct_ in structs_:
             try:
-                return struct_.pack(*self.fields)
+                if type(self.fields[0]) in [tuple,list]:
+                    return struct_.pack(*self.fields[0])
+                else:
+                    return struct_.pack(*self.fields)
             except struct.error:
                 pass
-        
-        # We only get here if the ``return`` inside the``for`` loop 
-        # above wasn't reached, i.e. none of the `structs_` matched.   
+
+        # We only get here if the ``return`` inside the``for`` loop
+        # above wasn't reached, i.e. none of the `structs_` matched.
         #
         raise PackError(self)
 
@@ -121,15 +124,15 @@ class Packet(object):
            byte stuffing reversed.
 
         """
-            
+
         structs_ = get_structs_for_rawpacket(rawpacket)
-                
+
         for struct_ in structs_:
             try:
                 return cls(*struct_.unpack(rawpacket))
             except struct.error:
                 pass
-        
+
         # Packet ID 0xff is a pseudo-packet representing
         # packets unknown to `python-TSIP` in their raw format.
         #
@@ -138,7 +141,7 @@ class Packet(object):
 
     def __repr__(self):
         return 'Packet%s' % (str(tuple(self.fields)))
-    
+
 
 class GPS(gps):
 
@@ -148,8 +151,8 @@ class GPS(gps):
 
     def read(self):
         pkt = super(GPS, self).read()
-        return Packet.unpack(unstuff(unframe(pkt))) 
-    
+        return Packet.unpack(unstuff(unframe(pkt)))
+
     def write(self, packet):
         super(GPS, self).write(frame(stuff(packet.pack())))
-        
+
