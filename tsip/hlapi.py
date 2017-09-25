@@ -59,6 +59,11 @@ class Packet(object):
         except TypeError:
             self.fields = fields
 
+    # Packets are equal if their fields are equal
+    #
+    def __eq__(self, other):
+        return self.fields == other.fields
+
 
     # Make self.fields accessible as indexes on the
     # packet instance.

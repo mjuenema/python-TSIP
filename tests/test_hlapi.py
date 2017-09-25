@@ -27,13 +27,12 @@ class PacketTest(object):
         self.pkt6 = Packet.unpack(self.pkt3.pack())
 
     def test_pack(self):
-        assert self.pkt1.fields == \
-               self.fields == \
-               self.pkt2.fields == \
-               self.pkt3.fields == \
-               self.pkt4.fields == \
-               self.pkt5.fields == \
-               self.pkt6.fields
+        assert self.pkt1 == \
+               self.pkt2 == \
+               self.pkt3 == \
+               self.pkt4 == \
+               self.pkt5 == \
+               self.pkt6
 
 
 @raises(PackError)
