@@ -1,10 +1,19 @@
-|pypiversions| |pypistatus| |pythontsiplicense|
- 
-.. |pypiversions| image:: https://img.shields.io/pypi/pyversions/python-TSIP.svg
+.. image:: https://img.shields.io/pypi/v/tsip.svg?style=flat-square
+   :target: https://pypi.python.org/pypi/tsip
+   :alt: Version
 
-.. |pypistatus| image::  https://img.shields.io/pypi/status/python-TSIP.svg
+.. image:: https://img.shields.io/github/license/mjuenema/python-TSIP.svg?style=flat-square
+   :target: https://opensource.org/licenses/BSD-2-Clause
+   :alt: License
 
-.. |pythontsiplicense| image:: https://img.shields.io/github/license/mjuenema/python-TSIP.svg
+.. image:: https://img.shields.io/github/issues/mjuenema/python-TSIP.svg?style=flat-square
+   :target: https://github.com/mjuenema/python-TSIP/issues
+   :alt: Issues
+
+.. image:: https://img.shields.io/travis/mjuenema/python-TSIP/master.svg?style=flat-square
+   :target: https://www.travis-ci.org/mjuenema/python-TSIP/builds
+   :alt: Travis-CI
+
 
 About Python-TSIP
 =================
@@ -41,39 +50,9 @@ The tests currently fail on the following Python versions.
 * Python 3.2 (syntax error in the coverage module, it may work otherwise)
 * Jython (can't get Tox to work with jython)
 
-====================   ===================   ==============   =================
-Branch                 Travis-CI             Codacy           Codecov
-====================   ===================   ==============   =================
-master                 |travismaster|        |codacymaster|   |codecovmaster|
-develop                |travisdevelop|                        |codecovdevelop|
-====================   ===================   ==============   =================
+The master_ branch equals the latest release. The develop_ branch represents the
+latest development but may not always pass all tests.
 
-The master_ branch equals the latest release. The develop_ branch represents the latest development but may not always pass all tests. I use the gitflow_ plugin to follow this `Git branching model`_.
-
-.. _master: https://github.com/mjuenema/python-TSIP/tree/master
-
-.. _develop: https://github.com/mjuenema/python-TSIP/tree/develop
-
-.. _gitflow: https://github.com/nvie/gitflow
-
-.. _`Git branching model`: http://nvie.com/posts/a-successful-git-branching-model/
-
-.. |travismaster| image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=master
-    :target: https://travis-ci.org/mjuenema/python-TSIP
-    
-.. |travisdevelop| image:: https://travis-ci.org/mjuenema/python-TSIP.svg?branch=develop
-    :target: https://travis-ci.org/mjuenema/python-TSIP
-    
-.. |codacymaster| image:: https://api.codacy.com/project/badge/grade/91b7ca0231a24e3288ac88ff5085af42
-    :target: https://www.codacy.com/app/markus_2/python-TSIP
-    
-.. |codecovmaster| image:: https://codecov.io/github/mjuenema/python-TSIP/coverage.svg?branch=master
-    :target: https://codecov.io/github/mjuenema/python-TSIP?branch=master
-    
-.. |codecovdevelop| image:: https://codecov.io/github/mjuenema/python-TSIP/coverage.svg?branch=develop
-    :target: https://codecov.io/github/mjuenema/python-TSIP?branch=develop
-    
-.. |githubtag| image:: https://img.shields.io/github/tag/mjuenema/docker-eclipse-pydev.svg
 
 Example
 =======

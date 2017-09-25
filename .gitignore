@@ -45,3 +45,13 @@ docs/_build
 
 # Eclipse/PyDev
 .settings
+
+# Misc
+clonedigger.html
+
+# Intellij
+.idea
+*.iml
+
+# vi
+**.swp
