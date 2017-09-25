@@ -3,6 +3,14 @@
 History
 =======
 
+0.3.0 (26-Sep-2017)
+-------------------
+
+* Argument to ``tsip.Packet()`` can now also be a tuple or list 
+  (inspired by Criss Swaim).
+* Changed development status from alpha to beta.
+* Cleaned up lots of code to satisfy flake8.
+
 0.2.0 (03-Dec-2015)
 -------------------
 
