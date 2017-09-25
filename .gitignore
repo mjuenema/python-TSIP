@@ -48,3 +48,10 @@ docs/_build
 
 # Misc
 clonedigger.html
+
+# Intellij
+.idea
+*.iml
+
+# vi
+**.swp
