@@ -50,7 +50,7 @@ The tests currently fail on the following Python versions.
 * Python 3.2 (syntax error in the coverage module, it may work otherwise)
 * Jython (can't get Tox to work with jython)
 
-The master_ branch equals the latest release. The develop_ branch represents the
+The master branch equals the latest release. The develop branch represents the
 latest development but may not always pass all tests.
 
 

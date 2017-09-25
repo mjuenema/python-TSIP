@@ -3,6 +3,11 @@
 History
 =======
 
+0.3.1 (26-Sep-2017)
+-------------------
+
+* Fixed README.rst so it renders properly on PyPi.
+
 0.3.0 (26-Sep-2017)
 -------------------
 
