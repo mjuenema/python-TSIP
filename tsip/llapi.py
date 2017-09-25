@@ -6,6 +6,7 @@ Low-level API.
 
 from tsip.config import *
 
+
 def is_framed(packet):
     """
     Check whether a packet contains leading DLE and trailing DLE/ETX.
@@ -22,7 +23,7 @@ def is_framed(packet):
 
 def frame(data):
     """
-    Add leading DLE and trailing DLE/ETX to data. 
+    Add leading DLE and trailing DLE/ETX to data.
 
     :param data: TSIP data without leading DLE and trailing DLE/ETX.
     :type data: Binary string.
@@ -39,13 +40,13 @@ def frame(data):
 
 def unframe(packet):
     """
-    Strip leading DLE and trailing DLE/ETX from packet. 
+    Strip leading DLE and trailing DLE/ETX from packet.
 
     :param packet: TSIP packet with leading DLE and trailing DLE/ETX.
     :type packet: Binary string.
     :return: TSIP packet with leading DLE and trailing DLE/ETX removed.
     :raise: ``ValueError`` if `packet` does not start with DLE and end in DLE/ETX.
- 
+
 
     """
 
@@ -69,7 +70,7 @@ def stuff(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
     else:
         return packet.replace(CHR_DLE, CHR_DLE + CHR_DLE)
-        
+
 
 
 def unstuff(packet):
@@ -98,7 +99,7 @@ class gps(object):
         return self
 
     def read(self):
-    
+
         packet = ''
         dle_count = 0
 
@@ -109,7 +110,7 @@ class gps(object):
             if len(b) == 0:
                 return None
 
-            packet += chr(ord(b))	# Python 3 work-around
+            packet += chr(ord(b))    # Python 3 work-around
 
             if b == CHR_DLE:
                 dle_count += 1
@@ -117,7 +118,7 @@ class gps(object):
                 return packet
             else:
                 pass
-            
+
             last_b = b
 
 
@@ -131,16 +132,14 @@ class gps(object):
 
     def __next__(self):
         return self.next()
-        
-    
+
+
     def write(self, packet):
         """
-        
+
            :param packet: A complete TSIP packet with byte
                 stuffing and framing applied.
-            
-        """
-        
-        self.conn.write(packet)
-        
 
+        """
+
+        self.conn.write(packet)

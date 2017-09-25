@@ -2,20 +2,6 @@
 
 import struct
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def main():
 
     with open('thunderbolt.tsip') as reader:

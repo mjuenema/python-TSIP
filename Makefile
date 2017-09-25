@@ -51,7 +51,7 @@ clean-test:
 #
 flakes: lint
 lint:
-	pyflakes tsip/*.py tests/*.py
+	flake8 tsip/*.py tests/*.py
 
 
 # ---------------------------------------------------------

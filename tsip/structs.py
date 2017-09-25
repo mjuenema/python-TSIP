@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Binary structures of TSIP packets. 
+Binary structures of TSIP packets.
 
 The mechanisms for "packing" and "unpacking" TSIP packets
-do not check at all whether values are valid or even sensible. 
+do not check at all whether values are valid or even sensible.
 
 The rationale behind this descision is to avoid conflict with
-any future changes to the TSIP protocol by the vendor. It is 
-entirely up to the user to ensure that the TSIP packets they 
+any future changes to the TSIP protocol by the vendor. It is
+entirely up to the user to ensure that the TSIP packets they
 create are valid.
 
 """
@@ -26,29 +26,29 @@ MAX_CHANNELS = 12
 
 
 # Classes for packing/unpacking TSIP packets whose structure
-# cannot be expressed as `struct.Struct()` instances. These 
+# cannot be expressed as `struct.Struct()` instances. These
 # mostly deal with packets of variable size/structure/content.
 #
 # class StructNone(object):
 #     """Structure of packets without payload.
-#     
+#
 #        This class represents the strcuture of packets that don't
 #        have any payload. It provides "dummy" `pack()` and `unpack()`
 #        methods to maintain the standard interface for managing
-#        TSIP packet structures. 
-#     
+#        TSIP packet structures.
+#
 #     """
-#     
+#
 #     def pack(self, *f):
 #         return ''
-#     
+#
 #     def unpack(self, s=''):
 #         return []
-#     
+#
 
 def tobytes(s):
     try:
-        return bytes(s.encode())   
+        return bytes(s.encode())
     except AttributeError:
         return s
     except UnicodeDecodeError:
@@ -81,7 +81,7 @@ class Struct(struct.Struct):
        * some issues regarding Python 2 strings versus Python 3 unicode strings
          and byte-arrays are dealt with transparently.
 
-       * add `unpack_slice()` method which transparently deals 
+       * add `unpack_slice()` method which transparently deals
          with Python 2 and Python 3 differences (strings vs. bytes).
 
     """
@@ -104,112 +104,113 @@ class Struct(struct.Struct):
 #            y = bytes(x)[i:j]  # Python 2
 #
 #        return list(super(Struct, self).unpack(y))
-        
 
-    
+
+
 class StructRaw(object):
     """Structure of packets that are interpreted as raw data.
-    
+
        The `StructRaw` class is used for packets for which the
        structure is not implemented anywhere else. Such packets
        are interpreted as containing a single field holding
        the entire packet payload.
-       
+
     """
-    
+
     def pack(self, *f):
         raise NotImplementedError()
-    
+
     def unpack(self, s):
         return struct.unpack('>%ds' % (len(s)), s)
-    
-    
+
+
 class Struct0x1c81(object):
     """Report packet 0x1C:81 - Report firmware version.
-    
-       The product name is of variable length. 
-    
+
+       The product name is of variable length.
+
     """
-    
+
     format = '>BBBBBBBBH'
+
     def pack(self, *f):
         return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
-     
+
     def unpack(self, rawpacket):
         return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:].decode(),)
-    
-    
+
+
 class Struct0x1c83(object):
     format = '>BBIBBHBH'
+
     def pack(self, *f):
         return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
-     
+
     def unpack(self, s):
         return struct.unpack(self.format, s[:13]) + (s[14:].decode(),)
-         
-    
-    
+
 # class Struct0x47(object):
 #     def pack(self, *f):
 #         s = struct.pack('>B', len(f)/2)
-#         
+#
 #         for i in range(1, len(f), 2):
 #             s += struct.pack('>Bf', f[i], f[i+1])
-#             
-#         return s 
-# 
+#
+#         return s
+#
 #     def unpack(self, s):
-# 
+#
 #         count = struct.unpack('>B', s[0])[0]
 #         fields = [count]
-# 
+#
 #         for i in range(0, count):
 #             (satnum, siglevel) = struct.unpack('>Bf', s[i+1:i+6])
 #             fields.append(satnum)
 #             fields.append(siglevel)
-# 
+#
 #         return fields
+
 
 class Struct0x58(object):
     def pack(self, *f):
         raise NotImplementedError
-    
+
     def unpack(self, s):
         raise NotImplementedError
-    
+
 
 # class Struct0x6d(object):
 #     """Report Packet 0x6D: Satellite Selection List.
-#     
-#        This packet is of variable length equal to 17+nsvs where "nsvs" is 
+#
+#        This packet is of variable length equal to 17+nsvs where "nsvs" is
 #        the number of satellites used in the solution.
-#        
+#
 #     """
-#     
-#     
+#
+#
 #     def pack(self, *f):
 #         fmt = '>Bffff' + 'b' * (len(f) - 5)
 #         return struct.pack(fmt, *f)
-#     
+#
 #     def unpack(self, s):
 #         fields = struct.unpack('>Bffff', s[0:17])
 #         nsvs = (fields[0] & 0b11110000) >> 4
 #         return fields + struct.unpack('%db' % (nsvs), s[17:])
-    
+
 
 class Struct0xbb(object):
     """Set/get receiver configuration.
-    
+
        Packet 0xbb/subcode=0 may be used to either query the current receiver
        configuration or change it. The packet contains fields that must contain
-       ``0xff``. 
-       
+       ``0xff``.
+
     """
     format = '>BBBBBBffffBBBBBBBBBBBBBBBBBBB'
-    
+
     def pack(self, *fields):
-        
-        # 
+
+        #
         #
         if not fields:
             # 0xbb query mode is handled by StructNone(); raise struct.error
@@ -217,30 +218,30 @@ class Struct0xbb(object):
             #
             raise struct.error
         else:
-            # Ensure that fields 1, 3, 8 (index starts a zero!) and the trailing 
+            # Ensure that fields 1, 3, 8 (index starts a zero!) and the trailing
             # bytes contain 0xff.
-            #    
+            #
             fields = list(fields)         # Convert to list as tuples are immutable.
             fields[3] = fields[5] = fields[10] = 0xff
             fields = fields[0:12] + [0xff] * 17
             return struct.pack(self.format, *fields)
-    
+
     def unpack(self, rawpacket):
         return struct.unpack(self.format, rawpacket)
-          
+
 
 
 class Struct0x8ea0(object):
     """Command Packet 0x8E-A0: Set DAC Value.
-     
+
        There are three variants of this packet: Without data, the packet
        is used to request the current DAC voltage. With data, the packet
        is used to set the DAC voltage or value. Furthermore depending
        on the value of byte 1, the DAC value may be set as a value or
-       a voltage. 
-     
+       a voltage.
+
     """
-    
+
     def pack(self, *fields):
         if fields == (0x8e, 0xa0):
             return struct.pack('>BB', *fields)
@@ -250,31 +251,31 @@ class Struct0x8ea0(object):
             return struct.pack('>BBBI', *fields)
         else:
             raise ValueError
-     
+
     def unpack(self, rawpacket):
-        
+
         try:
             flag = unpack('>B', rawpacket[2])[0]
         except IndexError:
             return unpack('>BB', rawpacket)
-        
+
         if flag == 0:
             return unpack('>BBBf', rawpacket)
         elif flag == 1:
             return unpack('>BBBI', rawpacket)
         else:
             raise ValueError('Invalid flag in packet 0x8ea0')
-        
-        
+
+
 class Struct0x8ea8(object):
-    fmt0 = '>BBBff' 
+    fmt0 = '>BBBff'
     fmt1 = '>BBBfff'
     fmt2 = '>BBBff'
     fmt3 = '>BBBf'
-    
+
     def pack(self, *fields):
         type_ = fields[2]
-        
+
         if type_ == 0:
             return struct.pack(self.fmt0, *fields)
         elif type_ == 1:
@@ -285,10 +286,10 @@ class Struct0x8ea8(object):
             return struct.pack(self.fmt3, *fields)
         else:
             raise ValueError('Invalid type in packet 0x8ea8')
-        
+
     def unpack(self, rawpacket):
         type_ = unpack('>B', rawpacket[2])[0]
-        
+
         if type_ == 0:
             return unpack(self.fmt0, rawpacket)
         elif type_ == 1:
@@ -299,14 +300,16 @@ class Struct0x8ea8(object):
             return unpack(self.fmt3, rawpacket)
         else:
             raise ValueError('Invalid type in packet 0x8ea8')
-        
+
+
 Struct0x8fa8 = Struct0x8ea8
+
 
 # Packet structures.
 #
 # Keys are the packet codes/subcodes. Values are lists(!) of instances
-# of `Struct()` or class instances providing custom `pack()` 
-# and `unpack()` methods for a particular TSIP packet. The values 
+# of `Struct()` or class instances providing custom `pack()`
+# and `unpack()` methods for a particular TSIP packet. The values
 # must be lists even if it contains only a single item.
 #
 PACKET_STRUCTURES = {
@@ -319,7 +322,7 @@ PACKET_STRUCTURES = {
     # Command Packet 0x1C - Hardware Component Version Information
     0x1c03: [Struct('>BB')],
     # Report Packet 0x1C - Hardware Component Version Information
-    0x1c83: [Struct0x1c83()], 
+    0x1c83: [Struct0x1c83()],
     # Command Packet 0x1E - Clear Battery Backup, then Reset
     0x1e:   [Struct('>BB')],
     # Command Packet 0x1F - Request Software Versions
@@ -374,10 +377,10 @@ PACKET_STRUCTURES = {
     0x45:   [Struct('>BBBBBBBBBBB')],
     # Report Packet 0x46: Receiver Health
     # In contradiction to the official documentation packet 0x46 may occur
-    # with only single unsigned integer field. 
-    0x46:   [Struct('>BBB'), Struct('>B')],    
+    # with only single unsigned integer field.
+    0x46:   [Struct('>BBB'), Struct('>B')],
     # Report Packet 0x47: Signals Levels for Tracked Satellites
-    # Up to 12 satellite number/signal level pairs may be sent as indicated by 
+    # Up to 12 satellite number/signal level pairs may be sent as indicated by
     # the count field
     0x47:   [Struct('>BB' + 'Bf' * i) for i in range(0, MAX_CHANNELS)],
     # Report Packet 0x49: Almanac Health
@@ -395,7 +398,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x57: Information about Last Computed Fix
     0x57:   [Struct('>BBBfI')],
     # Report Packet 0x58: GPS System Data from the Receiver
-    0x58:   [Struct0x58()], 
+    0x58:   [Struct0x58()],
     # Report Packet 0x59: Status of Satellite Disable or Ignore Health
     0x59:   [Struct('>BB32B')],
     # Report Packet 0x5A: Raw Data Measurement Data
@@ -407,7 +410,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x5F-11: EEPROM Segment Status
     0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d:   [Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],  
+    0x6d:   [Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],
     #[Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
     0x70:   [Struct('>BBBBB')],
@@ -418,7 +421,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x84: Double Precision LLA Position (Fix and Bias Information)
     0x84:   [Struct('>Bddddf')],
     # Command/Report Packet 0xBB: Set Receiver Configuration
-    0xbb00 :[Struct('>BB'), Struct0xbb()],
+    0xbb00: [Struct('>BB'), Struct0xbb()],
     # Command/Report Packet 0xBC: Set Port Configuration
     0xbc:   [Struct('>BB'), Struct('>BBBBBBBBBBB')],
     # Command Packet 0x8E-15: Request current Datum values
@@ -484,7 +487,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x8F-A6: Self-Survey Command
     0x8fa6: [Struct('>BBB')],
     # Report Packet 0x8F-A8: Oscillator Disciplining Parameters
-    0x8fa8: [Struct0x8fa8()], 
+    0x8fa8: [Struct0x8fa8()],
     # Report Packet 0x8F-A9: Self-Survey Parameters
     0x8fa9: [Struct('>BBBBII')],
     # Report Packet 0x8F-AB:Primary Timing Packet
@@ -496,16 +499,16 @@ PACKET_STRUCTURES = {
 
 def get_structs_for_rawpacket(rawpacket):
     """
-    
+
        :param rawpacket: Packet code.
        :type rawpacket: Binary string.
-       :return: Possible structures of this packet. May be an empty list. 
+       :return: Possible structures of this packet. May be an empty list.
        :rtype: List.
-    
+
     """
-    
+
     key = unpack('>B', rawpacket[0])[0]
-    
+
     try:
         return PACKET_STRUCTURES[key]
     except KeyError:
@@ -514,12 +517,12 @@ def get_structs_for_rawpacket(rawpacket):
             return PACKET_STRUCTURES[key]
         except (struct.error, KeyError):
             return []
-    
-            
+
+
 def get_structs_for_fields(fields):
-    
+
     key = fields[0]
-    
+
     try:
         return PACKET_STRUCTURES[key]
     except KeyError:
