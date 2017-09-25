@@ -16,9 +16,23 @@ class PacketTest(object):
     def setup(self):
         self.pkt1 = Packet(*self.fields)
         self.pkt2 = Packet.unpack(self.pkt1.pack())
+        
+        # Passing tuple to Packet()
+        self.pkt3 = Packet(tuple(self.fields))
+        self.pkt4 = Packet.unpack(self.pkt3.pack())
+        
+        # Passing list to Packet()
+        self.pkt5 = Packet(list(self.fields))
+        self.pkt6 = Packet.unpack(self.pkt3.pack())
 
     def test_pack(self):    
-        assert self.pkt1.fields == self.fields == self.pkt2.fields
+        assert self.pkt1.fields == \
+               self.fields == \
+               self.pkt2.fields == \
+               self.pkt3.fields == \
+               self.pkt4.fields == \
+               self.pkt5.fields == \
+               self.pkt6.fields
 
 
 @raises(PackError)

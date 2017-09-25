@@ -25,13 +25,16 @@ class Packet(object):
 
     Check the TSIP reference documentation for the description of individual
     packets.
+    
+    The argument(s) to `Packet()` can be either individual values, a single 
+    tuple or a single list.
 
     Examples::
 
-      >>> pkt = Packet(0x1f)                        # Request software versions.
-      >>> pkt = Packet(0x1e, 0x4b)                  # Request cold-start.
-      >>> pkt = Packet(0x23, -37.1, 144.1, 10.0)    # Set initial position.
-      >>> pkt = Packet(0x8e, 0x4f, 0.1)             # Set PPS with to 0.1s
+      >>> pkt = Packet(0x1f)                          # Request software versions.
+      >>> pkt = Packet(0x1e, 0x4b)                    # Request cold-start.
+      >>> pkt = Packet( (0x23, -37.1, 144.1, 10.0) )  # Set initial position (tuple).
+      >>> pkt = Packet( [0x8e, 0x4f, 0.1] )           # Set PPS with to 0.1s (list)
 
     """
 
@@ -40,7 +43,20 @@ class Packet(object):
 
 
     def __init__(self, *fields):
-        self.fields = fields
+        
+        # Allow `*fields` to be either individual arguments or a list or tuple.
+        # Because `fields` will always be a tuple anyway, passing a list or 
+        # tuple will result in `fields` being a nested structure.A
+        #
+        # Packet(1,2,3)   -> (1,2,3)   -> self.fields = fields
+        # Packet((1,2,3)) -> ((1,2,3)) -> self.fields = fields[0]
+        # Packet([1,2,3]) -> [(1,2,3)] -> self.fields = fields[0]
+        # 
+        try:
+            fields[0][0]             # Passed list or tuple to `Packet()`?
+            self.fields = fields[0]
+        except TypeError:
+            self.fields = fields
             
     
     # Make self.fields accessible as indexes on the
