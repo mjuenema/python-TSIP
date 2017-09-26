@@ -76,7 +76,7 @@ The following code shows how to receive the current GPS time from the receiver.
    gps_conn.write(command)
    
    while True:      # should implement timeout here!!!
-       report = gps.read()
+       report = gps_conn.read()
        if report[0] == 0x41:
            print 'GPS time of week .......: %f' % (report[1])
            print 'Extended GPS week number: %d' % (report[2])
