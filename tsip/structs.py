@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 """
 Binary structures of TSIP packets.
 
@@ -149,26 +149,22 @@ class Struct0x1c83(object):
     def unpack(self, s):
         return struct.unpack(self.format, s[:13]) + (s[14:].decode(),)
 
-# class Struct0x47(object):
-#     def pack(self, *f):
-#         s = struct.pack('>B', len(f)/2)
-#
-#         for i in range(1, len(f), 2):
-#             s += struct.pack('>Bf', f[i], f[i+1])
-#
-#         return s
-#
-#     def unpack(self, s):
-#
-#         count = struct.unpack('>B', s[0])[0]
-#         fields = [count]
-#
-#         for i in range(0, count):
-#             (satnum, siglevel) = struct.unpack('>Bf', s[i+1:i+6])
-#             fields.append(satnum)
-#             fields.append(siglevel)
-#
-#         return fields
+class Struct0x47(object):
+    def pack(self, *f):
+        raise NotImplemented
+
+    def unpack(self, s):
+        count = struct.unpack('>B', s[1])[0]
+        fields = [0x47, count]
+
+        for i in range(0, count-1):
+            i1 = 2 + i * 5
+            i2 = 2 + i * 5 + 5
+            (satnum, siglevel) = struct.unpack('>Bf', s[i1:i2])
+            fields.append(satnum)
+            fields.append(siglevel)
+
+        return fields
 
 
 class Struct0x58(object):
@@ -179,23 +175,27 @@ class Struct0x58(object):
         raise NotImplementedError
 
 
-# class Struct0x6d(object):
-#     """Report Packet 0x6D: Satellite Selection List.
-#
-#        This packet is of variable length equal to 17+nsvs where "nsvs" is
-#        the number of satellites used in the solution.
-#
-#     """
-#
-#
-#     def pack(self, *f):
-#         fmt = '>Bffff' + 'b' * (len(f) - 5)
-#         return struct.pack(fmt, *f)
-#
-#     def unpack(self, s):
-#         fields = struct.unpack('>Bffff', s[0:17])
-#         nsvs = (fields[0] & 0b11110000) >> 4
-#         return fields + struct.unpack('%db' % (nsvs), s[17:])
+class Struct0x6d(object):
+    """Report Packet 0x6D: Satellite Selection List.
+
+       This packet is of variable length equal to 5+nsvs where "nsvs" is
+       the number of satellites used in the solution.
+
+    """
+
+
+    def pack(self, *f):
+        fmt = '>Bffff' + 'b' * (len(f) - 5)
+        return struct.pack(fmt, *f)
+
+    def unpack(self, s):
+        fields = [0x6d] + list(struct.unpack('>Bffff', s[1:18]))
+        nsvs = (fields[0] & 0b11110000) >> 4
+ 
+        for n in range(0, nsvs):
+            fields.append(struct.unpack('>b', s[18+n])[0])
+
+        return fields
 
 
 class Struct0xbb(object):
@@ -382,7 +382,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x47: Signals Levels for Tracked Satellites
     # Up to 12 satellite number/signal level pairs may be sent as indicated by
     # the count field
-    0x47:   [Struct('>BB' + 'Bf' * i) for i in range(0, MAX_CHANNELS)],
+    0x47:   [Struct0x47()],
     # Report Packet 0x49: Almanac Health
     0x49:   [Struct('>B32B')],
     # Report Packet 0x4A: Single Precision LLA Position Fix
@@ -410,8 +410,7 @@ PACKET_STRUCTURES = {
     # Report Packet 0x5F-11: EEPROM Segment Status
     0x5f:   [StructRaw()],
     # Report Packet 0x6D: Satellite Selection List
-    0x6d:   [Struct('>BBffff' + 'b' * i) for i in range(0, MAX_CHANNELS)],
-    #[Struct0x6d()],
+    0x6d:   [Struct0x6d()],
     # Command/Report Packet 0x70: Filter Configuration
     0x70:   [Struct('>BBBBB')],
     # Report Packet 0x82: SBAS correction status
