@@ -14,9 +14,27 @@ Includes code inspired and co-written by Daniel Macia.
 
 import tsip
 import serial
+import threading
+import sys
 
 SERIAL = '/dev/ttyAMA0'
 BAUD = 38400
+
+
+# The WRITE flag indicates to the main loop when to send
+# request packets to the GPS. It is set in the `set_write_flag()`
+# function which is called through a `threading.Timer()`. 
+#
+WRITE = False
+WRITE_INTERVAL = 5
+
+def set_write_flag():
+    global WRITE
+    WRITE = 1
+
+timer = threading.Timer(WRITE_INTERVAL, set_write_flag)
+timer.start()
+
 
 # Open serial connection to Copernicus II receiver
 #
@@ -39,28 +57,14 @@ gps_conn = tsip.GPS(serial_conn)
 #
 gps_conn.write(tsip.Packet(0x35, 0b00110011, 0b00000011, 0b00000001, 0b00101001))
 
-
-# In addition this example requests the following packets. Depending on the
-# type of packet this must be requested only once or repeatedly. Check the code
-# below for details.
-#
-# Request Satellite System Data. Request each type of data once.
-#
-#gps_conn.write(tsip.Packet(0x38, 1, 2, 0))	# Almanac
-#gps_conn.write(tsip.Packet(0x38, 1, 3, 0))	# Health
-#gps_conn.write(tsip.Packet(0x38, 1, 4, 0))	# Ionosphere
-#gps_conn.write(tsip.Packet(0x38, 1, 5, 0))	# UTC
-#gps_conn.write(tsip.Packet(0x38, 1, 6, 0))	# Ephemeris
-#
-# Request Current Satellite Tracking Status of all satellites.
-#
-gps_conn.write(tsip.Packet(0x3c, 0))
-
-# Request Signal Levels
-#
-gps_conn.write(tsip.Packet(0x27))
-
 while True:
+
+    # Set SIGALRM to fire and call `read_timeout_handler()` 
+    # if READ_TIMEOUT seconds expire without setting SIGALRM 
+    # again.
+    #
+    #signal.alarm(READ_TIMEOUT)
+
 
     # Read the next report packet.
     # NOTE: Should implement timeout here.
@@ -109,8 +113,6 @@ while True:
         for i in range(0, len(report[2:]), 2):
             print 'Signal level for satellite %d: %f' % (report[2+i], report[2+i+1])
 
-        gps_conn.write(tsip.Packet(0x27))
-
     elif report_id == 0x4b:
         # Machine/Code ID and Additional Status
         print 'Machine ID: %d' % (report[1])
@@ -138,6 +140,14 @@ while True:
         print 'Auxiliary: Raw measurements on: %s' % (bool(report[4] & 0b00000001))
         print 'Auxiliary: Signal level unit: %s' % ("dB Hz" if bool(report[4] & 0b00001000) else "AMU")
         print 'Auxiliary: Signal levels for SV: %s' % (bool(report[4] & 0b00100000))
+
+    elif report_id == 0x58:
+        # Satellite System Data
+        print 'Operation: %d' % (report[1])
+        print 'Type of data: %d' % (report[2])
+        print 'Satellite PRN#: %d' % (report[3])
+        print 'Length: %d' % (report[4])
+        print 'Data: %s' % (report[5:])
 
     elif report_id == 0x6d:
         print 'Dimension: %s' % ('3D' if report[1] & 0b00000111 == 4 else '2D')
@@ -175,17 +185,6 @@ while True:
     elif report_id == 0x82:
         print 'SBAS correction status: %d' % (report[1])
        
-    elif report_id == 0x58:
-        # Satellite System Data
-        if report[1] == 1:
-            if report[2] == 2:
-                print "TODO: print almanac data"
-                # Request almanac again?
-            elif report[2] == 3:
-                print "TODO: print health page"
-                # Request health again?
-            # and so forth... <========
-     
     elif report_id == 0x5a:
         # Raw Measurement Data
         print 'Satellite PRN number: %d' % (report[1])
@@ -208,8 +207,6 @@ while True:
         print 'Azimuth: %f' % (report[9])
         print 'Reserved: %d' % (report[10])
 
-        gps_conn.write(tsip.Packet(0x3c, 0))
-       
     elif report_id == 0x8f:
         # Super-packets
         report_subid = report[1]
@@ -230,3 +227,33 @@ while True:
     else:
         # Unhandled report packet.
         print 'Received unhandled report packet: %s' % (report)
+
+
+    # Some requests have to be send to the GPS every WRITEINTERVAL
+    #
+    if WRITE:
+
+        # Request Satellite System Data. Request each type of data once.
+        #
+        gps_conn.write(tsip.Packet(0x38, 1, 2, 0))	# Almanac
+        gps_conn.write(tsip.Packet(0x38, 1, 3, 0))	# Health
+        gps_conn.write(tsip.Packet(0x38, 1, 4, 0))	# Ionosphere
+        gps_conn.write(tsip.Packet(0x38, 1, 5, 0))	# UTC
+        gps_conn.write(tsip.Packet(0x38, 1, 6, 0))	# Ephemeris
+
+        # Request Signal Levels
+        #
+        gps_conn.write(tsip.Packet(0x27))
+
+        # Request Current Satellite Tracking Status of all satellites.
+        #
+        gps_conn.write(tsip.Packet(0x3c, 0))
+
+        # Reset WRITE flag
+        #
+        WRITE = False
+
+        # Restart Timer
+        #
+        timer = threading.Timer(WRITE_INTERVAL, set_write_flag)
+        timer.start()

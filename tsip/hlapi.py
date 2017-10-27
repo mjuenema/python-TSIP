@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-7 -*-
 """
 High-level API.
 
@@ -150,6 +150,8 @@ class Packet(object):
             try:
                 return cls(*struct_.unpack(rawpacket))
             except struct.error:
+                raise
+                # Try next one.
                 pass
 
         # Packet ID 0xff is a pseudo-packet representing

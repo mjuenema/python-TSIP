@@ -168,12 +168,35 @@ class Struct0x47(object):
 
 
 class Struct0x58(object):
+    # ONLY TESTED WITH COPERNICUS II
+
     def pack(self, *f):
         raise NotImplementedError
 
     def unpack(self, s):
-        raise NotImplementedError
+        fields = list(struct.unpack('>BBBBB', s[:5]))
 
+        type_of_data = fields[2]
+        s = s[5:]
+
+        if type_of_data == 2:
+            # Almanac
+            fields += list(struct.unpack('>BBfffffffffffffffHH', s))
+        elif type_of_data == 3:
+            # Health page
+            fields += list(struct.unpack('>BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBh', s))
+        elif type_of_data == 4:
+            # Ionospheric
+            fields += list(struct.unpack('>ffffffff', s[8:]))
+        elif type_of_data == 5:
+            # UTC
+            fields += list(struct.unpack('>dfhfHHHh', s[13:]))
+        elif type_of_data == 6:
+            # Ephemeris
+            fields += list(struct.unpack('>BfhBBBBhffffffBBffdfdfdffdfdfdffddddd', s))
+
+        return fields
+        
 
 class Struct0x6d(object):
     """Report Packet 0x6D: Satellite Selection List.
@@ -191,9 +214,16 @@ class Struct0x6d(object):
     def unpack(self, s):
         fields = [0x6d] + list(struct.unpack('>Bffff', s[1:18]))
         nsvs = (fields[0] & 0b11110000) >> 4
- 
-        for n in range(0, nsvs):
-            fields.append(struct.unpack('>b', s[18+n])[0])
+
+        try:
+            s = s[18:]
+            for n in range(0, nsvs):
+                fields.append(struct.unpack('>b', s[n])[0])
+        except IndexError:
+            # Occasionally `s` doesn't seem to be long enough
+            # so in this case instead of causing an exception we
+            # simply return the data so far.
+            pass
 
         return fields
 
