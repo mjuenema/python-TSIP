@@ -33,8 +33,6 @@ Copernicus II receiver is currently work in progress. Presumably Trimble Thunder
 supported as they appear to implement a subset of the commands/reports of the (newer) Copernicus II receiver. 
 I don't have access to any other Trimble products.
 
-Documentation is way behind and largely reflects an obsolete implementation of this project. 
-
 Python-TSIP is automatically tested against the following Python versions.
 
 * Python 2.6
@@ -50,7 +48,7 @@ The tests currently fail on the following Python versions.
 * Python 3.2 (syntax error in the coverage module, it may work otherwise)
 * Jython (can't get Tox to work with jython)
 
-The master_ branch equals the latest release. The develop_ branch represents the
+The master branch equals the latest release. The develop branch represents the
 latest development but may not always pass all tests.
 
 
@@ -66,20 +64,21 @@ The following code shows how to receive the current GPS time from the receiver.
 
    import tsip
    import serial
-   
+
    # Open serial connection to Copernicus II receiver
    serial_conn = serial.Serial('/dev/ttyS0', 38400)
    gps_conn = tsip.GPS(serial_conn)
-   
+
    # Prepare and send command packet 0x21
    command = tsip.Packet(0x21)
    gps_conn.write(command)
-   
+
    while True:      # should implement timeout here!!!
-       report = gps.read()
+       report = gps_conn.read()
        if report[0] == 0x41:
            print 'GPS time of week .......: %f' % (report[1])
            print 'Extended GPS week number: %d' % (report[2])
            print 'GPS UTC offset .........: %f' % (report[3])
            break
-   
+
+More examples can be found in the `docs/examples/` folder.
