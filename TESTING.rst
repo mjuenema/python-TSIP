@@ -1,6 +1,8 @@
 Testing
 =======
 
+**TESTING DOES NOT WORK AT THE MOMENT**
+
 The ``tests/`` directory contains Nose_ style tests for this package.
 
 By default the tests read from the file ``tests/packets.tsip`` which
