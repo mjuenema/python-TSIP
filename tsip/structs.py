@@ -157,7 +157,7 @@ class Struct0x47(object):
         count = struct.unpack('>B', s[1])[0]
         fields = [0x47, count]
 
-        for i in range(0, count-1):
+        for i in range(0, count):
             i1 = 2 + i * 5
             i2 = 2 + i * 5 + 5
             (satnum, siglevel) = struct.unpack('>Bf', s[i1:i2])
