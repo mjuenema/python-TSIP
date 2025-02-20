@@ -107,7 +107,7 @@ class Packet(object):
             raise PackError(self)
 
 
-        # Possible structs for packet ID + subcode
+        # Possible structs for packet ID and subcode
         #
         if structs_ == []:
             try:
