@@ -151,10 +151,10 @@ class Struct0x1c83(object):
 
 class Struct0x47(object):
     def pack(self, *f):
-        raise NotImplemented
+        raise NotImplementedError
 
     def unpack(self, s):
-        count = struct.unpack('>B', s[1])[0]
+        count = struct.unpack('>B', s[1].to_bytes(1,'little'))[0]
         fields = [0x47, count]
 
         for i in range(0, count):
@@ -201,24 +201,24 @@ class Struct0x58(object):
 class Struct0x6d(object):
     """Report Packet 0x6D: Satellite Selection List.
 
-       This packet is of variable length equal to 5+nsvs where "nsvs" is
+       This packet is of variable length equal to 6+nsvs where "nsvs" is
        the number of satellites used in the solution.
 
     """
 
 
     def pack(self, *f):
-        fmt = '>Bffff' + 'b' * (len(f) - 5)
+        fmt = '>BBffff' + 'b' * (len(f) - 6)
         return struct.pack(fmt, *f)
 
     def unpack(self, s):
-        fields = [0x6d] + list(struct.unpack('>Bffff', s[1:18]))
+        fields = list(struct.unpack('>BBffff', s[:18]))
         nsvs = (fields[0] & 0b11110000) >> 4
 
         try:
             s = s[18:]
             for n in range(0, nsvs):
-                fields.append(struct.unpack('>b', s[n])[0])
+                fields.append(struct.unpack('>b', s[n].to_bytes(1,'little'))[0])
         except IndexError:
             # Occasionally `s` doesn't seem to be long enough
             # so in this case instead of causing an exception we
