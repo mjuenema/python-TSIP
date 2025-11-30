@@ -60,6 +60,35 @@ The following code shows how to receive the current GPS time from the receiver.
 * Command packet 0x21 requests the current GPS time.
 * Report packet 0x41 contains the current GPS time. Its fields are accessible by index.
 
+Simple example for Python 3:
+
+.. code-block:: python
+
+   import tsip
+   import serial
+
+   # Open serial connection to Trimble receiver
+   serial_conn = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+   gps_conn = tsip.GPS(serial_conn)
+
+   # Prepare and send command packet 0x21
+   gps_conn.write(tsip.Packet(0x21))
+
+   while True:
+       try:
+           report = gps_conn.read()
+           if report[0] == 0x41: #got response to 0x21
+               print(f"GPS time of week .......: {report[1]}")
+               print(f"Extended GPS week number: {report[2]}")
+               print(f"GPS UTC offset .........: {report[3]}")
+               break
+           else: #some other packet received, output packet number
+               print(f"Received packet: {hex(report[0])}")
+       except ValueError:
+           pass #ignore failed reads
+
+Based on original Python 2 example:
+
 .. code-block:: python
 
    import tsip
@@ -81,4 +110,4 @@ The following code shows how to receive the current GPS time from the receiver.
            print 'GPS UTC offset .........: %f' % (report[3])
            break
 
-More examples can be found in the `docs/examples/` folder.
+More examples can be found in the `docs/examples/` folder (haven't been updated to work with Python 3)
