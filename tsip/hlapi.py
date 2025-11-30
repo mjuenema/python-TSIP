@@ -1,4 +1,4 @@
-# -*- coding: utf-7 -*-
+# -*- coding: utf-8 -*-
 """
 High-level API.
 
@@ -150,7 +150,6 @@ class Packet(object):
             try:
                 return cls(*struct_.unpack(rawpacket))
             except struct.error:
-                raise
                 # Try next one.
                 pass
 
