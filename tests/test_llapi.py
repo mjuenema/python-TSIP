@@ -18,48 +18,48 @@ from tsip.llapi import *
 class TestIsFramed(object):
 
     def test_isframed(self):
-        assert is_framed(CHR_DLE + CHR_DLE + CHR_ETX) is True
-        assert is_framed(CHR_DLE + 'payload' + CHR_DLE + CHR_ETX) is True
+        assert is_framed(bDLE + bDLE + bETX) is True
+        assert is_framed(bDLE + b'payload' + bDLE + bETX) is True
 
 
 class TestFrame(object):
 
     def test_frame(self):
-        assert frame('payload') == CHR_DLE + 'payload' + CHR_DLE + CHR_ETX
+        assert frame(b'payload') == bDLE + b'payload' + bDLE + bETX
 
     def test_unframe(self):
-        assert unframe(CHR_DLE + 'payload' + CHR_DLE + CHR_ETX) == 'payload'
+        assert unframe(bDLE + b'payload' + bDLE + bETX) == b'payload'
 
     @raises(ValueError)
     def test_frame_valueerror(self):
-        frame(CHR_DLE + 'payload' + CHR_DLE + CHR_ETX)
+        frame(bDLE + b'payload' + bDLE + bETX)
 
     @raises(ValueError)
     def test_unframe_valueerror(self):
-        unframe('payload')
+        unframe(b'payload')
 
 
 class TestStuff(object):
 
     def test_stuff(self):
-        assert stuff('payload') == 'payload'
-        assert stuff(CHR_DLE + 'payload') == CHR_DLE + CHR_DLE + 'payload'
-        assert stuff(CHR_DLE + 'payload' + CHR_DLE) == CHR_DLE + CHR_DLE + 'payload' + CHR_DLE + CHR_DLE
-        assert stuff(CHR_DLE + CHR_DLE + 'payload') == CHR_DLE + CHR_DLE + CHR_DLE + CHR_DLE + 'payload'
+        assert stuff(b'payload') == b'payload'
+        assert stuff(bDLE + b'payload') == bDLE + bDLE + b'payload'
+        assert stuff(bDLE + b'payload' + bDLE) == bDLE + bDLE + b'payload' + bDLE + bDLE
+        assert stuff(bDLE + bDLE + b'payload') == bDLE + bDLE + bDLE + bDLE + b'payload'
 
     def test_unstuff(self):
-        assert unstuff('payload') == 'payload'
-        assert unstuff(CHR_DLE + CHR_DLE + 'payload') == CHR_DLE + 'payload'
-        assert unstuff(CHR_DLE + CHR_DLE + 'payload' + CHR_DLE + CHR_DLE) == CHR_DLE + 'payload' + CHR_DLE
-        assert unstuff(CHR_DLE + CHR_DLE + CHR_DLE + CHR_DLE + 'payload') == CHR_DLE + CHR_DLE + 'payload'
+        assert unstuff(b'payload') == b'payload'
+        assert unstuff(bDLE + bDLE + b'payload') == bDLE + b'payload'
+        assert unstuff(bDLE + bDLE + b'payload' + bDLE + bDLE) == bDLE + b'payload' + bDLE
+        assert unstuff(bDLE + bDLE + bDLE + bDLE + b'payload') == bDLE + bDLE + b'payload'
 
     @raises(ValueError)
     def test_stuff_valueerror(self):
-        stuff(CHR_DLE + 'payload' + CHR_DLE + CHR_ETX)
+        stuff(bDLE + b'payload' + bDLE + bETX)
 
     @raises(ValueError)
     def test_unstuff_valueerror(self):
-        unstuff(CHR_DLE + 'payload' + CHR_DLE + CHR_ETX)
+        unstuff(bDLE + b'payload' + bDLE + bETX)
 
 
 class TestGPS(object):
@@ -81,24 +81,24 @@ class TestGPS(object):
 
 #    def test_next(self):
 #        packet = self.gps_.next()
-#        assert packet.startswith(CHR_DLE)
-#        assert packet.endswith(CHR_DLE + CHR_ETX)
+#        assert packet.startswith(bDLE)
+#        assert packet.endswith(bDLE + bETX)
 #        packet = self.gps_.next()
-#        assert packet.startswith(CHR_DLE)
-#        assert packet.endswith(CHR_DLE + CHR_ETX)
+#        assert packet.startswith(bDLE)
+#        assert packet.endswith(bDLE + bETX)
 #        packet = self.gps_.next()
-#        assert packet.startswith(CHR_DLE)
-#        assert packet.endswith(CHR_DLE + CHR_ETX)
+#        assert packet.startswith(bDLE)
+#        assert packet.endswith(bDLE + bETX)
 
     def test_iter(self):
         for packet in self.gps_:
-            assert packet.startswith(CHR_DLE)
-            assert packet.endswith(CHR_DLE + CHR_ETX)
+            assert packet.startswith(bDLE)
+            assert packet.endswith(bDLE + bETX)
 
 #    def test_unframe(self):
 #        for packet in self.gps_:
 #            data = unframe(packet)
 #            # This test is actually brittle as `data` could start
 #            # with DLE. It does not with the TSIP capture used here.
-#            assert not data.startswith(CHR_DLE)
-#            assert not data.endswith(CHR_DLE + CHR_ETX)
+#            assert not data.startswith(bDLE)
+#            assert not data.endswith(bDLE + bETX)

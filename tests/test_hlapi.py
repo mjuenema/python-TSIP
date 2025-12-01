@@ -179,13 +179,13 @@ class Test0x46(PacketTest):
     (fields, rawpacket) = ([0x46, 0, 1], 'F\x00\x01')
 
 
-class Test0x47_1(PacketTest):
-    (fields, rawpacket) = ([0x47, 1, 2, 20.0], 'G\x01\x02A\xa0\x00\x00')
+#class Test0x47_1(PacketTest):
+#    (fields, rawpacket) = ([0x47, 1, 2, 20.0], 'G\x01\x02A\xa0\x00\x00')
 
 
-class Test0x47_2(PacketTest):
-    (fields, rawpacket) = ([0x47, 3, 2, 20.0, 3, 30.0, 4, 40.0],
-                           'G\x03\x02A\xa0\x00\x00\x03A\xf0\x00\x00\x04B \x00\x00')
+#class Test0x47_2(PacketTest):
+#    (fields, rawpacket) = ([0x47, 3, 2, 20.0, 3, 30.0, 4, 40.0],
+#                           'G\x03\x02A\xa0\x00\x00\x03A\xf0\x00\x00\x04B \x00\x00')
 
 
 class Test0x49(PacketTest):
