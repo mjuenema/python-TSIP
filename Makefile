@@ -12,16 +12,8 @@ help:
 	@echo "clean-build   - remove build artifacts"
 	@echo "clean-pyc     - remove Python file artifacts"
 	@echo "clean-test    - remove test and coverage artifacts"
-	@echo "lint          - check style with pyflakes"
-	@echo "flake8        - check with flake8"
-	@echo "clonedigger   - check with clonedigger"
-	@echo "pyntch        - check with pyntch"
 	@echo "test          - run tests quickly with the default Python"
-	@echo "test-all      - run tests on every Python version with tox"
-	@echo "coverage      - check code coverage quickly with the default Python"
-	@echo "docs          - generate Sphinx HTML documentation, including API docs"
-	@echo "release       - package and upload a release"
-	@echo "dist          - package"
+	@echo "sdist          - package"
 
 
 # ---------------------------------------------------------
@@ -46,14 +38,6 @@ clean-test:
 	rm -f .coverage
 	rm -fr htmlcov/
 
-# ---------------------------------------------------------
-#  
-#  lint
-#
-flakes: lint
-lint:
-	flake8 tsip/*.py tests/*.py
-
 
 # ---------------------------------------------------------
 #  
@@ -68,64 +52,20 @@ test_llapi:
 test_hlapi:
 	nosetests -x -v tests/$@.py
 
-tox: 
-	tox
-
-
-#coverage:
-#	coverage run --source python-TSIP setup.py test
-#	coverage report -m
-#	coverage html
-#	open htmlcov/index.html
-
-docs:
-#	rm -f docs/python-TSIP.rst
-#	rm -f docs/modules.rst
-#	sphinx-apidoc -o docs/ python-TSIP
-#	$(MAKE) -C docs clean
-#	$(MAKE) -C docs html
-#	open docs/_build/html/index.html
 
 .PHONY: sdist
 sdist: 
 	$(PYTHON) setup.py $@
 
-.PHONY: bdist
-bdist:
-	$(PYTHON) setup.py $@
-
-.PHONY: rpm
-rpm:
-	# native python version
-	python setup.py bdist_rpm
-
 .PHONY: wheel
 wheel:
 	$(PYTHON) setup.py bdist_wheel --universal
-
-.PHONY: info
-info:
-	$(PYTHON) setup.py egg_info
 
 .PHONY: build
 build: 
 	$(PYTHON) setup.py build
 
 .PHONY:
-upload: clean sdist wheel
+release: test clean sdist wheel
 	twine upload dist/*
-
-# Code test tools
-#
-.PHONY: clonedigger
-clonedigger:
-	clonedigger -l python -o clonedigger.html tsip
-
-.PHONY: flake8
-flake8:
-	flake8 --statistics --exit-zero tsip
-
-.PHONY: pyntch
-pyntch:
-	tchecker.py tsip/*.py
 
