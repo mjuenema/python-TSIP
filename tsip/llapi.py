@@ -18,7 +18,10 @@ def is_framed(packet):
 
     """
 
-    return packet[0] == CHR_DLE and packet[-2] == CHR_DLE and packet[-1] == CHR_ETX
+    if packet == None or len(packet) < 3:
+        return False
+    else:
+        return packet[0] == DLE and packet[-2] == DLE and packet[-1] == ETX
 
 
 def frame(data):
@@ -35,7 +38,7 @@ def frame(data):
     if is_framed(data):
         raise ValueError('data contains leading DLE and trailing DLE/ETX')
     else:
-        return CHR_DLE + data + CHR_DLE + CHR_ETX
+        return bDLE + data + bDLE + bETX
 
 
 def unframe(packet):
@@ -51,7 +54,7 @@ def unframe(packet):
     """
 
     if is_framed(packet):
-        return packet.lstrip(CHR_DLE).rstrip(CHR_ETX).rstrip(CHR_DLE)
+        return packet.lstrip(bDLE).rstrip(bETX).rstrip(bDLE)
     else:
         raise ValueError('packet does not contain leading DLE and trailing DLE/ETX')
 
@@ -69,7 +72,7 @@ def stuff(packet):
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
     else:
-        return packet.replace(CHR_DLE, CHR_DLE + CHR_DLE)
+        return packet.replace(bDLE, bDLE + bDLE)
 
 
 
@@ -87,7 +90,7 @@ def unstuff(packet):
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
     else:
-        return packet.replace(CHR_DLE + CHR_DLE, CHR_DLE)
+        return packet.replace(bDLE + bDLE, bDLE)
 
 
 class gps(object):
@@ -100,26 +103,37 @@ class gps(object):
 
     def read(self):
 
-        packet = ''
-        dle_count = 0
+        packet = bytes()
+        pkt_active = 0
 
-        last_b = None
+        #hold last 3 bytes (initialize assuming previous byte wasn't DLE)
+        #could get unlucky if start reading mid-message with 2nd data DLE (stuffed) byte as first byte seen
+        #would mis-interpret as start of message, but will simply return corrupt first packet, which was invalid anyway
+        b = [b'\0x00', b'\0x00', b'\0x00']
         while True:
-            b = self.conn.read(1)
+            b[0] = self.conn.read(1)
 
-            if len(b) == 0:
+            if len(b[0]) == 0: #timeout
                 return None
 
-            packet += chr(ord(b))    # Python 3 work-around
-
-            if b == CHR_DLE:
-                dle_count += 1
-            elif b == CHR_ETX and last_b == CHR_DLE and (dle_count % 2) == 0:    # even, because leading DLE is counted!
-                return packet
+            #rather than counting even/odd DLEs, look for known pattern for start/end, to prevent issues when start reading mid-message
+            #end will always be <not DLE> <DLE> <ETX>
+            #start will always be <not DLE> <DLE> <not DLE, not ETX> (1 byte delayed, since DLE is the start)
+            if b[2][0] != DLE and b[1][0] == DLE and b[0][0] == ETX: #end of message
+                if pkt_active: #only return packet if active, otherwise found end of partial message, ignore
+                    packet += b[0]
+                    return packet
+            elif b[2][0] != DLE and b[1][0] == DLE and b[0][0] != DLE: #start of message
+                pkt_active = 1
+                packet += bDLE #start is delayed by 1 byte, need to put first DLE byte into packet
+                packet += b[0]
             else:
-                pass
+                if pkt_active: #only accumulate packet data after start of message was found
+                    packet += b[0]
 
-            last_b = b
+            #shift old bytes
+            b[2] = b[1]
+            b[1] = b[0]
 
 
     def next(self):
