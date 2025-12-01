@@ -1,6 +1,7 @@
+
 .PHONY: clean-pyc clean-build docs clean
 
-PYTHON := python2.7
+PYTHON := python3
 
 # ---------------------------------------------------------
 #  
