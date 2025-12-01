@@ -3,6 +3,12 @@
 History
 =======
 
+0.4.1 (01-Dec-2025)
+-------------------
+
+* Python 3 is now supported.
+* Python 2 is no longer supported.
+
 0.3.2 (28-Oct-2017)
 -------------------
 

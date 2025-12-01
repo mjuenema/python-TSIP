@@ -26,7 +26,7 @@ Python-TSIP is available under the "BSD 2-Clause Simplified License".
 
 I am no longer actively maintaining this project but I am happy to accept merge requests!
 
-Releases up to 0.3.2 supported only Python 2. Any later releases only suport Python 3.
+Releases up to 0.3.2 supported only Python 2. Any later releases only support Python 3.
 
 Github user **pdaderko** deserves all credit for making this library compatible with Python 3.
 

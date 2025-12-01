@@ -6,7 +6,7 @@ from tsip.llapi import *
 from tsip.hlapi import *
 
 NAME = 'tsip'
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 LICENSE = 'BSD License'
 AUTHOR = 'Markus Juenemann'
 EMAIL = 'markus@juenemann.net'
