@@ -49,7 +49,7 @@ def main():
         packet = gps.read()
 
         if packet:
-            print "0x%0x %s" % (packet.code, packet.values)
+            print(packet)
         else:
             print 'None'
 
