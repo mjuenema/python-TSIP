@@ -21,7 +21,7 @@ def test_hlgps_read_eof():
     try:
         p3 = drv.read()
     except ValueError as e:
-        assert e.args == ("packet does not contain leading DLE and trailing DLE/ETX",)
+        assert e.args == ("packet does not contain leading DLE+ID and trailing DLE/ETX",), e
         raise e
 
 
