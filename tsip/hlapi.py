@@ -158,9 +158,24 @@ class Packet(object):
         #
         return cls(0xff, rawpacket)
 
+    def __str__(self):
+        fields = self.fields
+        key, klen = fields[0], 1
+        if key not in PACKET_STRUCTURES and len(fields) > 1:
+            key, klen = fields[0] * 256 + fields[1], 2
+        if key not in PACKET_STRUCTURES:
+            key, klen = None, 0
+        # Name known packets in a way documentation names them:
+        if key is None:
+            return repr(self)
+        tail = repr(tuple(self.fields[klen:]))
+        if klen == 1:
+            return 'Packet_0x{:02X}{:s}'.format(key, tail)
+        elif klen == 2:
+            return 'Packet_0x{:02X}-{:02X}{:s}'.format(fields[0], fields[1], tail)
 
     def __repr__(self):
-        return 'Packet%s' % (str(tuple(self.fields)))
+        return 'Packet%s' % (repr(tuple(self.fields)))
 
 
 class GPS(gps):
