@@ -129,21 +129,39 @@ class TestGPS(object):
         assert isinstance(self.gps_, gps)
         assert self.gps_.conn == self.conn
 
-#    def test_next(self):
-#        packet = self.gps_.next()
-#        assert packet.startswith(bDLE)
-#        assert packet.endswith(bDLE + bETX)
-#        packet = self.gps_.next()
-#        assert packet.startswith(bDLE)
-#        assert packet.endswith(bDLE + bETX)
-#        packet = self.gps_.next()
-#        assert packet.startswith(bDLE)
-#        assert packet.endswith(bDLE + bETX)
+def setup_tsipfile(fname):
+    if os.path.isfile(fname):
+        return fname
+    fname = os.path.join('tests', fname)
+    assert os.path.isfile(fname)
+    return fname
 
-    def test_iter(self):
-        for packet in self.gps_:
+KNOWN_DUMPS = (
+    ('thunderbolt.tsip', 211),
+    ('copernicus2.tsip', 2478),
+)
+
+def test_gps_next():
+    for fname, expected_count in KNOWN_DUMPS:
+        conn = open(setup_tsipfile(fname), 'rb')
+        gps_ = gps(conn)
+        count = 0
+        for packet in iter(gps_.next, None):
+            assert packet.startswith(bDLE)
+            assert packet.endswith(bDLE_ETX)
+            count += 1
+        assert count == expected_count
+
+def test_gps_iter():
+    for fname, expected_count in KNOWN_DUMPS:
+        conn = open(setup_tsipfile(fname), 'rb')
+        gps_ = gps(conn)
+        count = 0
+        for packet in gps_:
             assert packet.startswith(bDLE)
             assert packet.endswith(bDLE + bETX)
+            count += 1
+        assert count == expected_count
 
 #    def test_unframe(self):
 #        for packet in self.gps_:
