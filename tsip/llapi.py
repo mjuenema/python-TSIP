@@ -18,13 +18,12 @@ def is_framed(packet):
 
     """
 
-    if packet == None or len(packet) < 3:
+    if packet == None or len(packet) < 4:
         return False
-    else:
-        return packet[0] == DLE and packet[-2] == DLE and packet[-1] == ETX
+    return packet[0] == DLE and packet[1] not in (DLE, ETX) and packet[-2:] == bDLE_ETX
 
 
-def frame(data):
+def frame(packet):
     """
     Add leading DLE and trailing DLE/ETX to data.
 
@@ -35,10 +34,15 @@ def frame(data):
 
     """
 
-    if is_framed(data):
-        raise ValueError('data contains leading DLE and trailing DLE/ETX')
-    else:
-        return bDLE + data + bDLE + bETX
+    if is_framed(packet):
+        raise ValueError('packet contains leading DLE and trailing DLE/ETX')
+    if packet[0] in (DLE, ETX): # logic error
+        raise ValueError('packet <ID> can\t be DLE or ETX', packet[0])
+    single = packet.count(bDLE)
+    double = packet.count(bDLE_DLE)
+    if single != double * 2: # coding error?
+        raise ValueError('packet contains unbalanced count of DLE (not stuffed?)', single, double)
+    return bDLE + packet + bDLE_ETX
 
 
 def unframe(packet):
@@ -50,13 +54,11 @@ def unframe(packet):
     :return: TSIP packet with leading DLE and trailing DLE/ETX removed.
     :raise: ``ValueError`` if `packet` does not start with DLE and end in DLE/ETX.
 
-
     """
 
-    if is_framed(packet):
-        return packet.lstrip(bDLE).rstrip(bETX).rstrip(bDLE)
-    else:
-        raise ValueError('packet does not contain leading DLE and trailing DLE/ETX')
+    if not is_framed(packet):
+        raise ValueError('packet does not contain leading DLE+ID and trailing DLE/ETX')
+    return packet[1:-2]
 
 
 def stuff(packet):
@@ -71,9 +73,9 @@ def stuff(packet):
 
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
-    else:
-        return packet.replace(bDLE, bDLE + bDLE)
-
+    if packet[0] in (DLE, ETX): # logic error
+        raise ValueError('packet <ID> can\t be DLE or ETX', packet[0])
+    return packet.replace(bDLE, bDLE_DLE)
 
 
 def unstuff(packet):
@@ -89,8 +91,16 @@ def unstuff(packet):
 
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
-    else:
-        return packet.replace(bDLE + bDLE, bDLE)
+    # TSIP is not generous enough to provide checksums, so we squeeze every validation opportunity
+    single = packet.count(bDLE)
+    double = packet.count(bDLE_DLE)
+    if single != double * 2:
+        raise ValueError('packet contains uneven count of DLE', single, double)
+    unstuffed = packet.replace(bDLE_DLE, bDLE)
+    assert unstuffed.count(bDLE) == double
+    if unstuffed[0] in (DLE, ETX):
+        raise ValueError('packet <ID> can\t be DLE or ETX', unstuffed[0])
+    return unstuffed
 
 
 class gps(object):
