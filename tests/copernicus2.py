@@ -37,6 +37,7 @@ def sigalrm_handler(s, f):
 signal.signal(signal.SIGALRM, sigalrm_handler)
 
 
+# FIXME: broken as .code and .subcode attributes were removed since abb9c82a
 @attr(gps='copernicus2')
 class TestCopernicus(object):
     def setup(self):
