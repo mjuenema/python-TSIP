@@ -159,20 +159,19 @@ class Packet(object):
         return cls(0xff, rawpacket)
 
     def __str__(self):
-        fields = self.fields
-        key, klen = fields[0], 1
-        if key not in PACKET_STRUCTURES and len(fields) > 1:
-            key, klen = fields[0] * 256 + fields[1], 2
-        if key not in PACKET_STRUCTURES:
-            key, klen = None, 0
+        f = self.fields
         # Name known packets in a way documentation names them:
-        if key is None:
+        if f[0] == 0xff:
+            return 'PacketErr' + str(tuple(f[1:]))
+        elif f[0] in PACKET_STRUCTURES:
+            head = 'Packet_0x{:02X}'.format(key)
+            klen = 1
+        elif len(f) > 1 and (f[0] * 256 + f[1]) in PACKET_STRUCTURES:
+            head = 'Packet_0x{:02X}-{:02X}'.format(f[0], f[1])
+            klen = 2
+        else:
             return repr(self)
-        tail = repr(tuple(self.fields[klen:]))
-        if klen == 1:
-            return 'Packet_0x{:02X}{:s}'.format(key, tail)
-        elif klen == 2:
-            return 'Packet_0x{:02X}-{:02X}{:s}'.format(fields[0], fields[1], tail)
+        return head + repr(tuple(self.fields[klen:]))
 
     def __repr__(self):
         return 'Packet%s' % (repr(tuple(self.fields)))

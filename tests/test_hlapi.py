@@ -42,6 +42,8 @@ def test_unpack_unknown_packet():
     packet = Packet.unpack('\x1e\x01\x02')
     assert packet[0] == 255
     assert packet[1] == '\x1e\x01\x02'
+    assert str(packet).startswith('Packet')
+    assert repr(packet).startswith('Packet')
 
 
 def test_gps():
