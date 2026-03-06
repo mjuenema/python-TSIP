@@ -30,6 +30,9 @@ class PacketTest(object):
                self.pkt4 == \
                self.pkt5 == \
                self.pkt6
+        for p in (self.pkt1, self.pkt2, self.pkt3, self.pkt4, self.pkt5, self.pkt6):
+            assert repr(p).startswith('Packet')
+            assert str(p).startswith('Packet')
 
 
 @raises(PackError)
