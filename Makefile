@@ -2,6 +2,8 @@
 .PHONY: clean-pyc clean-build docs clean
 
 PYTHON := python3
+# It's named nosetests3 in python3-nose=1.3.7-8 Ubuntu package.
+NOSETEST != type nosetests3 >/dev/null 2>&1 && echo nosetests3 || echo nosetests
 
 # ---------------------------------------------------------
 #  
@@ -44,13 +46,13 @@ clean-test:
 #  test
 #
 test: 
-	nosetests -x -v tests/test_structs.py tests/test_llapi.py tests/test_hlapi.py
+	$(NOSETEST) -x -v tests/test_*.py
 
 test_llapi:
-	nosetests -x -v tests/$@.py
+	$(NOSETEST) -x -v tests/$@.py
 
 test_hlapi:
-	nosetests -x -v tests/$@.py
+	$(NOSETEST) -x -v tests/$@.py
 
 
 .PHONY: sdist

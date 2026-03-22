@@ -1,10 +1,7 @@
 
 from struct import Struct
 
-try:
-    import StringIO as stringio
-except ImportError:
-    import io as stringio
+import io
 
 from nose.tools import raises
 
@@ -33,6 +30,9 @@ class PacketTest(object):
                self.pkt4 == \
                self.pkt5 == \
                self.pkt6
+        for p in (self.pkt1, self.pkt2, self.pkt3, self.pkt4, self.pkt5, self.pkt6):
+            assert repr(p).startswith('Packet')
+            assert str(p).startswith('Packet')
 
 
 @raises(PackError)
@@ -45,19 +45,21 @@ def test_unpack_unknown_packet():
     packet = Packet.unpack('\x1e\x01\x02')
     assert packet[0] == 255
     assert packet[1] == '\x1e\x01\x02'
+    assert str(packet).startswith('Packet')
+    assert repr(packet).startswith('Packet')
 
 
-#def test_gps():
-#    conn = stringio.StringIO()
-#    conn.write('\x10\x1c\x81\x00\x03\x02\x01\x0b\x11\x07\xdf\x0bproductname\x10\03')
-#    conn.seek(0)
-#    gps = GPS(conn)
-#    packet = gps.read()
-#    assert packet[0] == 0x1c
-#
-#    packet = Packet.unpack('\x1e\x01')
-#    gps.write(packet)
+def test_gps():
+    conn = io.BytesIO()
+    conn.write(b'\x10\x1c\x81\x00\x03\x02\x01\x0b\x11\x07\xdf\x0bproductname\x10\x03')
+    conn.seek(0)
+    gps = GPS(conn)
+    packet = gps.read()
+    assert packet[0] == 0x1c
+    assert packet[9] == 'productname'
 
+    packet = Packet.unpack('\x1e\x01')
+    gps.write(packet)
 
 class Test0x1c01(PacketTest):
     (fields, rawpacket) = ([0x1c, 0x01], '\x1c\x01')
