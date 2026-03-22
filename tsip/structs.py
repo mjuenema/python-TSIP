@@ -134,20 +134,27 @@ class Struct0x1c81(object):
     format = '>BBBBBBBBH'
 
     def pack(self, *f):
+        # TODO: ensure that ASCII encoding is used
         return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
 
     def unpack(self, rawpacket):
-        return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:].decode(),)
+        if rawpacket[10] != len(rawpacket) - 11:
+            raise ValueError('Wrong L1 length', rawpacket[10], len(rawpacket) - 11)
+        return struct.unpack(self.format, rawpacket[:10]) + (rawpacket[11:].decode('ascii'),)
 
 
 class Struct0x1c83(object):
+    """Report packet 0x1C-83: Hardware component version information."""
     format = '>BBIBBHBH'
 
     def pack(self, *f):
+        # TODO: ensure that ASCII encoding is used
         return struct.pack(self.format, *f[:-1]) + struct.pack('>B', len(f[-1])) + tobytes(f[-1])
 
     def unpack(self, s):
-        return struct.unpack(self.format, s[:13]) + (s[14:].decode(),)
+        if s[13] != len(s) - 14:
+            raise ValueError('Wrong L1 length', s[13], len(s) - 14)
+        return struct.unpack(self.format, s[:13]) + (s[14:].decode('ascii'),)
 
 class Struct0x47(object):
     def pack(self, *f):

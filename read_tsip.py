@@ -13,8 +13,8 @@ import serial
 import tsip
 import time
 import binascii
-
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -30,7 +30,6 @@ def main():
     except IndexError:
         help()
 
-
     if os.path.isfile(source):
         conn = open(source)
     else:
@@ -41,20 +40,17 @@ def main():
         except TypeError:
             help()
 
-        conn = serial.Serial(source ,baud)
+        conn = serial.Serial(source, baud)
 
     gps = tsip.GPS(conn)
-      
+
     while True:
         packet = gps.read()
-
         if packet:
-            print "0x%0x %s" % (packet.code, packet.values)
+            print(packet)
         else:
-            print 'None'
+            print("None")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-          

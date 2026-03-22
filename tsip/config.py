@@ -19,6 +19,8 @@ CHR_ETX = chr(ETX)
 #
 bDLE = DLE.to_bytes(1, 'little')
 bETX = ETX.to_bytes(1, 'little')
+bDLE_DLE = bDLE + bDLE
+bDLE_ETX = bDLE + bETX
 
 
 # Contants for setting bits

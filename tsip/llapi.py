@@ -18,13 +18,12 @@ def is_framed(packet):
 
     """
 
-    if packet == None or len(packet) < 3:
+    if packet == None or len(packet) < 4:
         return False
-    else:
-        return packet[0] == DLE and packet[-2] == DLE and packet[-1] == ETX
+    return packet[0] == DLE and packet[1] not in (DLE, ETX) and packet[-2:] == bDLE_ETX
 
 
-def frame(data):
+def frame(packet):
     """
     Add leading DLE and trailing DLE/ETX to data.
 
@@ -35,10 +34,15 @@ def frame(data):
 
     """
 
-    if is_framed(data):
-        raise ValueError('data contains leading DLE and trailing DLE/ETX')
-    else:
-        return bDLE + data + bDLE + bETX
+    if is_framed(packet):
+        raise ValueError('packet contains leading DLE and trailing DLE/ETX')
+    if packet[0] in (DLE, ETX): # logic error
+        raise ValueError('packet <ID> can\t be DLE or ETX', packet[0])
+    single = packet.count(bDLE)
+    double = packet.count(bDLE_DLE)
+    if single != double * 2: # coding error?
+        raise ValueError('packet contains unbalanced count of DLE (not stuffed?)', single, double)
+    return bDLE + packet + bDLE_ETX
 
 
 def unframe(packet):
@@ -50,13 +54,11 @@ def unframe(packet):
     :return: TSIP packet with leading DLE and trailing DLE/ETX removed.
     :raise: ``ValueError`` if `packet` does not start with DLE and end in DLE/ETX.
 
-
     """
 
-    if is_framed(packet):
-        return packet.lstrip(bDLE).rstrip(bETX).rstrip(bDLE)
-    else:
-        raise ValueError('packet does not contain leading DLE and trailing DLE/ETX')
+    if not is_framed(packet):
+        raise ValueError('packet does not contain leading DLE+ID and trailing DLE/ETX')
+    return packet[1:-2]
 
 
 def stuff(packet):
@@ -71,9 +73,9 @@ def stuff(packet):
 
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
-    else:
-        return packet.replace(bDLE, bDLE + bDLE)
-
+    if packet[0] in (DLE, ETX): # logic error
+        raise ValueError('packet <ID> can\t be DLE or ETX', packet[0])
+    return packet.replace(bDLE, bDLE_DLE)
 
 
 def unstuff(packet):
@@ -89,8 +91,16 @@ def unstuff(packet):
 
     if is_framed(packet):
         raise ValueError('packet contains leading DLE and trailing DLE/ETX')
-    else:
-        return packet.replace(bDLE + bDLE, bDLE)
+    # TSIP is not generous enough to provide checksums, so we squeeze every validation opportunity
+    single = packet.count(bDLE)
+    double = packet.count(bDLE_DLE)
+    if single != double * 2:
+        raise ValueError('packet contains uneven count of DLE', single, double)
+    unstuffed = packet.replace(bDLE_DLE, bDLE)
+    assert unstuffed.count(bDLE) == double
+    if unstuffed[0] in (DLE, ETX):
+        raise ValueError('packet <ID> can\t be DLE or ETX', unstuffed[0])
+    return unstuffed
 
 
 class gps(object):
@@ -102,39 +112,57 @@ class gps(object):
         return self
 
     def read(self):
-
-        packet = bytes()
-        pkt_active = 0
-
-        #hold last 3 bytes (initialize assuming previous byte wasn't DLE)
-        #could get unlucky if start reading mid-message with 2nd data DLE (stuffed) byte as first byte seen
-        #would mis-interpret as start of message, but will simply return corrupt first packet, which was invalid anyway
-        b = [b'\0x00', b'\0x00', b'\0x00']
+        # It's wrong to assume that end will always be <not DLE> <DLE> <ETX>.
+        # <DLE> <DLE> <DLE> <ETX> is perfectly fine if we get one <DLE> in the end of the packet
+        # for some reason, e.g. unlucky floating point number, weird product name,
+        # Packet 0x45 with firmware built on year 2016, Packet 0x41 with leap second count 16,
+        # Packet 0x57 with (week % 256) being 16, Packet 0x8F-AB (Primary Timing) on year 2064, etc.
+        #
+        # <not DLE> <DLE> <DLE> <ETX> is also a valid packet body. so we can't know if <ETX> is
+        # the end of the packet or not unless we've counted true parity of <DLE> count. We can't
+        # count it properly unless we've seen <not DLE>. It makes harder to skip the half-message in
+        # a streaming way: series of <DLE> followed by <ETX> may be the body or end of the packet.
+        #
+        # [<DLE>] <ETX> <DLE> <not DLE> is always a marker of end of one packet and start of another
+        # one, as non-stuffed <DLE> is only valid at the preamble.
+        #
+        # However, the read() usually does not see the <ETX> as the usual startup happens when the
+        # wire is silent.  Waiting for <ETX> and skipping the first packet on every read() to sync
+        # with the stream is suboptimal.  Storing state in the backtracking buffer is an option, but
+        # re-syncing might be more robust.
+        #
+        # Initialize assuming previous byte wasn't DLE.  Could get unlucky if start reading
+        # mid-message with 2nd data DLE (stuffed) byte as first byte seen would mis-interpret as
+        # start of message, but will simply return corrupt first packet, which was invalid anyway.
+        # Packet ID is never ETX or DLE, so it'll break the streak.
+        streak = None
+        buf = []
         while True:
-            b[0] = self.conn.read(1)
-
-            if len(b[0]) == 0: #timeout
+            b = self.conn.read(1)
+            if len(b) == 0: # timeout, EOF
                 return None
-
-            #rather than counting even/odd DLEs, look for known pattern for start/end, to prevent issues when start reading mid-message
-            #end will always be <not DLE> <DLE> <ETX>
-            #start will always be <not DLE> <DLE> <not DLE, not ETX> (1 byte delayed, since DLE is the start)
-            if b[2][0] != DLE and b[1][0] == DLE and b[0][0] == ETX: #end of message
-                if pkt_active: #only return packet if active, otherwise found end of partial message, ignore
-                    packet += b[0]
-                    return packet
-            elif b[2][0] != DLE and b[1][0] == DLE and b[0][0] != DLE: #start of message
-                pkt_active = 1
-                packet += bDLE #start is delayed by 1 byte, need to put first DLE byte into packet
-                packet += b[0]
-            else:
-                if pkt_active: #only accumulate packet data after start of message was found
-                    packet += b[0]
-
-            #shift old bytes
-            b[2] = b[1]
-            b[1] = b[0]
-
+            buf.append(b)
+            if b == bETX and streak is not None and streak & 1:
+                # That's the end of packet for sure. The head might be just fine, but it as well may
+                # be polluted with the tail of the previous packet or have <DLE> <ID> chopped off.
+                #  1. P endswith <non-DLE><2N+1*DLE><ETX>
+                #  2. That's the only <non-DLE><2N+1*DLE><ETX> sequence in P.
+                # Let's _assume_ that no bytes were skipped, e.g. by delayed calls to conn.read().
+                # In this case the only possible tail of the previous packet is <N*DLE><ETX>.
+                # <DLE> <ID> start does not guarantee that the frame is complete, but that's the
+                # best we can hope for.  Otherwise the frame is just half-frame.
+                p = b''.join(buf)
+                if p[0] == DLE and p[1] not in (DLE, ETX): # common case
+                    return p
+                p = p.lstrip(bDLE)
+                if len(p) >= 4 and p[0] == ETX and p[1] == DLE and p[2] not in (DLE, ETX):
+                    return p[1:] # N=0, just <ETX>
+                else:
+                    buf = [] # skip half-frame, keep `streak`, TODO: decide if return None instead
+            if b != bDLE:
+                streak = 0
+            elif streak is not None: # got <DLE> now, have seen <not DLE> before
+                streak += 1
 
     def next(self):
         packet = self.read()
