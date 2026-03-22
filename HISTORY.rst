@@ -3,6 +3,11 @@
 History
 =======
 
+0.4.2 (22-March-2026)
+---------------------
+
+* Multiple bug fixes thanks to **darkk**.
+
 0.4.1 (01-Dec-2025)
 -------------------
 
